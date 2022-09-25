@@ -3,9 +3,15 @@
 
 #include <inttypes.h>
 
+#include "bson.h"
+
+typedef struct document document;
+
 struct document {
     int32_t bytes;
-    element elements[];
+    element* elements;
 };
+
+document* create_document(int32_t bytes, size_t elements);
 
 #endif

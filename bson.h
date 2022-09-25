@@ -4,7 +4,6 @@
 #include <string.h>
 #define MAX_ELEMENT_NAME 64
 
-typedef struct document document;
 typedef struct element element;
 typedef enum ELEMENT_TYPE ELEMENT_TYPE;
 
@@ -14,7 +13,7 @@ enum ELEMENT_TYPE {EMPTY, DOUBLE, STRING, EMBEDDED_DOC, ARRAY, BINARY, OBJECT_ID
 struct element {
     ELEMENT_TYPE e_type;
     char e_name[MAX_ELEMENT_NAME];
-    // void e_data;
+    void* e_data;
 };
 
 #endif
