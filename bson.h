@@ -1,5 +1,5 @@
-#ifndef MONGODB_BSON_H
-#define MONGODB_BSON_H
+#ifndef ENORMEDB_BSON_H
+#define ENORMEDB_BSON_H
 
 #include <string.h>
 #define MAX_ELEMENT_NAME 64

@@ -1,5 +1,5 @@
-#ifndef MONGODB_DOCUMENT_H
-#define MONGODB_DOCUMENT_H
+#ifndef ENORMEDB_DOCUMENT_H
+#define ENORMEDB_DOCUMENT_H
 
 #include <inttypes.h>
 
