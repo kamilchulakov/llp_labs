@@ -8,6 +8,7 @@
 typedef struct document document;
 
 struct document {
+    // collection col;
     int32_t bytes;
     element* elements;
 };
