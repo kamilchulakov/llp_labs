@@ -3,4 +3,4 @@ project(enormedb C)
 
 set(CMAKE_C_STANDARD 11)
 
-add_executable(enormedb main.c bson.h document.h document.c)
+add_executable(enormedb src/main.c src/bson.h src/document.c src/document.h)
