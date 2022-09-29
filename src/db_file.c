@@ -29,3 +29,9 @@ mem_info create_mem_info() {
     mem_info mem_info = {0, 0, 0};
     return mem_info;
 }
+
+mem_info read_mem_info(FILE* file) {
+    mem_info mem_info = {};
+    fread(&mem_info, sizeof(mem_info), 1, file);
+    return mem_info;
+}

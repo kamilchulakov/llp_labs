@@ -26,5 +26,6 @@ typedef struct {
 
 int create_db_file(char* db_name);
 int delete_db_file(char* db_name);
+mem_info read_mem_info(FILE* file);
 
 #endif //ENORMEDB_DB_FILE_H
