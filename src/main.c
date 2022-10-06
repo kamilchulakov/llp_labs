@@ -1,11 +1,11 @@
-#include <stdio.h>
-
-#include "bson.h"
-#include "document.h"
 #include "db_file.h"
+#include "pager.h"
 
 int main() {
-    create_db_file("../db");
-    printf("%d", read_mem_info(fopen("../db", "r")).allocated_mem);
+    db_handler* db_handler = open_db_file("db2");
+    debug_mem_info(db_handler);
+    insert_empty_page(db_handler);
+    insert_empty_page(db_handler);
+    debug_mem_info(db_handler);
     return 0;
 }

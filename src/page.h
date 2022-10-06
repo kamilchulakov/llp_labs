@@ -1,29 +1,30 @@
 #ifndef ENORMEDB_PAGE_H
 #define ENORMEDB_PAGE_H
 
+#include <stdlib.h>
+#include <stdio.h>
+#include <time.h>
 #include "collection.h"
-#include "string_heap.h"
+#include "db_file.h"
 
 #define PAGE_SIZE 4096
 
-typedef uint64_t datetime;
 typedef struct page page;
+typedef enum { PAGE_DB_HEADER, PAGE_COLLECTION, PAGE_DOCUMENT, PAGE_EMPTY } page_type;
+
+typedef struct {
+    uint32_t page_id;
+    uint32_t next_page_id;
+    time_t last_modified;
+    uint32_t used_mem; // in bytes, of PAGE_SIZE
+    page_type type;
+} page_header;
 
 struct page {
-    page* prev_page;
-    page* next_page;
-    uint32_t page_id;
-    datetime last_modified;
+    page_header page_header;
+    void* page_data;
 };
 
-typedef struct {
-    page* page;
-    collection* collection;
-} collection_page;
-
-typedef struct {
-    page* page;
-    string_heap* string_heap;
-} string_heap_page;
+page* create_empty_page(uint32_t page_id);
 
 #endif //ENORMEDB_PAGE_H

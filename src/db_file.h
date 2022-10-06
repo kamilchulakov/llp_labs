@@ -12,20 +12,23 @@
 typedef struct {
     uint32_t allocated_mem;
     uint32_t used_mem;
-    uint32_t amount_of_pages;
 } mem_info;
 
 typedef struct {
-    mem_info mem_info;
-    collection_page* collection_page;
-    collection_page* free_collection_page;
-    string_heap_page* string_heap;
+    mem_info* mem_info;
+    uint32_t page_id_seq;
 } db_file_header;
+
+typedef struct {
+    char* filename;
+    FILE* fp;
+    db_file_header* db_file_header;
+} db_handler;
 
 // INTERFACES
 
-int create_db_file(char* db_name);
-int delete_db_file(char* db_name);
-mem_info read_mem_info(FILE* file);
+db_handler* open_db_file(char* db_name);
+uint32_t get_and_set_page_id_seq(db_handler* db_handler);
+int debug_mem_info(db_handler* db_handler);
 
 #endif //ENORMEDB_DB_FILE_H
