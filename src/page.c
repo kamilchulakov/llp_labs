@@ -9,3 +9,7 @@ page* create_empty_page(uint32_t page_id) {
     pg->page_header.type = PAGE_EMPTY;
     return pg;
 }
+
+int debug_page(page* page) {
+    return printf("\nPAGE_ID:%u USED_MEM:%u PAGE_TYPE:%u TIME:%ld\n", page->page_header.page_id, page->page_header.used_mem, page->page_header.type, page->page_header.last_modified);
+}

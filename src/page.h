@@ -22,9 +22,9 @@ typedef struct {
 
 struct page {
     page_header page_header;
-    void* page_data;
 };
 
 page* create_empty_page(uint32_t page_id);
+int debug_page(page* page);
 
 #endif //ENORMEDB_PAGE_H
