@@ -1,0 +1,1 @@
+- can't name collection as collection

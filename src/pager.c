@@ -35,7 +35,7 @@ int update_page_data(db_handler* handler, uint32_t page_id, void* data, size_t d
 int write_collection_to_page(db_handler* handler, uint32_t page_id, collection* col) {
     fseek(handler->fp, calc_page_offset(page_id)+sizeof(page_header), SEEK_SET);
     fwrite(&col->name_size, sizeof(size_t), 1, handler->fp);
-    fprintf(handler->fp, "%s", col->name);
+    fputs( col->name, handler->fp);
     return update_page_data(handler, page_id, col, strlen(col->name));
 }
 
@@ -53,7 +53,8 @@ int create_collection_in_page(db_handler* handler, uint32_t page_id, char* name)
 int debug_collection(db_handler* handler, uint32_t page_id) {
     debug_page(get_page(handler, page_id));
     collection* col = malloc(sizeof(collection));
-    fread(&col->name_size, sizeof(size_t), 1, handler->fp);
-    fgets(col->name, col->name_size, handler->fp);
-    return printf("COLLECTION:%s", col->name);
+    fread(&(col->name_size), sizeof(size_t), 1, handler->fp);
+    col->name = malloc(col->name_size*sizeof(char));
+    fgets(col->name, col->name_size+1, handler->fp);
+    return printf("COLLECTION:%zu %s", col->name_size, col->name);
 }
