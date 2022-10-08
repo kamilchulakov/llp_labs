@@ -10,10 +10,12 @@
 #define PAGE_SIZE 4096
 
 typedef struct page page;
-typedef enum { PAGE_DB_HEADER, PAGE_COLLECTION, PAGE_DOCUMENT, PAGE_EMPTY } page_type;
+typedef enum { PAGE_COLLECTION, PAGE_DOCUMENT, PAGE_EMPTY } page_type;
+typedef enum { false, true } bool;
 
 typedef struct {
     uint32_t page_id;
+    bool is_full;
     uint32_t next_page_id;
     time_t last_modified;
     uint32_t used_mem; // in bytes, of PAGE_SIZE
