@@ -3,4 +3,5 @@ project(enormedb C)
 
 set(CMAKE_C_STANDARD 11)
 
-add_executable(enormedb src/main.c src/bson.h src/document.c src/document.h src/query.h src/collection.h src/db_file.c src/db_file.h src/page.c src/page.h src/pager.c src/pager.h)
+add_executable(enormedb src/main/main.c src/main/bson.h src/main/document.c src/main/document.h src/main/query.h src/main/collection.h src/main/db_file.c src/main/db_file.h src/main/page.c src/main/page.h src/main/pager.c src/main/pager.h src/main/element.c src/main/element.h src/main/bool.h src/main/bool.c src/main/io.h)
+add_executable(test src/test/test_runner.c src/main/bson.h src/main/bool.h src/main/bool.c src/main/io.h src/test/test_document.c src/test/test.h src/test/test_element.c src/test/test_element.h src/main/element.h src/main/element.c )

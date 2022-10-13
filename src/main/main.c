@@ -10,6 +10,9 @@ int main() {
     get_page_and_debug(db_handler, 0);
     get_page_and_debug(db_handler, 1);
     create_collection_in_page(db_handler, 0, "coolname");
+    create_document_in_page(db_handler, 1, 0);
+    debug_document(db_handler, 1);
+    update_collection_doc_id(db_handler, 0, 1);
     debug_collection(db_handler, 0);
     return 0;
 }

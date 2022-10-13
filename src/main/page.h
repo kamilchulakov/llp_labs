@@ -6,12 +6,12 @@
 #include <time.h>
 #include "collection.h"
 #include "db_file.h"
+#include "bool.h"
 
-#define PAGE_SIZE 4096
+#define PAGE_SIZE 256
 
 typedef struct page page;
 typedef enum { PAGE_COLLECTION, PAGE_DOCUMENT, PAGE_EMPTY } page_type;
-typedef enum { false, true } bool;
 
 typedef struct {
     uint32_t page_id;
