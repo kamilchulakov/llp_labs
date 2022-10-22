@@ -6,7 +6,7 @@
 #include <time.h>
 #include "collection.h"
 #include "db_file.h"
-#include "bool.h"
+#include "types.h"
 
 #define PAGE_SIZE 256
 

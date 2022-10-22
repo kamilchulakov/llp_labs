@@ -4,6 +4,7 @@
 #ifndef STDIO
 #define STDIO
 #include <stdio.h>
+#include <stdlib.h>
 #endif
 
 typedef enum {
