@@ -32,6 +32,8 @@ READ_STATUS read_element_data(FILE* fp, element* el) {
         return read_bool(fp, el->e_data);
     if (el->e_field.e_type == INT32 && fread(el->e_data, sizeof(int32_t), 1, fp) == 1)
         return READ_OK;
+    if (el->e_field.e_type == STRING)
+        return read_string(fp, el->e_data);
     return READ_ERROR;
 }
 
@@ -42,6 +44,8 @@ WRITE_STATUS write_element_data(FILE* fp, element* el) {
         return write_bool(fp, el->e_data);
     if (el->e_field.e_type == INT32 && fwrite(el->e_data, sizeof(int32_t), 1, fp) == 1)
         return WRITE_OK;
+    if (el->e_field.e_type == STRING)
+        return write_string(fp, el->e_data);
     return WRITE_ERROR;
 }
 

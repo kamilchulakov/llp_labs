@@ -2,7 +2,7 @@
 #include "../main/element.h"
 #include "inttypes.h"
 
-// should cover at least element types: 4 bytes int[], double, string, bool[x]
+// should cover at least element types: 4 bytes int[x], double, string, bool[x]
 
 test_status test_int32_element(FILE* fp) {
     element* el = create_element(INT32, "int");
@@ -51,9 +51,29 @@ test_status test_empty_element(FILE* fp) {
     return TEST_OK;
 }
 
+test_status test_string_element(FILE* fp) {
+    element* el = create_element(STRING, "str");
+    el->e_data = malloc(sizeof(string));
+    ((string* )el->e_data)->len = 5;
+    ((string* )el->e_data)->ch = "data5";
+    open_test_file_write(fp);
+    assert(write_element(fp, el) == WRITE_OK);
+    open_test_file_read(fp);
+    el = malloc(sizeof(element));
+    assert(read_element(fp, el) == READ_OK);
+    assert(el->e_field.e_type == STRING);
+    string expected_field_name = {.len = 3, .ch = "str"};
+    assert(strcmp(el->e_field.e_name.ch, expected_field_name.ch) == 0);
+    assert(el->e_field.e_name.len == expected_field_name.len);
+    assert(((string* ) el->e_data)->len == 5);
+    assert(strcmp(((string* ) el->e_data)->ch, "data5") == 0);
+    return TEST_OK;
+}
+
 test_status test_element(FILE* fp) {
     test_empty_element(fp);
     test_bool_element(fp);
     test_int32_element(fp);
+    test_string_element(fp);
     return TEST_OK;
 }
