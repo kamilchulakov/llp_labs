@@ -2,7 +2,7 @@
 #include "../main/element.h"
 #include "inttypes.h"
 
-// should cover at least element types: 4 bytes int[x], double, string, bool[x]
+// should cover at least element types: 4 bytes int[x], double[x], string[x], bool[x]
 
 test_status test_int32_element(FILE* fp) {
     element* el = create_element(INT32, "int");
@@ -17,6 +17,22 @@ test_status test_int32_element(FILE* fp) {
     assert(strcmp(el->e_field.e_name.ch, expected_field_name.ch) == 0);
     assert(el->e_field.e_name.len == expected_field_name.len);
     assert(*((int32_t*)el->e_data) == INT32_MAX);
+    return TEST_OK;
+}
+
+test_status test_double_element(FILE* fp) {
+    element* el = create_element(DOUBLE, "double");
+    double data = 5.0;
+    el->e_data = &data;
+    open_test_file_write(fp);
+    assert(write_element(fp, el) == WRITE_OK);
+    open_test_file_read(fp);
+    assert(read_element(fp, el) == READ_OK);
+    assert(el->e_field.e_type == DOUBLE);
+    string expected_field_name = {.len = 6, .ch = "double"};
+    assert(strcmp(el->e_field.e_name.ch, expected_field_name.ch) == 0);
+    assert(el->e_field.e_name.len == expected_field_name.len);
+    assert(*((double*)el->e_data) == 5.0);
     return TEST_OK;
 }
 
@@ -75,5 +91,6 @@ test_status test_element(FILE* fp) {
     test_bool_element(fp);
     test_int32_element(fp);
     test_string_element(fp);
+    test_double_element(fp);
     return TEST_OK;
 }
