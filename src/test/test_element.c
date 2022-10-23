@@ -5,9 +5,7 @@
 // should cover at least element types: 4 bytes int[x], double[x], string[x], bool[x]
 
 test_status test_int32_element(FILE* fp) {
-    element* el = create_element(INT32, "int");
-    int32_t data = INT32_MAX;
-    el->e_data = &data;
+    element* el = create_element_int32("int", INT32_MAX);
     open_test_file_write(fp);
     assert(write_element(fp, el) == WRITE_OK);
     open_test_file_read(fp);

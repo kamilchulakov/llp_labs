@@ -11,6 +11,16 @@ element* create_element(ELEMENT_TYPE e_type, char* e_name) {
     return el;
 }
 
+element* create_element_int32(char* e_name, int32_t value) {
+    element* el = malloc(sizeof(element));
+    el->e_field.e_type = INT32;
+    el->e_field.e_name.len = strlen(e_name);
+    el->e_field.e_name.ch = e_name;
+    el->e_data = malloc(sizeof(int32_t));
+    *(int32_t*)el->e_data = value;
+    return el;
+}
+
 READ_STATUS read_element_field(FILE* fp, element* el) {
     if (fread(&el->e_field.e_type, sizeof(ELEMENT_TYPE), 1, fp) == 1) {
         return read_string(fp, &el->e_field.e_name);

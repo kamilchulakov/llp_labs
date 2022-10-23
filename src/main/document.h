@@ -11,10 +11,11 @@ typedef struct document document;
 struct document {
     uint32_t next_doc_page_id;
     uint32_t elements;
+    void* data;
 };
 
 document* create_document(uint32_t elements);
-int write_document(FILE* fp, document* doc);
-int read_document(FILE* fp, document* doc);
+WRITE_STATUS write_document(FILE* fp, document* doc);
+READ_STATUS read_document(FILE* fp, document* doc);
 
 #endif

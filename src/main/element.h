@@ -10,6 +10,7 @@ typedef struct {
 } element;
 
 element* create_element(ELEMENT_TYPE e_type, char* e_name);
+element* create_element_int32(char* e_name, int32_t value);
 READ_STATUS read_element(FILE* fp, element* el);
 WRITE_STATUS write_element(FILE* fp, element* el);
 
