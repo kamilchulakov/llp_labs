@@ -1,1 +1,1 @@
-- can't name collection as collection
+- can't name collection as collection [FIXED with string type]

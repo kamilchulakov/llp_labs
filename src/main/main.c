@@ -12,7 +12,7 @@ int main() {
     get_page_and_debug(db_handler, 0);
     get_page_and_debug(db_handler, 1);
     get_page_and_debug(db_handler, 2);
-    create_collection_in_page(db_handler, 0, "coolname");
+    create_collection_in_page(db_handler, 0, "collection");
     create_collection_in_page(db_handler, 1, "second");
     create_collection_in_page(db_handler, 2, "third");
 //    debug_document(db_handler, 1);
