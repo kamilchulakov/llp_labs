@@ -4,8 +4,7 @@
 #include "document.h"
 
 typedef struct {
-    size_t name_size;
-    char* name;
+    string name;
     uint32_t doc_page_id;
 } collection;
 

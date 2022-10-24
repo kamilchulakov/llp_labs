@@ -1,7 +1,6 @@
 #include <stdlib.h>
 
 #include "document.h"
-#include "element.h"
 
 document* create_document(uint32_t elements) {
     document* doc = malloc(sizeof(document));
@@ -53,4 +52,8 @@ READ_STATUS read_document(FILE* fp, document* doc) {
     if (read_document_header(fp, doc) == READ_OK)
         return read_document_data(fp, doc);
     return READ_ERROR;
+}
+
+long size_document_header() {
+    return sizeof(uint32_t)*2;
 }

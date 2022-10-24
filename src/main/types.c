@@ -34,3 +34,7 @@ WRITE_STATUS write_string(FILE* fp, string* str) {
     else
         return WRITE_ERROR;
 }
+
+size_t string_size(string* str) {
+    return sizeof(int)+sizeof(char)*str->len;
+}

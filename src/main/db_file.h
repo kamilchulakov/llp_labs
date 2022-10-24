@@ -23,6 +23,7 @@ typedef struct {
     char* filename;
     FILE* fp;
     db_file_header* db_file_header;
+    uint32_t last_collection_page_id;
 } db_handler;
 
 // INTERFACES
