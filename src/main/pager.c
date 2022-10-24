@@ -78,23 +78,35 @@ collection* get_collection(db_handler* handler, uint32_t page_id) {
     return col;
 }
 
-
-int write_document_to_page(db_handler* handler, uint32_t page_id, document* doc) {
-    return update_page_data(handler, page_id, doc, sizeof(document));
+document* get_document(db_handler* handler, uint32_t page_id) {
+    fseek(handler->fp, calc_page_offset(page_id)+sizeof(page_header), SEEK_SET);
+    document* doc = malloc(size_document_header());
+    read_document(handler->fp, doc);
+    return doc;
 }
 
-int create_document_in_page(db_handler* handler, uint32_t page_id, uint32_t elements) {
-    document* doc = create_document(elements);
-    write_document_to_page(handler, page_id, doc);
+int create_document_in_page(db_handler* handler, uint32_t page_id, uint32_t collection_page_id) {
+    document* doc = create_document(0);
+    fseek(handler->fp, calc_page_offset(page_id)+sizeof(page_header), SEEK_SET);
+    write_document(handler->fp, doc);
     page* pg = create_empty_page(page_id);
-    pg->page_header.used_mem = sizeof(document)+sizeof(element)*doc->elements;
+    pg->page_header.used_mem = size_document_header();
     pg->page_header.type = PAGE_DOCUMENT;
-    return update_page_header(handler, page_id, pg);
+    update_page_header(handler, page_id, pg);
+    collection* col = get_collection(handler, collection_page_id);
+    uint32_t page_to_update_id = col->last_doc_page_id;
+    if (page_to_update_id == 0) page_to_update_id = col->doc_page_id;
+    if (col->doc_page_id == 0) col->doc_page_id = page_id;
+    col->last_doc_page_id = page_id;
+    write_collection_to_page(handler, collection_page_id, col);
+    if (page_to_update_id != 0) {
+        document *doc_to_update = get_document(handler, page_to_update_id);
+        doc_to_update->next_doc_page_id = page_id;
+        fseek(handler->fp, calc_page_offset(page_to_update_id) + sizeof(page_header), SEEK_SET);
+        return write_document(handler->fp, doc_to_update);
+    } else return 0;
 }
 
-int debug_document(db_handler* handler, uint32_t page_id) {
-    debug_page(get_page(handler, page_id));
-    document* doc = malloc(sizeof(document));
-    fread(doc, sizeof(document), 1, handler->fp);
+int debug_document(document* doc) {
     return printf("DOCUMENT: NEXT_DOC_PAGE_ID:%u ELEMENTS:%u\n", doc->next_doc_page_id, doc->elements);
 }

@@ -15,7 +15,8 @@ int update_collection_doc_id(db_handler* handler, uint32_t page_id, uint32_t doc
 collection* get_collection(db_handler* handler, uint32_t page_id);
 int debug_collection(collection* co);
 
-int create_document_in_page(db_handler* handler, uint32_t page_id, uint32_t elements);
-int debug_document(db_handler* handler, uint32_t page_id);
+int create_document_in_page(db_handler* handler, uint32_t page_id, uint32_t collection_page_id);
+document* get_document(db_handler* handler, uint32_t page_id);
+int debug_document(document* doc);
 
 #endif //ENORMEDB_PAGER_H
