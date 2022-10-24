@@ -1,6 +1,12 @@
 #include "api.h"
 #include "pager.h"
 
+bool collection_fits_filter(collection* col, filter* filter) {
+    if (filter->type == ALL) return true;
+    if (filter->type == NAME && string_equals(&col->name, filter->data)) return true;
+    return false;
+}
+
 RESULT select_collection(db_handler* dbHandler, filter* filter) {
     printf("________________");
     printf("\nSELECT QUERY\n");
@@ -14,7 +20,7 @@ RESULT select_collection(db_handler* dbHandler, filter* filter) {
         collection* col = get_collection(dbHandler, pg->page_header.page_id);
         if (col == NULL)
             return RESULT_ERROR;
-        debug_collection(col);
+        if (collection_fits_filter(col, filter)) debug_collection(col);
         pg = get_page(dbHandler, pg->page_header.next_page_id);
     }
     collection* col = get_collection(dbHandler, pg->page_header.page_id);

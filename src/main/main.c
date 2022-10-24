@@ -17,6 +17,10 @@ int main() {
     create_collection_in_page(db_handler, 2, "third");
 //    debug_document(db_handler, 1);
 //    update_collection_doc_id(db_handler, 0, 1);
-    select_collection(db_handler, NULL);
+    filter all = {ALL};
+    select_collection(db_handler, &all);
+    string str = {5, "third"};
+    filter by_name = {NAME, &str};
+    select_collection(db_handler, &by_name);
     return 0;
 }

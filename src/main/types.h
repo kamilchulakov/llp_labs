@@ -16,5 +16,6 @@ typedef struct {
 READ_STATUS read_string(FILE* fp, string* str);
 WRITE_STATUS write_string(FILE* fp, string* str);
 size_t string_size(string* str);
+bool string_equals(void* first, void* second);
 
 #endif //ENORMEDB_TYPES_H

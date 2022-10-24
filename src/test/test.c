@@ -16,7 +16,7 @@ void assert_int32_equals(void* first, void* second) {
 }
 
 void assert_string_equals(void* first, void* second) {
-    assert(strcmp(first, second) == 0);
+    assert(string_equals(first, second));
 }
 
 void assert_boolean_equals(void* first, void* second) {

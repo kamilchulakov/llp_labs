@@ -1,3 +1,4 @@
+#include <string.h>
 #include "types.h"
 #include "io.h"
 
@@ -37,4 +38,8 @@ WRITE_STATUS write_string(FILE* fp, string* str) {
 
 size_t string_size(string* str) {
     return sizeof(int)+sizeof(char)*str->len;
+}
+
+bool string_equals(void* first, void* second) {
+    return ((string *) first)->len == ((string *) second)->len && strcmp(((string *) first)->ch, ((string *) second)->ch) == 0;
 }
