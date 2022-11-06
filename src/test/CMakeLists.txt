@@ -1,0 +1,5 @@
+add_library(tests STATIC test_document.c test.h test_element.c test_element.h test.c test_document.h)
+target_link_libraries(tests db)
+add_executable(test test_runner.c)
+target_link_libraries(test tests)
+add_custom_command(TARGET test POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:test> ${PROJECT_SOURCE_DIR}/test)
