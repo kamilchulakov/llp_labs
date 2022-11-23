@@ -2,6 +2,7 @@
 #define ENORMEDB_TYPES_H
 
 #include "io.h"
+#include "inttypes.h"
 
 typedef enum { false = 0, true } bool;
 
