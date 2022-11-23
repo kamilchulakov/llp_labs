@@ -2,8 +2,7 @@
 #define ENORMEDB_DOCUMENT_H
 
 #include <inttypes.h>
-#include <bits/types/FILE.h>
-
+#include "io.h"
 #include "bson.h"
 #include "element.h"
 #include "operation.h"
