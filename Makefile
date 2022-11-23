@@ -1,7 +1,7 @@
 BUILD_DIR = build
 build: clean
 	mkdir ${BUILD_DIR}
-	cmake -B build && cd ${BUILD_DIR} && make
+	cmake -B build && cd ${BUILD_DIR} && cmake
 
 run: build
 	./app
