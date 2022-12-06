@@ -11,4 +11,11 @@ typedef struct {
     string e_name;
 } field;
 
+//size_t size_of(field fld) {
+//    return string_size(&fld.e_name) + sizeof(field);
+//}
+
+READ_STATUS read_field(FILE* fp, field e_field);
+WRITE_STATUS write_field(FILE* fp, field e_field);
+
 #endif

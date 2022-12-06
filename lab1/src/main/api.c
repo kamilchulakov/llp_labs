@@ -73,3 +73,20 @@ RESULT select_document(db_handler* dbHandler, filter* collection_filter, filter*
     if (document_fits_filter(doc, document_filter)) debug_document(doc);
     return RESULT_OK;
 }
+
+int update_mem(db_handler* handler, page* pg, uint32_t mem) {
+    pg->page_header.used_mem += mem;
+    pg->page_header.last_modified = time(NULL);
+    return update_page_header(handler, pg->page_header.page_id, pg);
+}
+
+
+RESULT insert_element(db_handler* dbHandler, uint32_t document_id, element* el) {
+    page* pg = get_page(dbHandler, document_id);
+    update_mem(dbHandler, pg, sizeof(field));
+    document* doc = get_document(dbHandler, document_id);
+    doc->elements += 1;
+    write_document_header(dbHandler->fp, doc);
+    if (write_element(dbHandler->fp, el) == WRITE_OK) return RESULT_OK;
+    return RESULT_ERROR;
+}

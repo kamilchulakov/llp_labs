@@ -29,5 +29,9 @@ int main() {
     uint32_t collection_id = 0;
     filter collection_id_filter = {ID, &collection_id};
     select_document(db_handler, &collection_id_filter, &all);
+
+    element* el = create_element_int32("int", 100);
+    insert_element(db_handler, 3, el);
+    select_document(db_handler, &collection_id_filter, &all);
     return 0;
 }

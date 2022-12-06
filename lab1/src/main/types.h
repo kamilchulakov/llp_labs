@@ -1,8 +1,8 @@
 #ifndef ENORMEDB_TYPES_H
 #define ENORMEDB_TYPES_H
 
+#include <inttypes.h>
 #include "io.h"
-#include "inttypes.h"
 
 typedef enum { false = 0, true } bool;
 

@@ -19,7 +19,7 @@ add_library(
         io.h
         operation.h
         api.c
-        api.h)
+        api.h query_executor.c query_executor.h schema.c schema.h bson.c)
 add_executable(app main.c)
 target_link_libraries(app db)
 add_custom_command(TARGET app POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:app> ${PROJECT_SOURCE_DIR}/app)

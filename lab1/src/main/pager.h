@@ -9,6 +9,7 @@
 int insert_empty_page(db_handler* db_handler);
 page* get_page(db_handler* db_handler, uint32_t page_id);
 int get_page_and_debug(db_handler* db_handler, uint32_t page_id);
+int update_page_header(db_handler* handler, uint32_t page_id, page* pg);
 
 int create_collection_in_page(db_handler* handler, uint32_t page_id, char* name);
 int update_collection_doc_id(db_handler* handler, uint32_t page_id, uint32_t doc_page_id);

@@ -29,6 +29,7 @@ typedef struct {
 // INTERFACES
 
 db_handler* open_db_file(char* db_name);
+void utilize_db_file(db_handler* db);
 uint32_t get_and_set_page_id_seq(db_handler* db_handler);
 int debug_mem_info(db_handler* db_handler);
 

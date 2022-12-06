@@ -14,6 +14,13 @@ db_handler* open_db_file(char* db_name) {
     return handler;
 }
 
+void utilize_db_file(db_handler* db) {
+    remove(db->filename);
+    free(db->db_file_header->mem_info);
+    free(db->db_file_header);
+    free(db);
+}
+
 db_handler* create_db_handler(char* filename, FILE* fp, db_file_header* header) {
     db_handler* handler = malloc(sizeof(db_handler));
     handler->filename = filename;

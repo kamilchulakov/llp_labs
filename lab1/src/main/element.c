@@ -1,7 +1,7 @@
+#include <string.h>
 #include "element.h"
 #include "types.h"
 #include "io.h"
-#include <string.h>
 
 element* create_element(ELEMENT_TYPE e_type, char* e_name) {
     element* el = malloc(sizeof(element));
@@ -19,20 +19,6 @@ element* create_element_int32(char* e_name, int32_t value) {
     el->e_data = malloc(sizeof(int32_t));
     *(int32_t*)el->e_data = value;
     return el;
-}
-
-READ_STATUS read_element_field(FILE* fp, element* el) {
-    if (fread(&el->e_field.e_type, sizeof(ELEMENT_TYPE), 1, fp) == 1) {
-        return read_string(fp, &el->e_field.e_name);
-    }
-    return READ_ERROR;
-}
-
-WRITE_STATUS write_element_field(FILE* fp, element* el) {
-    if (fwrite(&el->e_field.e_type, sizeof(ELEMENT_TYPE), 1, fp) == 1) {
-        return write_string(fp, &el->e_field.e_name);
-    }
-    return WRITE_ERROR;
 }
 
 READ_STATUS read_element_data(FILE* fp, element* el) {
@@ -64,14 +50,14 @@ WRITE_STATUS write_element_data(FILE* fp, element* el) {
 }
 
 WRITE_STATUS write_element(FILE* fp, element* el) {
-    if (write_element_field(fp, el) != WRITE_OK)
+    if (write_field(fp, el->e_field) != WRITE_OK)
         return WRITE_ERROR;
     else
         return write_element_data(fp, el);
 }
 
 READ_STATUS read_element(FILE* fp, element* el) {
-    if (read_element_field(fp, el) != READ_OK)
+    if (read_field(fp, el->e_field) != READ_OK)
         return READ_ERROR;
     else
         return read_element_data(fp, el);

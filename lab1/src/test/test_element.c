@@ -1,6 +1,5 @@
 #include "test_element.h"
 #include "../main/element.h"
-#include "inttypes.h"
 
 // should cover at least element types: 4 bytes int[x], double[x], string[x], bool[x]
 
