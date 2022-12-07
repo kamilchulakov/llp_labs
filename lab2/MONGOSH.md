@@ -37,7 +37,7 @@ $lt - Matches numeric values that are less than a specified value.
 
 $lte - Matches numeric values that are less than or equal to a specified value.
 
-$like - Matches string values that match pattern
+$regex - Matches string values that match pattern
 
 ### Examples
 ```
@@ -45,6 +45,15 @@ db.movies.find( {
      year: 2010,
      $or: [ { "awards.wins": { $gte: 5 } }, { genres: "Drama" } ]
 } )
+```
+
+```
+db.bios.find( { birth: 
+  { 
+    $gt: new Date('1940-01-01'), 
+    $lt: new Date('1960-01-01') }
+  }
+)
 ```
 
 ## AST
