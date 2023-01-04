@@ -11,15 +11,15 @@
 - [ ] visitor
 
 #### Lexer
-- [ ] regular expressions for tokens
+- [x] regular expressions for tokens
   - [x] mongosh keywords
   - [ ] bool expressions
 - [ ] regular expressions for values
 
 #### Parser
 - [x] tokens
+- [x] parsing tokens with print
 - [ ] types
-- [ ]
 
 ### Project structure
 - src/lexer.l = lexer
