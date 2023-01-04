@@ -55,19 +55,19 @@ db.bios.find({ birth:
     $gt: new Date('1940-01-01'), 
     $lt: new Date('1960-01-01')
   }
-})
+});
 ```
 
 #### Schemas (as I imagined)
 ```
-db.createCollection( example_collection, 
+db.createCollection("example", 
   {
     name: string,
     int_field: int32,
     double_field: double,
     is_example: bool
   } 
-)
+);
 ```
 
 

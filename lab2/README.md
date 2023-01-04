@@ -19,6 +19,8 @@
 #### Parser
 - [x] tokens
 - [x] parsing tokens with print
+- [x] db queries
+- [ ] collection queries
 - [ ] types
 
 ### Project structure

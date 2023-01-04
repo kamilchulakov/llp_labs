@@ -8,9 +8,9 @@
 
 alpha                   [A-Za-z_0-9 \t\r]
 int                     ([-+]?[0-9])+
-blank                   [ \t\r\n\f\v]
+blank                   [ \t\r\n\f\v]+
 word                    [a-zA-Z_][a-zA-Z0-9_]*
-quoted_string           \"{word}*\"
+quoted_word             \"{word}\"
 
 %%
 
@@ -38,7 +38,13 @@ quoted_string           \"{word}*\"
 "$lte"                  {return (LTE);}
 "$regex"                {return (REGEX);}
 
+"string"                {return (STRING);}
+"int32"                 {return (INT32);}
+"bool"                  {return (BOOL);}
+"double"                {return (DOUBLE);}
+
 {word}                  {return (WORD);}
+{quoted_word}           {return (QUOTED_WORD);}
 
 ":"                     {return (COLON);}
 ";"                     {return (SEMICOLON);}
@@ -47,7 +53,8 @@ quoted_string           \"{word}*\"
 ","                     {return (COMMA);}
 "{"                     {return (LBRACKET);}
 "}"                     {return (RBRACKET);}
-.                       {return (OTHER);}
 
 {blank}                 { /* ignoring blank lines */ }
+
+.                       {return (OTHER);}
 %%
