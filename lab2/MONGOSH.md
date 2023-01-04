@@ -1,7 +1,7 @@
-## nemongosh
+## mongosh
 
 <a href="https://www.mongodb.com/docs/manual/reference/method/">
-<p style="background-color: antiquewhite; width: fit-content">mongosh</p>
+mongodb docs
 </a>
 
 - use $db;
