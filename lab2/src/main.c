@@ -1,4 +1,5 @@
+#include "lexer.h"
+
 int main() {
-    yylex();
-    return 0;
+    return yylex();
 }

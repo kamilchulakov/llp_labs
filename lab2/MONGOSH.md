@@ -40,6 +40,8 @@ $lte - Matches numeric values that are less than or equal to a specified value.
 $regex - Matches string values that match pattern
 
 ### Examples
+
+#### Data
 ```
 db.movies.find( {
      year: 2010,
@@ -48,13 +50,26 @@ db.movies.find( {
 ```
 
 ```
-db.bios.find( { birth: 
+db.bios.find({ birth: 
   { 
     $gt: new Date('1940-01-01'), 
-    $lt: new Date('1960-01-01') }
+    $lt: new Date('1960-01-01')
   }
+})
+```
+
+#### Schemas (as I imagined)
+```
+db.createCollection( example_collection, 
+  {
+    name: string,
+    int_field: int32,
+    double_field: double,
+    is_example: bool
+  } 
 )
 ```
+
 
 ## AST
 ![ast](AST.png)

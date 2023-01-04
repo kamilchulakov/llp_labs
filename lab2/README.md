@@ -5,10 +5,21 @@
 
 ### TODO
 - [x] check mongosh
-- [ ] prepare build
+- [x] prepare build
 - [ ] lexer
 - [ ] parser
 - [ ] visitor
+
+#### Lexer
+- [ ] regular expressions for tokens
+  - [x] mongosh keywords
+  - [ ] bool expressions
+- [ ] regular expressions for values
+
+#### Parser
+- [x] tokens
+- [ ] types
+- [ ]
 
 ### Project structure
 - src/lexer.l = lexer
