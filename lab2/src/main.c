@@ -3,6 +3,6 @@
 #include "parser.tab.h"
 
 int main() {
-    printf("it works...\n");
+    printf("INPUT:\n");
     return yyparse();
 }

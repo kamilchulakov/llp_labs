@@ -3,6 +3,36 @@
 - Task: [TASK](TASK.md)
 - Status: IN PROGRESS...
 
+### Examples
+```
+INPUT:
+db.createCollection("example", 
+  {
+    name: "string",
+    int_field: "int32",
+    double_field: "double",
+    is_example: "bool"
+  } 
+);
+
+OUTPUT:
+createCollection:
+	collection: "example"
+	schema:
+		schema_field:
+			field_name: name
+			field_type: "string"
+		schema_field:
+			field_name: int_field
+			field_type: "int32"
+		schema_field:
+			field_name: double_field
+			field_type: "double"
+		schema_field:
+			field_name: is_example
+			field_type: "bool"
+```
+
 ### TODO
 - [x] check mongosh
 - [x] prepare build
