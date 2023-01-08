@@ -62,10 +62,10 @@ db.bios.find({ birth:
 ```
 db.createCollection("example", 
   {
-    name: string,
-    int_field: int32,
-    double_field: double,
-    is_example: bool
+    name: "string",
+    int_field: "int32",
+    double_field: "double",
+    is_example: "bool"
   } 
 );
 ```

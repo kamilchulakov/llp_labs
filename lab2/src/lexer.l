@@ -1,12 +1,12 @@
 %option noyywrap
 
-%top {
+%{
     #include <stdio.h>
     #include <string.h>
-    #include "parser.h"
-}
+    #include "ast.h"
+    #include "parser.tab.h"
+%}
 
-alpha                   [A-Za-z_0-9 \t\r]
 int                     ([-+]?[0-9])+
 blank                   [ \t\r\n\f\v]+
 word                    [a-zA-Z_][a-zA-Z0-9_]*
@@ -38,13 +38,12 @@ quoted_word             \"{word}\"
 "$lte"                  {return (LTE);}
 "$regex"                {return (REGEX);}
 
-"string"                {return (STRING);}
 "int32"                 {return (INT32);}
 "bool"                  {return (BOOL);}
 "double"                {return (DOUBLE);}
 
-{word}                  {return (WORD);}
-{quoted_word}           {return (QUOTED_WORD);}
+{word}                  {sscanf(yytext, "%s", yylval.str); return (WORD);}
+{quoted_word}           {sscanf(yytext, "%s", yylval.str); return (QUOTED_WORD);}
 
 ":"                     {return (COLON);}
 ";"                     {return (SEMICOLON);}

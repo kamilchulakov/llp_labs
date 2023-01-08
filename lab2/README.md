@@ -15,6 +15,7 @@
   - [x] mongosh keywords
   - [ ] bool expressions
 - [ ] regular expressions for values
+- [ ] handle big strings
 
 #### Parser
 - [x] tokens
