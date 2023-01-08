@@ -25,7 +25,7 @@ typedef struct {
     str_query_criteria* criteria;
 } get_collection_query;
 
-typedef enum { CREATE_COLLECTION_QUERY, GET_COLLECTION_QUERY } query_type;
+typedef enum { CREATE_COLLECTION_QUERY, GET_COLLECTION_QUERY, DROP_DATABASE_QUERY } query_type;
 
 typedef struct {
     union {
@@ -39,6 +39,7 @@ str_query_criteria* create_str_query_criteria(char* value);
 schema_field* create_schema_field(char* name, char* type);
 db_query* create_create_collection_query(char* name, schema_field* schema);
 db_query* create_get_collection_query(str_query_criteria* criteria);
+db_query* create_drop_database_query();
 void print_db_query(db_query* db_que);
 
 

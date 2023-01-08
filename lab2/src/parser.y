@@ -11,7 +11,7 @@
 %token DB DOT
 %token DOUBLE STRING INT32 BOOL
 %token INT32_VAL
-%token CREATE_COLLECTION GET_COLLECTION GET_NAME DROP_DATABASE
+%token CREATE_COLLECTION GET_COLLECTION DROP_DATABASE
 %token WORD QUOTED_WORD
 %token COUNT FIND INSERT_ONE INSERT_MANY REMOVE RENAME_COLLECTION UPDATE UPDATE_ONE
 %token LPAREN RPAREN COMMA LBRACKET RBRACKET COLON SEMICOLON
@@ -28,6 +28,7 @@
 %type <dbque> db_func
 %type <dbque> create_collection_call
 %type <dbque> get_collection_call
+%type <dbque> drop_database_call
 
 
 %union {
@@ -51,7 +52,7 @@ db_query:
 ;
 
 db_func:
-   get_collection_call | create_collection_call
+   get_collection_call | create_collection_call | drop_database_call
 ;
 
 schema:
@@ -82,6 +83,12 @@ create_collection_call:
 get_collection_call:
     GET_COLLECTION str_arg {
         $$ = create_get_collection_query($2);
+    }
+;
+
+drop_database_call:
+    DROP_DATABASE LPAREN RPAREN {
+        $$ = create_drop_database_query();
     }
 ;
 

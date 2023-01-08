@@ -60,6 +60,15 @@ db_query* create_get_collection_query(str_query_criteria* criteria) {
     return db_que;
 }
 
+db_query* create_drop_database_query() {
+    db_query* db_que = malloc(sizeof(db_query));
+    if (db_que == NULL)
+        return NULL;
+
+    db_que->type = DROP_DATABASE_QUERY;
+    return db_que;
+}
+
 void print_tabs(int tabs) {
     for (int i = 0; i < tabs; i++) {
         printf("\t");
@@ -109,6 +118,9 @@ void print_db_query(db_query* db_que) {
             break;
         case GET_COLLECTION_QUERY:
             print_get_collection(db_que);
+            break;
+        case DROP_DATABASE_QUERY:
+            printf("dropDatabase\n");
             break;
     }
 }

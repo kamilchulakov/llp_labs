@@ -19,7 +19,6 @@ quoted_word             \"{word}\"
 "createCollection"      {return (CREATE_COLLECTION);}
 "getCollection"         {return (GET_COLLECTION);}
 "dropDatabase"          {return (DROP_DATABASE);}
-"getName"               {return (GET_NAME);}
 
 "count"                 {return (COUNT);}
 "find"                  {return (FIND);}

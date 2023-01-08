@@ -11,7 +11,6 @@ mongodb docs
   - .createCollection($collection, $schema)
   - .getCollection(query criteria)
   - .dropDatabase()
-  - .getName()
 
 ### Collection Methods
 - db.collection
