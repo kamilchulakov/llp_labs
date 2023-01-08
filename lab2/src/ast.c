@@ -1,6 +1,16 @@
 #include <stdio.h>
 #include "ast.h"
 
+str_query_criteria* create_str_query_criteria(char* value) {
+    str_query_criteria* criteria = malloc(sizeof(str_query_criteria));
+    if (criteria == NULL)
+        return NULL;
+
+    criteria->value = malloc(strlen(value)+1);
+    strcpy(criteria->value, value);
+    return criteria;
+}
+
 schema_field* create_schema_field(char* name, char* type) {
     schema_field* fld = malloc(sizeof(schema_field));
     if (fld == NULL)
@@ -29,6 +39,23 @@ db_query* create_create_collection_query(char* name, schema_field* schema) {
 
     db_que->query.create_collection = query;
     db_que->type = CREATE_COLLECTION_QUERY;
+
+    return db_que;
+}
+
+db_query* create_get_collection_query(str_query_criteria* criteria) {
+    get_collection_query* query = malloc(sizeof(get_collection_query));
+    if (query == NULL)
+        return NULL;
+
+    query->criteria = criteria;
+
+    db_query* db_que = malloc(sizeof(db_query));
+    if (db_que == NULL)
+        return NULL;
+
+    db_que->query.get_collection = query;
+    db_que->type = GET_COLLECTION_QUERY;
 
     return db_que;
 }
@@ -68,11 +95,20 @@ void print_create_collection(db_query* db_que) {
     print_schema(db_que->query.create_collection->schema, tabs);
 }
 
+void print_get_collection(db_query* db_que) {
+    printf("getCollection:\n");
+    print_tabs(1);
+    printf("collection: %s\n", db_que->query.get_collection->criteria->value);
+}
+
 void print_db_query(db_query* db_que) {
     printf("\nOUTPUT:\n");
     switch (db_que->type) {
         case CREATE_COLLECTION_QUERY:
             print_create_collection(db_que);
+            break;
+        case GET_COLLECTION_QUERY:
+            print_get_collection(db_que);
             break;
     }
 }

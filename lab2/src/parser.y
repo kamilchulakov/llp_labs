@@ -20,14 +20,19 @@
 
 %type <str> WORD
 %type <str> QUOTED_WORD
+%type <criteria> str_arg
 %type <sch> sch_field
 %type <sch> sch_fields
 %type <sch> schema
 %type <dbque> db_query
+%type <dbque> db_func
 %type <dbque> create_collection_call
+%type <dbque> get_collection_call
+
 
 %union {
     char str[42];
+    str_query_criteria* criteria;
     schema_field* sch;
     db_query* dbque;
 }
@@ -40,9 +45,13 @@ input:
 ;
 
 db_query:
-    DB DOT create_collection_call {
+    DB DOT db_func {
         $$ = $3;
     }
+;
+
+db_func:
+   get_collection_call | create_collection_call
 ;
 
 schema:
@@ -67,6 +76,18 @@ sch_field:
 create_collection_call:
     CREATE_COLLECTION LPAREN QUOTED_WORD COMMA schema RPAREN {
         $$ = create_create_collection_query($3, $5);
+    }
+;
+
+get_collection_call:
+    GET_COLLECTION str_arg {
+        $$ = create_get_collection_query($2);
+    }
+;
+
+str_arg:
+    LPAREN QUOTED_WORD RPAREN {
+        $$ = create_str_query_criteria($2);
     }
 ;
 %%

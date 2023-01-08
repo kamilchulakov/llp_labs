@@ -68,6 +68,8 @@ db.createCollection("example",
     is_example: "bool"
   } 
 );
+
+db.getCollection("example");
 ```
 
 
