@@ -210,8 +210,26 @@ void print_value(value* val) {
 void print_operator(int tabs, int type) {
     print_tabs(tabs);
     switch (type) {
-        case 0:
+        case CMP_EQ:
             printf("op: equal\n");
+            break;
+        case CMP_LT:
+            printf("op: less\n");
+            break;
+        case CMP_LTE:
+            printf("op: less or equal\n");
+            break;
+        case CMP_NEQ:
+            printf("op: not equal\n");
+            break;
+        case CMP_REGEX:
+            printf("op: regex\n");
+            break;
+        case CMP_GT:
+            printf("op: greater\n");
+            break;
+        case CMP_GTE:
+            printf("op: greater or equal\n");
             break;
     }
 }

@@ -11,6 +11,7 @@ int                     ([-+]?[0-9])+
 blank                   [ \t\r\n\f\v]+
 word                    [a-zA-Z_][a-zA-Z0-9_]*
 quoted_word             \"{word}\"
+field_reference         \"({word}\.)*{word}\"
 
 %%
 
@@ -46,6 +47,7 @@ quoted_word             \"{word}\"
 {int}                   {yylval.intval = atoi(yytext); return (INT32_VAL); }
 {word}                  {sscanf(yytext, "%s", yylval.str); return (WORD);}
 {quoted_word}           {sscanf(yytext, "%s", yylval.str); return (QUOTED_WORD);}
+{field_reference}       {sscanf(yytext, "%s", yylval.str); return (QUOTED_WORD);}
 
 ":"                     {return (COLON);}
 ";"                     {return (SEMICOLON);}

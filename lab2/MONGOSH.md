@@ -38,18 +38,22 @@ $lte - Matches numeric values that are less than or equal to a specified value.
 
 $regex - Matches string values that match pattern
 
+### Conditions
+https://www.mongodb.com/docs/manual/tutorial/query-documents/#specify-or-conditions
+
+
 ### Examples
 
 #### Data
 ```
 db.movies.find( {
      year: 2010,
-     $or: [ { awards.wins: { $gte: 5 } }, { genres: "Drama" } ]
-} )
+     $or: [ { "awards.wins": { $gte: 5 } }, { genres: "Drama" } ]
+} );
 
 db.movies.count( {
   year: 2023,
-  $or: [ { author: "Gofard" } , { rating: { $lte: 10 } } ]
+  $or: [ { author: { $ne: "Truffaut" } ]
 });
 
 db.movies.count( {
@@ -59,12 +63,7 @@ db.movies.count( {
 ```
 
 ```
-db.bios.find({ birth: 
-  { 
-    $gt: new Date('1940-01-01'), 
-    $lt: new Date('1960-01-01')
-  }
-});
+db.inventory.find( { status: "A", qty: { $lt: 30 } } );
 ```
 
 #### Schemas (as I imagined)

@@ -38,6 +38,8 @@
 %type <cmp_op> cmp_operator
 %type <val> value
 %type <str> field
+%type <criteria> query_criterias_in_brackets
+%type <criteria> query_criteria_in_brackets
 %type <criteria> query_criteria_arg
 %type <criteria> query_criterias
 %type <criteria> query_criteria
@@ -141,8 +143,21 @@ count_call:
 ;
 
 query_criteria_arg:
-    LPAREN LBRACKET query_criterias RBRACKET RPAREN {
-        $$ = $3;
+    LPAREN query_criteria_in_brackets RPAREN {
+        $$ = $2;
+    }
+;
+
+query_criterias_in_brackets:
+    query_criteria_in_brackets | query_criteria_in_brackets COMMA query_criterias_in_brackets {
+        $$ = $1;
+        $1->nxt = $3;
+    }
+;
+
+query_criteria_in_brackets:
+    LBRACKET query_criterias RBRACKET {
+        $$ = $2;
     }
 ;
 
@@ -155,21 +170,21 @@ query_criterias:
 ;
 
 query_criteria:
-    criteria_operator COLON LSBRACKET query_criterias RSBRACKET {
+    criteria_operator COLON LSBRACKET query_criterias_in_brackets RSBRACKET {
         $$ = create_criteria_operator($1, $4);
     }
     | field_query_criteria
 
 field_query_criteria:
-    field cmp_operator value {
-        $$ = create_field_criteria($1, $2, $3);
+    field COLON LBRACKET cmp_operator COLON value RBRACKET {
+        $$ = create_field_criteria($1, $4, $6);
     }
     | field COLON value {
         $$ = create_field_criteria($1, 0, $3);
     }
 
 field:
-    WORD
+    WORD | QUOTED_WORD
 
 cmp_operator:
     EQ | NEQ | GT | GTE | LT | LTE | REGEX
