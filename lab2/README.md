@@ -4,6 +4,7 @@
 - Status: IN PROGRESS...
 
 ### Examples
+#### createCollection
 ```
 INPUT:
 db.createCollection("example", 
@@ -33,6 +34,35 @@ createCollection:
 			field_type: "bool"
 ```
 
+#### collection.count
+```
+INPUT:
+db.movies.count( {
+  year: 2023,
+  $or: [ author: "Gofard", rating: 10 ]
+});
+
+OUTPUT:
+count:
+	collection: movies
+	criteria:
+		field_criteria:
+			field: year
+				op: equal
+			value: 2023
+		operator_criteria:
+			operator: or
+			criteria:
+				field_criteria:
+					field: author
+						op: equal
+					value: "Gofard"
+				field_criteria:
+					field: rating
+						op: equal
+					value: 10
+```
+
 ### TODO
 - [x] check mongosh
 - [x] prepare build
@@ -43,7 +73,7 @@ createCollection:
 #### Lexer
 - [x] regular expressions for tokens
   - [x] mongosh keywords
-  - [ ] bool expressions
+  - [x] bool expressions
 - [ ] regular expressions for values
 - [ ] handle big strings
 

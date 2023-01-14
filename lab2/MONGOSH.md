@@ -44,8 +44,18 @@ $regex - Matches string values that match pattern
 ```
 db.movies.find( {
      year: 2010,
-     $or: [ { "awards.wins": { $gte: 5 } }, { genres: "Drama" } ]
+     $or: [ { awards.wins: { $gte: 5 } }, { genres: "Drama" } ]
 } )
+
+db.movies.count( {
+  year: 2023,
+  $or: [ { author: "Gofard" } , { rating: { $lte: 10 } } ]
+});
+
+db.movies.count( {
+  year: 2022,
+  released: 2023
+});
 ```
 
 ```

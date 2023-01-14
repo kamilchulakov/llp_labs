@@ -69,6 +69,78 @@ db_query* create_drop_database_query() {
     return db_que;
 }
 
+
+value* create_int32_value(int val) {
+    value* res = malloc(sizeof(value));
+    if (res == NULL)
+        return NULL;
+    res->type = INT32_VAL_TYPE;
+    res->intval = val;
+    return res;
+}
+
+value* create_str_value(char* val) {
+    value* res = malloc(sizeof(value));
+    if (res == NULL)
+        return NULL;
+    res->type = STR_VAL_TYPE;
+    res->strval = malloc(strlen(val)+1);
+    strcpy(res->strval, val);
+    return res;
+}
+
+query_criteria* create_field_criteria(char* field, int cmp_op, value* val) {
+    query_criteria* criteria = malloc(sizeof(query_criteria));
+    if (criteria == NULL) {
+        return NULL;
+    }
+    criteria->fld = malloc(sizeof(field_query_criteria));
+    if (criteria->fld == NULL)
+        return NULL;
+
+    criteria->type = FIELD_CRITERIA;
+    criteria->fld->field = malloc(strlen(field)+1);
+    strcpy(criteria->fld->field, field);
+    criteria->fld->val = val;
+    criteria->fld->type = cmp_op;
+
+    return criteria;
+}
+
+query_criteria* create_criteria_operator(int criteria_op, query_criteria* other) {
+    query_criteria* criteria = malloc(sizeof(query_criteria));
+    if (criteria == NULL) {
+        return NULL;
+    }
+    criteria->op = malloc(sizeof(operator_criteria));
+    if (criteria->op == NULL)
+        return NULL;
+
+    criteria->type = OP_CRITERIA;
+    criteria->op->type = criteria_op;
+    criteria->op->criterias = other;
+    return criteria;
+}
+
+collection_query* create_count_query(query_criteria* criteria) {
+    count_query* query = malloc(sizeof(count_query));
+    if (query == NULL)
+        return NULL;
+
+    query->criteria = criteria;
+
+    collection_query* que = malloc(sizeof(collection_query));
+    if (que == NULL)
+        return NULL;
+
+    que->query.count = query;
+    que->type = COUNT_QUERY;
+
+    return que;
+}
+
+// ________________ prints ____________
+
 void print_tabs(int tabs) {
     for (int i = 0; i < tabs; i++) {
         printf("\t");
@@ -121,6 +193,89 @@ void print_db_query(db_query* db_que) {
             break;
         case DROP_DATABASE_QUERY:
             printf("dropDatabase\n");
+            break;
+    }
+}
+void print_value(value* val) {
+    switch (val->type) {
+        case INT32_VAL_TYPE:
+            printf("value: %d\n", val->intval);
+            break;
+        case STR_VAL_TYPE:
+            printf("value: %s\n", val->strval);
+            break;
+    }
+}
+
+void print_operator(int tabs, int type) {
+    print_tabs(tabs+1);
+    switch (type) {
+        case 0:
+            printf("op: equal\n");
+            break;
+    }
+}
+
+void print_field_criteria(field_query_criteria* fld, int tabs) {
+    print_tabs(tabs);
+    printf("field_criteria:\n");
+    print_tabs(tabs+1);
+    printf("field: %s\n", fld->field);
+    print_operator(tabs+1, fld->type);
+    print_tabs(tabs+1);
+    print_value(fld->val);
+}
+
+void print_criteria_operator(int tabs, int type) {
+    print_tabs(tabs);
+    switch (type) {
+        case 0:
+            printf("operator: or\n");
+            break;
+        case 1:
+            printf("operator: and\n");
+            break;
+    }
+}
+void print_query_criteria(query_criteria* criteria, int tabs);
+void print_operator_criteria(operator_criteria* op, int tabs) {
+    print_tabs(tabs);
+    printf("operator_criteria:\n");
+    print_criteria_operator(tabs+1, op->type);
+    print_query_criteria(op->criterias, tabs+1);
+}
+
+void print_query_criteria(query_criteria* criteria, int tabs) {
+    print_tabs(tabs);
+    printf("criteria:\n");
+    int curr_tabs = tabs+1;
+    query_criteria* curr = criteria;
+    while (curr) {
+        switch (curr->type) {
+            case OP_CRITERIA:
+                print_operator_criteria(curr->op, curr_tabs);
+                break;
+            case FIELD_CRITERIA:
+                print_field_criteria(curr->fld, curr_tabs);
+                break;
+        }
+        curr = curr->nxt;
+    }
+}
+
+void print_count(collection_query* col_query) {
+    int tabs = 1;
+    printf("count:\n");
+    print_tabs(tabs);
+    printf("collection: %s\n", col_query->collection);
+    print_query_criteria(col_query->query.count->criteria, tabs);
+}
+
+void print_col_query(collection_query* col_query) {
+    printf("\nOUTPUT:\n");
+    switch (col_query->type) {
+        case COUNT_QUERY:
+            print_count(col_query);
             break;
     }
 }

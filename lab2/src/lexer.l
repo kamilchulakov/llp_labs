@@ -29,18 +29,21 @@ quoted_word             \"{word}\"
 "update"                {return (UPDATE);}
 "updateOne"             {return (UPDATE_ONE);}
 
-"$eq"                   {return (EQ);}
-"$ne"                   {return (NEQ);}
-"$ge"                   {return (GT);}
-"$gte"                  {return (GTE);}
-"$lt"                   {return (LT);}
-"$lte"                  {return (LTE);}
-"$regex"                {return (REGEX);}
+"$or"                   {yylval.criteria_op = 0; return (OR);}
+"$and"                  {yylval.criteria_op = 1; return (AND);}
+"$eq"                   {yylval.cmp_op = 0; return (EQ);}
+"$ne"                   {yylval.cmp_op = 1; return (NEQ);}
+"$ge"                   {yylval.cmp_op = 2; return (GT);}
+"$gte"                  {yylval.cmp_op = 3; return (GTE);}
+"$lt"                   {yylval.cmp_op = 4; return (LT);}
+"$lte"                  {yylval.cmp_op = 5; return (LTE);}
+"$regex"                {yylval.cmp_op = 6; return (REGEX);}
 
 "int32"                 {return (INT32);}
 "bool"                  {return (BOOL);}
 "double"                {return (DOUBLE);}
 
+{int}                   {yylval.intval = atoi(yytext); return (INT32_VAL); }
 {word}                  {sscanf(yytext, "%s", yylval.str); return (WORD);}
 {quoted_word}           {sscanf(yytext, "%s", yylval.str); return (QUOTED_WORD);}
 
@@ -51,6 +54,8 @@ quoted_word             \"{word}\"
 ","                     {return (COMMA);}
 "{"                     {return (LBRACKET);}
 "}"                     {return (RBRACKET);}
+"["                     {return (LSBRACKET);}
+"]"                     {return (RSBRACKET);}
 
 {blank}                 { /* ignoring blank lines */ }
 
