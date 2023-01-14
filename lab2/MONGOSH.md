@@ -19,7 +19,8 @@ mongodb docs
   - .findOne(query criteria)
   - .insertOne($document)
   - .insertMany([$document, ...])
-  - .remove(query criteria, justOne)
+  - .remove(query criteria)
+  - .removeOne(query criteria)
   - .renameCollection(target, dropTarget)
   - .update(query criteria, update/document)
   - .updateOne(query criteria, update/document)
@@ -65,6 +66,9 @@ db.movies.count( {
 
 ```
 db.inventory.find( { status: "A", qty: { $lt: 30 } } );
+
+db.inventory.removeOne( { $and: [ { amount: { $gt: 2}, ytq: { $lte: 1 } } ] } );
+
 ```
 
 #### Schemas (as I imagined)

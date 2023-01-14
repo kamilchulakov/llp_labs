@@ -27,6 +27,7 @@ field_reference         \"({word}\.)*{word}\"
 "insertOne"             {return (INSERT_ONE);}
 "insertMany"            {return (INSERT_MANY);}
 "remove"                {return (REMOVE);}
+"removeOne"             {return (REMOVE_ONE);}
 "renameCollection"      {return (RENAME_COLLECTION);}
 "update"                {return (UPDATE);}
 "updateOne"             {return (UPDATE_ONE);}
@@ -36,7 +37,7 @@ field_reference         \"({word}\.)*{word}\"
 "$and"                  {yylval.criteria_op = 1; return (AND);}
 "$eq"                   {yylval.cmp_op = 0; return (EQ);}
 "$ne"                   {yylval.cmp_op = 1; return (NEQ);}
-"$ge"                   {yylval.cmp_op = 2; return (GT);}
+"$gt"                   {yylval.cmp_op = 2; return (GT);}
 "$gte"                  {yylval.cmp_op = 3; return (GTE);}
 "$lt"                   {yylval.cmp_op = 4; return (LT);}
 "$lte"                  {yylval.cmp_op = 5; return (LTE);}

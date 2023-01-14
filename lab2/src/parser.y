@@ -13,7 +13,7 @@
 %token INT32_VAL
 %token CREATE_COLLECTION GET_COLLECTION DROP_DATABASE
 %token WORD QUOTED_WORD
-%token COUNT FIND FIND_ONE INSERT_ONE INSERT_MANY REMOVE RENAME_COLLECTION UPDATE UPDATE_ONE
+%token COUNT FIND FIND_ONE INSERT_ONE INSERT_MANY REMOVE REMOVE_ONE RENAME_COLLECTION UPDATE UPDATE_ONE
 %token LPAREN RPAREN COMMA LBRACKET RBRACKET COLON SEMICOLON LSBRACKET RSBRACKET
 %token EQ NEQ GT GTE LT LTE REGEX
 %token OR AND
@@ -33,6 +33,7 @@
 %type <dbque> drop_database_call
 
 %type <intval> INT32_VAL
+%type <intval> limit
 %type <cmp_op> EQ NEQ GT GTE LT LTE REGEX
 %type <criteria_op> OR AND
 %type <criteria_op> criteria_operator
@@ -47,6 +48,7 @@
 %type <criteria> field_query_criteria
 %type <col_query> count_call
 %type <col_query> find_call
+%type <col_query> remove_call
 %type <col_query> col_func
 %type <col_query> col_query
 
@@ -135,7 +137,7 @@ col_query:
 ;
 
 col_func:
-    count_call | find_call
+    count_call | find_call | remove_call
 ;
 
 count_call:
@@ -151,9 +153,27 @@ find_call:
     | FIND_ONE query_criteria_arg {
         $$ = create_find_query($2, 1);
     }
-    | FIND query_criteria_arg DOT LIMIT LPAREN INT32_VAL RPAREN {
-        $$ = create_find_query($2, $6);
+    | FIND query_criteria_arg limit {
+        $$ = create_find_query($2, $3);
     }
+;
+
+remove_call:
+    REMOVE query_criteria_arg {
+        $$ = create_remove_query($2, -1);
+    }
+    | REMOVE_ONE query_criteria_arg {
+        $$ = create_remove_query($2, 1);
+    }
+    | REMOVE query_criteria_arg limit {
+        $$ = create_remove_query($2, $3);
+    }
+
+limit:
+    DOT LIMIT LPAREN INT32_VAL RPAREN {
+        $$ = $4;
+    }
+;
 
 query_criteria_arg:
     LPAREN query_criteria_in_brackets RPAREN {

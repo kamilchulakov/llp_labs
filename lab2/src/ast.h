@@ -91,12 +91,18 @@ typedef struct {
     int limit;
 } find_query;
 
-typedef enum { COUNT_QUERY, FIND_QUERY } collection_query_type;
+typedef struct {
+    query_criteria* criteria;
+    int limit;
+} remove_query;
+
+typedef enum { COUNT_QUERY, FIND_QUERY, REMOVE_QUERY } collection_query_type;
 
 typedef struct {
     union {
         count_query* count;
         find_query* find;
+        remove_query* remove;
     } query;
     collection_query_type type;
     char* collection;
@@ -115,6 +121,7 @@ query_criteria* create_field_criteria(char* field, int cmp_op, value* val);
 query_criteria* create_criteria_operator(int criteria_op, query_criteria* other);
 collection_query* create_count_query(query_criteria* criteria);
 collection_query* create_find_query(query_criteria* criteria, int limit);
+collection_query* create_remove_query(query_criteria* criteria, int limit);
 
 void print_db_query(db_query* db_que);
 void print_col_query(collection_query* col_query);

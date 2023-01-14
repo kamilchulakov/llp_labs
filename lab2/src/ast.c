@@ -157,6 +157,24 @@ collection_query* create_find_query(query_criteria* criteria, int limit) {
     return que;
 }
 
+collection_query* create_remove_query(query_criteria* criteria, int limit) {
+    remove_query* query = malloc(sizeof(remove_query));
+    if (query == NULL)
+        return NULL;
+
+    query->criteria = criteria;
+    query->limit = limit;
+
+    collection_query* que = malloc(sizeof(collection_query));
+    if (que == NULL)
+        return NULL;
+
+    que->query.remove = query;
+    que->type = REMOVE_QUERY;
+
+    return que;
+}
+
 // ________________ prints ____________
 
 void print_tabs(int tabs) {
@@ -306,9 +324,22 @@ void print_count(collection_query* col_query) {
     printf("collection: %s\n", col_query->collection);
     print_query_criteria(col_query->query.count->criteria, tabs);
 }
+
 void print_find(collection_query* col_query) {
     int tabs = 1;
     printf("find:\n");
+    if (col_query->query.find->limit != -1) {
+        print_tabs(tabs);
+        printf("limit: %d\n", col_query->query.find->limit);
+    }
+    print_tabs(tabs);
+    printf("collection: %s\n", col_query->collection);
+    print_query_criteria(col_query->query.count->criteria, tabs);
+}
+
+void print_remove(collection_query* col_query) {
+    int tabs = 1;
+    printf("remove:\n");
     if (col_query->query.find->limit != -1) {
         print_tabs(tabs);
         printf("limit: %d\n", col_query->query.find->limit);
@@ -326,6 +357,9 @@ void print_col_query(collection_query* col_query) {
             break;
         case FIND_QUERY:
             print_find(col_query);
+            break;
+        case REMOVE_QUERY:
+            print_remove(col_query);
             break;
     }
 }
