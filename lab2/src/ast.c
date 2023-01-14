@@ -208,7 +208,7 @@ void print_value(value* val) {
 }
 
 void print_operator(int tabs, int type) {
-    print_tabs(tabs+1);
+    print_tabs(tabs);
     switch (type) {
         case 0:
             printf("op: equal\n");

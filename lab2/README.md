@@ -55,11 +55,11 @@ count:
 			criteria:
 				field_criteria:
 					field: author
-						op: equal
+					op: equal
 					value: "Gofard"
 				field_criteria:
 					field: rating
-						op: equal
+					op: equal
 					value: 10
 ```
 
