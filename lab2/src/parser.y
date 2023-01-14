@@ -13,10 +13,11 @@
 %token INT32_VAL
 %token CREATE_COLLECTION GET_COLLECTION DROP_DATABASE
 %token WORD QUOTED_WORD
-%token COUNT FIND INSERT_ONE INSERT_MANY REMOVE RENAME_COLLECTION UPDATE UPDATE_ONE
+%token COUNT FIND FIND_ONE INSERT_ONE INSERT_MANY REMOVE RENAME_COLLECTION UPDATE UPDATE_ONE
 %token LPAREN RPAREN COMMA LBRACKET RBRACKET COLON SEMICOLON LSBRACKET RSBRACKET
 %token EQ NEQ GT GTE LT LTE REGEX
 %token OR AND
+%token LIMIT
 %token OTHER
 
 %type <str> WORD
@@ -45,6 +46,7 @@
 %type <criteria> query_criteria
 %type <criteria> field_query_criteria
 %type <col_query> count_call
+%type <col_query> find_call
 %type <col_query> col_func
 %type <col_query> col_query
 
@@ -133,7 +135,7 @@ col_query:
 ;
 
 col_func:
-    count_call
+    count_call | find_call
 ;
 
 count_call:
@@ -141,6 +143,17 @@ count_call:
         $$ = create_count_query($2);
     }
 ;
+
+find_call:
+    FIND query_criteria_arg {
+        $$ = create_find_query($2, -1);
+    }
+    | FIND_ONE query_criteria_arg {
+        $$ = create_find_query($2, 1);
+    }
+    | FIND query_criteria_arg DOT LIMIT LPAREN INT32_VAL RPAREN {
+        $$ = create_find_query($2, $6);
+    }
 
 query_criteria_arg:
     LPAREN query_criteria_in_brackets RPAREN {

@@ -63,6 +63,26 @@ count:
 					value: 10
 ```
 
+#### collection.find
+```
+INPUT:
+db.inventory.find( { status: "A", qty: { $lt: 30 } } ).limit(5);
+
+OUTPUT:
+find:
+	limit: 5
+	collection: inventory
+	criteria:
+		field_criteria:
+			field: status
+			op: equal
+			value: "A"
+		field_criteria:
+			field: qty
+			op: less
+			value: 30
+```
+
 ### TODO
 - [x] check mongosh
 - [x] prepare build

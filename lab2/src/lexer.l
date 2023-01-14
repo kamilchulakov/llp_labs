@@ -23,12 +23,14 @@ field_reference         \"({word}\.)*{word}\"
 
 "count"                 {return (COUNT);}
 "find"                  {return (FIND);}
+"findOne"               {return (FIND_ONE);}
 "insertOne"             {return (INSERT_ONE);}
 "insertMany"            {return (INSERT_MANY);}
 "remove"                {return (REMOVE);}
 "renameCollection"      {return (RENAME_COLLECTION);}
 "update"                {return (UPDATE);}
 "updateOne"             {return (UPDATE_ONE);}
+"limit"                 {return (LIMIT);}
 
 "$or"                   {yylval.criteria_op = 0; return (OR);}
 "$and"                  {yylval.criteria_op = 1; return (AND);}

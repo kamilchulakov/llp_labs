@@ -15,7 +15,8 @@ mongodb docs
 ### Collection Methods
 - db.collection
   - .count(query criteria)
-  - .find(query criteria, justOne)
+  - .find(query criteria)
+  - .findOne(query criteria)
   - .insertOne($document)
   - .insertMany([$document, ...])
   - .remove(query criteria, justOne)
