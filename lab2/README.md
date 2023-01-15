@@ -83,6 +83,27 @@ find:
 			value: 30
 ```
 
+#### collection.insert
+```
+INPUT:
+db.products.insertOne( { item: "card", qty: 15 } );
+
+OUTPUT:
+insert:
+	collection: products
+	document:
+		element:
+			field: item
+			value:
+				type: string
+				val: "card"
+		element:
+			field: qty
+			value:
+				type: int32
+				val: 15
+```
+
 ### TODO
 - [x] check mongosh
 - [x] prepare build

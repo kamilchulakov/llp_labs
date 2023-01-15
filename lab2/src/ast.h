@@ -5,11 +5,32 @@
 #include <string.h>
 
 typedef struct schema_field schema_field;
-
 struct schema_field {
     char* name;
     char* type;
     schema_field* nxt;
+};
+
+typedef enum { INT32_VAL_TYPE, STR_VAL_TYPE } value_type;
+typedef struct {
+    union {
+        int intval;
+        char* strval;
+    };
+    value_type type;
+} value;
+
+typedef struct field_value field_value;
+struct field_value {
+    char* field;
+    value* val;
+    field_value* nxt;
+};
+
+typedef struct document document;
+struct document {
+    field_value* elements;
+    document* nxt;
 };
 
 typedef struct {
@@ -27,15 +48,6 @@ typedef struct {
 
 typedef enum { CREATE_COLLECTION_QUERY, GET_COLLECTION_QUERY, DROP_DATABASE_QUERY } db_query_type;
 
-typedef enum { INT32_VAL_TYPE, STR_VAL_TYPE } value_type;
-typedef struct {
-    union {
-        int intval;
-        char* strval;
-    };
-    value_type type;
-} value;
-
 typedef enum {
     CMP_EQ = 0,
     CMP_NEQ = 1,
@@ -45,6 +57,7 @@ typedef enum {
     CMP_LTE = 5,
     CMP_REGEX = 6
 } op_type;
+
 typedef struct field_query_criteria field_query_criteria;
 struct field_query_criteria {
     char* field;
@@ -96,13 +109,18 @@ typedef struct {
     int limit;
 } remove_query;
 
-typedef enum { COUNT_QUERY, FIND_QUERY, REMOVE_QUERY } collection_query_type;
+typedef struct {
+    document* docs;
+} insert_query;
+
+typedef enum { COUNT_QUERY, FIND_QUERY, REMOVE_QUERY, INSERT_QUERY } collection_query_type;
 
 typedef struct {
     union {
         count_query* count;
         find_query* find;
         remove_query* remove;
+        insert_query* insert;
     } query;
     collection_query_type type;
     char* collection;
@@ -117,11 +135,17 @@ db_query* create_drop_database_query();
 
 value* create_int32_value(int val);
 value* create_str_value(char* val);
+
+document* create_document(field_value* elements);
+field_value* create_field_value(char* field, value* val);
+
 query_criteria* create_field_criteria(char* field, int cmp_op, value* val);
 query_criteria* create_criteria_operator(int criteria_op, query_criteria* other);
+
 collection_query* create_count_query(query_criteria* criteria);
 collection_query* create_find_query(query_criteria* criteria, int limit);
 collection_query* create_remove_query(query_criteria* criteria, int limit);
+collection_query* create_insert_query(document* docs);
 
 void print_db_query(db_query* db_que);
 void print_col_query(collection_query* col_query);

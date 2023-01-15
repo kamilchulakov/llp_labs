@@ -40,15 +40,22 @@
 %type <cmp_op> cmp_operator
 %type <val> value
 %type <str> field
+%type <element> field_value
+%type <element> field_values
+%type <doc> document
+%type <doc> documents
+
 %type <criteria> query_criterias_in_brackets
 %type <criteria> query_criteria_in_brackets
 %type <criteria> query_criteria_arg
 %type <criteria> query_criterias
 %type <criteria> query_criteria
 %type <criteria> field_query_criteria
+
 %type <col_query> count_call
 %type <col_query> find_call
 %type <col_query> remove_call
+%type <col_query> insert_call
 %type <col_query> col_func
 %type <col_query> col_query
 
@@ -61,6 +68,8 @@
     str_query_criteria* str_criteria;
     query_criteria* criteria;
     schema_field* sch;
+    document* doc;
+    field_value* element;
     value* val;
     collection_query* col_query;
     db_query* dbque;
@@ -137,7 +146,7 @@ col_query:
 ;
 
 col_func:
-    count_call | find_call | remove_call
+    count_call | find_call | remove_call | insert_call
 ;
 
 count_call:
@@ -168,10 +177,46 @@ remove_call:
     | REMOVE query_criteria_arg limit {
         $$ = create_remove_query($2, $3);
     }
+;
 
 limit:
     DOT LIMIT LPAREN INT32_VAL RPAREN {
         $$ = $4;
+    }
+;
+
+insert_call:
+    INSERT_ONE LPAREN document RPAREN {
+        $$ = create_insert_query($3);
+    }
+    | INSERT_MANY LPAREN documents RPAREN {
+        $$ = create_insert_query($3);
+    }
+;
+
+documents:
+    document | document COMMA documents {
+        $$ = $1;
+        $1->nxt = $3;
+    }
+;
+
+document:
+    LBRACKET field_values RBRACKET {
+        $$ = create_document($2);
+    }
+;
+
+field_values:
+    field_value | field_value COMMA field_values {
+        $$ = $1;
+        $1->nxt = $3;
+    }
+;
+
+field_value:
+    field COLON value {
+        $$ = create_field_value($1, $3);
     }
 ;
 
@@ -207,6 +252,7 @@ query_criteria:
         $$ = create_criteria_operator($1, $4);
     }
     | field_query_criteria
+;
 
 field_query_criteria:
     field COLON LBRACKET cmp_operator COLON value RBRACKET {
@@ -215,15 +261,19 @@ field_query_criteria:
     | field COLON value {
         $$ = create_field_criteria($1, 0, $3);
     }
+;
 
 field:
     WORD | QUOTED_WORD
+;
 
 cmp_operator:
     EQ | NEQ | GT | GTE | LT | LTE | REGEX
+;
 
 criteria_operator:
     OR | AND
+;
 
 value:
     INT32_VAL {
@@ -232,6 +282,7 @@ value:
     | QUOTED_WORD {
         $$ = create_str_value($1);
     }
+;
 %%
 
 void yyerror(const char* s) {

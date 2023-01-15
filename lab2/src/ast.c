@@ -24,6 +24,26 @@ schema_field* create_schema_field(char* name, char* type) {
     return fld;
 }
 
+document* create_document(field_value* elements) {
+    document* doc = malloc(sizeof(document));
+    if (doc == NULL)
+        return NULL;
+
+    doc->elements = elements;
+    return doc;
+}
+
+field_value* create_field_value(char* field, value* val) {
+    field_value* element = malloc(sizeof(field_value));
+    if (element == NULL)
+        return NULL;
+
+    element->field = malloc(strlen(field)+1);
+    strcpy(element->field, field);
+    element->val = val;
+    return element;
+}
+
 db_query* create_create_collection_query(char* name, schema_field* schema) {
     create_collection_query* query = malloc(sizeof(create_collection_query));
     if (query == NULL)
@@ -175,6 +195,22 @@ collection_query* create_remove_query(query_criteria* criteria, int limit) {
     return que;
 }
 
+collection_query* create_insert_query(document* docs) {
+    insert_query* query = malloc(sizeof(insert_query));
+    if (query == NULL)
+        return NULL;
+
+    query->docs = docs;
+
+    collection_query* que = malloc(sizeof(collection_query));
+    if (que == NULL)
+        return NULL;
+
+    que->query.insert = query;
+    que->type = INSERT_QUERY;
+    return que;
+}
+
 // ________________ prints ____________
 
 void print_tabs(int tabs) {
@@ -204,6 +240,67 @@ void print_schema(schema_field* schema, int tabs) {
     print_schema_field(curr, curr_tabs);
 }
 
+void print_value_type(value_type type, int tabs) {
+    print_tabs(tabs);
+    switch (type) {
+        case INT32_VAL_TYPE:
+            printf("type: int32\n");
+            break;
+        case STR_VAL_TYPE:
+            printf("type: string\n");
+            break;
+    }
+}
+
+void print_value(value* val, int tabs) {
+    print_tabs(tabs);
+    printf("value:\n");
+    print_value_type(val->type, tabs+1);
+    print_tabs(tabs+1);
+    switch (val->type) {
+        case INT32_VAL_TYPE:
+            printf("val: %d\n", val->intval);
+            break;
+        case STR_VAL_TYPE:
+            printf("val: %s\n", val->strval);
+            break;
+    }
+}
+
+void print_field(char* field, int tabs) {
+    print_tabs(tabs);
+    printf("field: %s\n", field);
+}
+
+void print_elements(field_value* elements, int tabs) {
+    field_value* curr = elements;
+    while (curr) {
+        print_tabs(tabs);
+        printf("element:\n");
+        print_field(curr->field, tabs+1);
+        print_value(curr->val, tabs+1);
+        curr = curr->nxt;
+    }
+}
+
+void print_document(document* doc, int tabs) {
+    print_tabs(tabs);
+    printf("document:\n");
+    print_elements(doc->elements, tabs+1);
+}
+
+void print_document_or_documents(document* docs, int tabs) {
+    if (docs->nxt == NULL)
+        print_document(docs, tabs);
+    else {
+        document* curr = docs;
+        while (curr) {
+            print_document(curr, tabs);
+            curr = curr->nxt;
+        }
+    }
+}
+
 void print_create_collection(db_query* db_que) {
     int tabs = 1;
     printf("createCollection:\n");
@@ -229,16 +326,6 @@ void print_db_query(db_query* db_que) {
             break;
         case DROP_DATABASE_QUERY:
             printf("dropDatabase\n");
-            break;
-    }
-}
-void print_value(value* val) {
-    switch (val->type) {
-        case INT32_VAL_TYPE:
-            printf("value: %d\n", val->intval);
-            break;
-        case STR_VAL_TYPE:
-            printf("value: %s\n", val->strval);
             break;
     }
 }
@@ -273,11 +360,9 @@ void print_operator(int tabs, int type) {
 void print_field_criteria(field_query_criteria* fld, int tabs) {
     print_tabs(tabs);
     printf("field_criteria:\n");
-    print_tabs(tabs+1);
-    printf("field: %s\n", fld->field);
+    print_field(fld->field, tabs+1);
     print_operator(tabs+1, fld->type);
-    print_tabs(tabs+1);
-    print_value(fld->val);
+    print_value(fld->val, tabs+1);
 }
 
 void print_criteria_operator(int tabs, int type) {
@@ -349,6 +434,14 @@ void print_remove(collection_query* col_query) {
     print_query_criteria(col_query->query.count->criteria, tabs);
 }
 
+void print_insert(collection_query* col_query) {
+    int tabs = 1;
+    printf("insert:\n");
+    print_tabs(tabs);
+    printf("collection: %s\n", col_query->collection);
+    print_document_or_documents(col_query->query.insert->docs, tabs);
+}
+
 void print_col_query(collection_query* col_query) {
     printf("\nOUTPUT:\n");
     switch (col_query->type) {
@@ -360,6 +453,9 @@ void print_col_query(collection_query* col_query) {
             break;
         case REMOVE_QUERY:
             print_remove(col_query);
+            break;
+        case INSERT_QUERY:
+            print_insert(col_query);
             break;
     }
 }
