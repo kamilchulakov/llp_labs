@@ -11,11 +11,14 @@ struct schema_field {
     schema_field* nxt;
 };
 
-typedef enum { INT32_VAL_TYPE, STR_VAL_TYPE } value_type;
+typedef enum { false = 0, true } bool;
+typedef enum { INT32_VAL_TYPE, STR_VAL_TYPE, BOOL_VAL_TYPE, DOUBLE_VAL_TYPE } value_type;
 typedef struct {
     union {
         int intval;
         char* strval;
+        bool boolval;
+        double doubleval;
     };
     value_type type;
 } value;
@@ -113,7 +116,12 @@ typedef struct {
     document* docs;
 } insert_query;
 
-typedef enum { COUNT_QUERY, FIND_QUERY, REMOVE_QUERY, INSERT_QUERY } collection_query_type;
+typedef struct {
+    query_criteria* criteria;
+    document* doc;
+} update_query;
+
+typedef enum { COUNT_QUERY, FIND_QUERY, REMOVE_QUERY, INSERT_QUERY, UPDATE_QUERY } collection_query_type;
 
 typedef struct {
     union {
@@ -121,6 +129,7 @@ typedef struct {
         find_query* find;
         remove_query* remove;
         insert_query* insert;
+        update_query* update;
     } query;
     collection_query_type type;
     char* collection;
@@ -135,6 +144,8 @@ db_query* create_drop_database_query();
 
 value* create_int32_value(int val);
 value* create_str_value(char* val);
+value* create_bool_value(bool val);
+value* create_double_value(double val);
 
 document* create_document(field_value* elements);
 field_value* create_field_value(char* field, value* val);
@@ -145,6 +156,7 @@ query_criteria* create_criteria_operator(int criteria_op, query_criteria* other)
 collection_query* create_count_query(query_criteria* criteria);
 collection_query* create_find_query(query_criteria* criteria, int limit);
 collection_query* create_remove_query(query_criteria* criteria, int limit);
+collection_query* create_update_query(query_criteria* criteria, document* doc);
 collection_query* create_insert_query(document* docs);
 
 void print_db_query(db_query* db_que);

@@ -109,6 +109,24 @@ value* create_str_value(char* val) {
     return res;
 }
 
+value* create_bool_value(bool val) {
+    value* res = malloc(sizeof(value));
+    if (res == NULL)
+        return NULL;
+    res->type = BOOL_VAL_TYPE;
+    res->boolval = val;
+    return res;
+}
+
+value* create_double_value(double val) {
+    value* res = malloc(sizeof(value));
+    if (res == NULL)
+        return NULL;
+    res->type = DOUBLE_VAL_TYPE;
+    res->doubleval = val;
+    return res;
+}
+
 query_criteria* create_field_criteria(char* field, int cmp_op, value* val) {
     query_criteria* criteria = malloc(sizeof(query_criteria));
     if (criteria == NULL) {
@@ -211,6 +229,23 @@ collection_query* create_insert_query(document* docs) {
     return que;
 }
 
+collection_query* create_update_query(query_criteria* criteria, document* doc) {
+    update_query* query = malloc(sizeof(update_query));
+    if (query == NULL)
+        return NULL;
+
+    query->criteria = criteria;
+    query->doc = doc;
+
+    collection_query* que = malloc(sizeof(collection_query));
+    if (que == NULL)
+        return NULL;
+
+    que->query.update = query;
+    que->type = UPDATE_QUERY;
+    return que;
+}
+
 // ________________ prints ____________
 
 void print_tabs(int tabs) {
@@ -240,6 +275,17 @@ void print_schema(schema_field* schema, int tabs) {
     print_schema_field(curr, curr_tabs);
 }
 
+void print_bool_val(bool val) {
+    printf("val: ");
+    switch (val) {
+        case 0:
+            printf("false\n");
+            break;
+        default:
+            printf("true\n");
+    }
+}
+
 void print_value_type(value_type type, int tabs) {
     print_tabs(tabs);
     switch (type) {
@@ -248,6 +294,12 @@ void print_value_type(value_type type, int tabs) {
             break;
         case STR_VAL_TYPE:
             printf("type: string\n");
+            break;
+        case DOUBLE_VAL_TYPE:
+            printf("type: double\n");
+            break;
+        case BOOL_VAL_TYPE:
+            printf("type: bool\n");
             break;
     }
 }
@@ -263,6 +315,12 @@ void print_value(value* val, int tabs) {
             break;
         case STR_VAL_TYPE:
             printf("val: %s\n", val->strval);
+            break;
+        case DOUBLE_VAL_TYPE:
+            printf("val: %f\n", val->doubleval);
+            break;
+        case BOOL_VAL_TYPE:
+            print_bool_val(val->boolval);
             break;
     }
 }
@@ -442,6 +500,15 @@ void print_insert(collection_query* col_query) {
     print_document_or_documents(col_query->query.insert->docs, tabs);
 }
 
+void print_update(collection_query* col_query) {
+    int tabs = 1;
+    printf("update:\n");
+    print_tabs(tabs);
+    printf("collection: %s\n", col_query->collection);
+    print_query_criteria(col_query->query.update->criteria, tabs);
+    print_document(col_query->query.update->doc, tabs);
+}
+
 void print_col_query(collection_query* col_query) {
     printf("\nOUTPUT:\n");
     switch (col_query->type) {
@@ -456,6 +523,9 @@ void print_col_query(collection_query* col_query) {
             break;
         case INSERT_QUERY:
             print_insert(col_query);
+            break;
+        case UPDATE_QUERY:
+            print_update(col_query);
             break;
     }
 }

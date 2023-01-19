@@ -104,26 +104,58 @@ insert:
 				val: 15
 ```
 
+#### collection.update
+```
+INPUT:
+db.listingsAndReviews.update(
+  { security_deposit: { $lt: 100 } },
+  {
+    $set: { security_deposit: 100, minimum_nights: 1 }
+  }
+);
+
+OUTPUT:
+update:
+	collection: listingsAndReviews
+	criteria:
+		field_criteria:
+			field: security_deposit
+			op: less
+			value:
+				type: int32
+				val: 100
+	document:
+		element:
+			field: security_deposit
+			value:
+				type: int32
+				val: 100
+		element:
+			field: minimum_nights
+			value:
+				type: int32
+				val: 1
+```
+
 ### TODO
 - [x] check mongosh
 - [x] prepare build
-- [ ] lexer
-- [ ] parser
-- [ ] visitor
+- [x] lexer + parser
+- [x] printer
+- [ ] free mem
 
 #### Lexer
 - [x] regular expressions for tokens
   - [x] mongosh keywords
   - [x] bool expressions
-- [ ] regular expressions for values
 - [ ] handle big strings
 
 #### Parser
 - [x] tokens
 - [x] parsing tokens with print
 - [x] db queries
-- [ ] collection queries
-- [ ] types
+- [x] collection queries
+- [x] types
 
 ### Project structure
 - src/lexer.l = lexer

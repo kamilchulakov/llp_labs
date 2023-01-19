@@ -21,9 +21,7 @@ mongodb docs
   - .insertMany([$document, ...])
   - .remove(query criteria)
   - .removeOne(query criteria)
-  - .renameCollection(target, dropTarget)
   - .update(query criteria, update/document)
-  - .updateOne(query criteria, update/document)
 
 ### Comparison
 $eq - Matches all values that are equal to a specified value.
@@ -69,6 +67,32 @@ db.inventory.find( { status: "A", qty: { $lt: 30 } } );
 
 db.inventory.removeOne( { $and: [ { amount: { $gt: 2}, ytq: { $lte: 1 } } ] } );
 
+db.movies.insertOne(
+  {
+    title: "The_Favourite",
+    genre: "Drama",
+    runtime: 121,
+    rated: "R",
+    year: 2018,
+    type: "movie"
+  }
+);
+
+db.listingsAndReviews.update(
+  { security_deposit: { $lt: 100 } },
+  {
+    $set: { security_deposit: 100, minimum_nights: 1 }
+  }
+);
+
+db.Employee.insertOne({
+  emp_id: 1,
+  emp_name: "ABC",
+  emp_address: "Mumbai", 
+  emp_phone: 1234567890,
+  emp_married: true,
+  emp_salary: 2.5
+});
 ```
 
 #### Schemas (as I imagined)

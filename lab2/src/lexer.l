@@ -8,6 +8,7 @@
 %}
 
 int                     ([-+]?[0-9])+
+double                  [+-]?([0-9]*[.])?[0-9]+
 blank                   [ \t\r\n\f\v]+
 word                    [a-zA-Z_][a-zA-Z0-9_]*
 quoted_word             \"{word}\"
@@ -30,7 +31,7 @@ field_reference         \"({word}\.)*{word}\"
 "removeOne"             {return (REMOVE_ONE);}
 "renameCollection"      {return (RENAME_COLLECTION);}
 "update"                {return (UPDATE);}
-"updateOne"             {return (UPDATE_ONE);}
+"$set"                   {return (SET);}
 "limit"                 {return (LIMIT);}
 
 "$or"                   {yylval.criteria_op = 0; return (OR);}
@@ -43,11 +44,14 @@ field_reference         \"({word}\.)*{word}\"
 "$lte"                  {yylval.cmp_op = 5; return (LTE);}
 "$regex"                {yylval.cmp_op = 6; return (REGEX);}
 
-"int32"                 {return (INT32);}
-"bool"                  {return (BOOL);}
-"double"                {return (DOUBLE);}
+"int32"                 {return (INT32_TYPE);}
+"bool"                  {return (BOOL_TYPE);}
+"double"                {return (DOUBLE_TYPE);}
 
 {int}                   {yylval.intval = atoi(yytext); return (INT32_VAL); }
+"true"                  {yylval.boolval = true; return (BOOL_VAL); }
+"false"                 {yylval.boolval = false; return (BOOL_VAL); }
+{double}                {yylval.doubleval = atof(yytext); return (DOUBLE_VAL);}
 {word}                  {sscanf(yytext, "%s", yylval.str); return (WORD);}
 {quoted_word}           {sscanf(yytext, "%s", yylval.str); return (QUOTED_WORD);}
 {field_reference}       {sscanf(yytext, "%s", yylval.str); return (QUOTED_WORD);}

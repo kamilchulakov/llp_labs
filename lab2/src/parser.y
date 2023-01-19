@@ -9,15 +9,15 @@
 %define parse.error verbose
 
 %token DB DOT
-%token DOUBLE STRING INT32 BOOL
-%token INT32_VAL
+%token DOUBLE_TYPE INT32_TYPE BOOL_TYPE
+%token INT32_VAL BOOL_VAL DOUBLE_VAL
 %token CREATE_COLLECTION GET_COLLECTION DROP_DATABASE
 %token WORD QUOTED_WORD
-%token COUNT FIND FIND_ONE INSERT_ONE INSERT_MANY REMOVE REMOVE_ONE RENAME_COLLECTION UPDATE UPDATE_ONE
+%token COUNT FIND FIND_ONE INSERT_ONE INSERT_MANY REMOVE REMOVE_ONE RENAME_COLLECTION UPDATE
 %token LPAREN RPAREN COMMA LBRACKET RBRACKET COLON SEMICOLON LSBRACKET RSBRACKET
 %token EQ NEQ GT GTE LT LTE REGEX
 %token OR AND
-%token LIMIT
+%token LIMIT SET
 %token OTHER
 
 %type <str> WORD
@@ -33,6 +33,8 @@
 %type <dbque> drop_database_call
 
 %type <intval> INT32_VAL
+%type <boolval> BOOL_VAL
+%type <doubleval> DOUBLE_VAL
 %type <intval> limit
 %type <cmp_op> EQ NEQ GT GTE LT LTE REGEX
 %type <criteria_op> OR AND
@@ -56,6 +58,7 @@
 %type <col_query> find_call
 %type <col_query> remove_call
 %type <col_query> insert_call
+%type <col_query> update_call
 %type <col_query> col_func
 %type <col_query> col_query
 
@@ -63,6 +66,8 @@
 %union {
     char str[42];
     int intval;
+    bool boolval;
+    double doubleval;
     int cmp_op;
     int criteria_op;
     str_query_criteria* str_criteria;
@@ -146,7 +151,7 @@ col_query:
 ;
 
 col_func:
-    count_call | find_call | remove_call | insert_call
+    count_call | find_call | remove_call | insert_call | update_call
 ;
 
 count_call:
@@ -191,6 +196,15 @@ insert_call:
     }
     | INSERT_MANY LPAREN documents RPAREN {
         $$ = create_insert_query($3);
+    }
+;
+
+update_call:
+    UPDATE LPAREN query_criteria_in_brackets COMMA document RPAREN {
+        $$ = create_update_query($3, $5);
+    }
+    | UPDATE LPAREN query_criteria_in_brackets COMMA LBRACKET SET COLON document RBRACKET RPAREN {
+        $$ = create_update_query($3, $8);
     }
 ;
 
@@ -281,6 +295,12 @@ value:
     }
     | QUOTED_WORD {
         $$ = create_str_value($1);
+    }
+    | BOOL_VAL {
+        $$ = create_bool_value($1);
+    }
+    | DOUBLE_VAL {
+        $$ = create_double_value($1);
     }
 ;
 %%
