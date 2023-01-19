@@ -162,5 +162,8 @@ collection_query* create_insert_query(document* docs);
 void print_db_query(db_query* db_que);
 void print_col_query(collection_query* col_query);
 
+void free_db_query(db_query* db_que);
+void free_col_query(collection_query* col_query);
+
 
 #endif //LAB2_AST_H

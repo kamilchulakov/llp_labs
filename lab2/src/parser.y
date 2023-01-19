@@ -84,9 +84,11 @@
 input:
     | input db_query SEMICOLON {
         print_db_query($2);
+        free_db_query($2);
     }
     | input col_query SEMICOLON {
         print_col_query($2);
+        free_col_query($2);
     }
 ;
 

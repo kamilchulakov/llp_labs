@@ -142,7 +142,7 @@ update:
 - [x] prepare build
 - [x] lexer + parser
 - [x] printer
-- [ ] free mem
+- [x] free mem
 
 #### Lexer
 - [x] regular expressions for tokens

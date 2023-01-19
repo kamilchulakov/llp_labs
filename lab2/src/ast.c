@@ -529,3 +529,140 @@ void print_col_query(collection_query* col_query) {
             break;
     }
 }
+
+// _________________free______________
+void free_str_criteria(str_query_criteria* criteria) {
+    free(criteria->value);
+    free(criteria);
+}
+
+void free_schema(schema_field* schema) {
+    free(schema->name);
+    free(schema->type);
+    if (schema->nxt) free_schema(schema->nxt);
+    free(schema);
+}
+
+void free_get_collection(get_collection_query* query) {
+    free_str_criteria(query->criteria);
+    free(query);
+}
+void free_create_collection(create_collection_query* query) {
+    free(query->name);
+    free_schema(query->schema);
+    free(query);
+}
+
+void free_db_query(db_query* db_que) {
+    switch (db_que->type) {
+        case GET_COLLECTION_QUERY:
+            free_get_collection(db_que->query.get_collection);
+            break;
+        case CREATE_COLLECTION_QUERY:
+            free_create_collection(db_que->query.create_collection);
+            break;
+        case DROP_DATABASE_QUERY:
+            break;
+    }
+    free(db_que);
+}
+
+void free_criteria(query_criteria* criteria);
+
+void free_op_criteria(operator_criteria* criteria) {
+    free_criteria(criteria->criterias);
+    free(criteria);
+}
+
+void free_val(value* val) {
+    switch (val->type) {
+        case STR_VAL_TYPE:
+            free(val->strval);
+            break;
+        default:
+            break;
+    }
+    free(val);
+}
+
+void free_field_criteria(field_query_criteria* criteria) {
+    free(criteria->field);
+    free_val(criteria->val);
+    free(criteria);
+}
+
+void free_criteria(query_criteria* criteria) {
+    switch (criteria->type) {
+        case OP_CRITERIA:
+            free_op_criteria(criteria->op);
+            free(criteria->op);
+            break;
+        case FIELD_CRITERIA:
+            free_field_criteria(criteria->fld);
+            free(criteria->fld);
+            break;
+    }
+    if (criteria->nxt) free_criteria(criteria->nxt);
+    free(criteria);
+}
+
+void free_count(count_query* query) {
+    free_criteria(query->criteria);
+    free(query);
+}
+
+void free_find(find_query* query) {
+    free_criteria(query->criteria);
+    free(query);
+}
+
+void free_remove(remove_query* query) {
+    free_criteria(query->criteria);
+    free(query);
+}
+
+void free_elements(field_value* elements) {
+    free(elements->field);
+    free_val(elements->val);
+    if (elements->nxt) free_elements(elements->nxt);
+    free(elements);
+}
+
+void free_document(document* doc) {
+    free_elements(doc->elements);
+    if (doc->nxt) free_document(doc->nxt);
+    free(doc);
+}
+
+void free_insert(insert_query* query) {
+    free_document(query->docs);
+    free(query);
+}
+
+void free_update(update_query* query) {
+    free_criteria(query->criteria);
+    free_document(query->doc);
+    free(query);
+}
+
+void free_col_query(collection_query* col_query) {
+    switch (col_query->type) {
+        case COUNT_QUERY:
+            free_count(col_query->query.count);
+            break;
+        case FIND_QUERY:
+            free_find(col_query->query.find);
+            break;
+        case REMOVE_QUERY:
+            free_remove(col_query->query.remove);
+            break;
+        case INSERT_QUERY:
+            free_insert(col_query->query.insert);
+            break;
+        case UPDATE_QUERY:
+            free_update(col_query->query.update);
+            break;
+    }
+    // free(col_query->collection);
+    free(col_query);
+}
