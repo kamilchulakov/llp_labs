@@ -5,7 +5,7 @@
 
 ### Examples
 #### createCollection
-```
+```mongodb
 INPUT:
 db.createCollection("example", 
   {
@@ -35,7 +35,7 @@ createCollection:
 ```
 
 #### collection.count
-```
+```mongodb
 INPUT:
 db.movies.count( {
   year: 2023,
@@ -64,7 +64,7 @@ count:
 ```
 
 #### collection.find
-```
+```mongodb
 INPUT:
 db.inventory.find( { status: "A", qty: { $lt: 30 } } ).limit(5);
 
@@ -84,7 +84,7 @@ find:
 ```
 
 #### collection.insert
-```
+```mongodb
 INPUT:
 db.products.insertOne( { item: "card", qty: 15 } );
 
@@ -105,7 +105,7 @@ insert:
 ```
 
 #### collection.update
-```
+```mongodb
 INPUT:
 db.listingsAndReviews.update(
   { security_deposit: { $lt: 100 } },

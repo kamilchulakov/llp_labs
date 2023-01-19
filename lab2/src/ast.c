@@ -571,7 +571,6 @@ void free_criteria(query_criteria* criteria);
 
 void free_op_criteria(operator_criteria* criteria) {
     free_criteria(criteria->criterias);
-    free(criteria);
 }
 
 void free_val(value* val) {
@@ -588,7 +587,6 @@ void free_val(value* val) {
 void free_field_criteria(field_query_criteria* criteria) {
     free(criteria->field);
     free_val(criteria->val);
-    free(criteria);
 }
 
 void free_criteria(query_criteria* criteria) {

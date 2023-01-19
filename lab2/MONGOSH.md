@@ -45,16 +45,14 @@ https://www.mongodb.com/docs/manual/tutorial/query-documents/#specify-or-conditi
 ### Examples
 
 #### Data
-```
+```mongodb
 db.movies.find( {
      year: 2010,
-     $or: [ { "awards.wins": { $gte: 5 } }, { genres: "Drama" } ]
-} );
-
-db.movies.count( {
-  year: 2023,
-  $or: [ { author: { $ne: "Truffaut" } ]
-});
+     $or: [ {
+       year: 2010,
+       $or: [ { "awards.wins": { $gte: 5 } }, { genres: "Drama" } ]
+     }, { genres: "Drama" } 
+]} );
 
 db.movies.count( {
   year: 2022,
@@ -62,7 +60,7 @@ db.movies.count( {
 });
 ```
 
-```
+```mongodb
 db.inventory.find( { status: "A", qty: { $lt: 30 } } );
 
 db.inventory.removeOne( { $and: [ { amount: { $gt: 2}, ytq: { $lte: 1 } } ] } );
@@ -96,7 +94,7 @@ db.Employee.insertOne({
 ```
 
 #### Schemas (as I imagined)
-```
+```mongodb
 db.createCollection("example", 
   {
     name: "string",
