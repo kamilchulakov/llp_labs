@@ -1,7 +1,8 @@
 ## Lab 2
 - Variant: [MONGOSH](MONGOSH.md)
 - Task: [TASK](TASK.md)
-- Status: IN PROGRESS...
+- Status: SUBMITTED
+- Report: [PDF](Отчёт%20LLP2.pdf)
 
 ### Examples
 #### createCollection
