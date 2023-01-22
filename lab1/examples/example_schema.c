@@ -1,39 +1,32 @@
-#include "../../src/main/query_executor.h"
+#include "../src/main/query_executor.h"
 
 
-string example_schema_name();
-schema_data example_schema_data();
-schema example_schema();
+schema* example_schema();
 
-int create_schema(db_handler* db) {
-    schema_query create_schema_query = {
-        .query_type = CREATE,
-        .query_data = {
-            .create_query_data = {
-                .schema = example_schema()
-            }
-        }
+int create_schema_example(db_handler* db) {
+    create_schema_query query = {
+        .schema = example_schema()
     };
 
-    execute_schema_query(db, create_schema_query);
+    create_schema(db, &query);
 
     return 0;
 }
 
-int scan_schema(db_handler* db) {
+int scan_schema_example(db_handler* db) {
     return 0;
 }
 
-int delete_schema(db_handler* db) {
+int delete_schema_example(db_handler* db) {
     return 0;
 }
 
 int main() {
     db_handler* db = open_db_file("example_db");
 
-    create_schema(db);
-    scan_schema(db);
-    delete_schema(db);
+    create_schema_example(db);
+    scan_schema_example(db);
+    delete_schema_example(db);
 
     utilize_db_file(db);
 
@@ -57,10 +50,9 @@ field* example_fields() {
     return fields;
 }
 
-schema_data example_schema_data() {
-    return (schema_data) { 2, example_fields() };
-}
-
-schema example_schema() {
-    return (schema) { example_schema_name(), example_schema_data() };
+schema* example_schema() {
+    schema* sch = malloc(sizeof(schema));
+    sch->field_count = 2;
+    sch->fields = example_fields();
+    return sch;
 }

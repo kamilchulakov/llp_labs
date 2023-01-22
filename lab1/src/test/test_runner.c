@@ -5,5 +5,6 @@
 int main() {
     FILE* fp = fopen("tmp", "w");
     test_element(fp);
+    test_document(fp);
     return 0;
 }

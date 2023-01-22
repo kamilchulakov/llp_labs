@@ -12,8 +12,8 @@ document* create_document(uint32_t elements) {
 }
 
 WRITE_STATUS write_document_header(FILE* fp, document* doc) {
-    if (fwrite(&doc->next_doc_page_id, sizeof(uint32_t), 1, fp) == 1 &&
-        fwrite(&doc->elements, sizeof(uint32_t), 1, fp) == 1)
+    if (write_uint(fp, &doc->next_doc_page_id) == WRITE_OK
+        && write_uint(fp, &doc->elements) == WRITE_OK)
         return WRITE_OK;
     return WRITE_ERROR;
 }

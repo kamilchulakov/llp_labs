@@ -12,7 +12,7 @@ typedef struct document document;
 struct document {
     uint32_t next_doc_page_id;
     uint32_t elements;
-    void* data;
+    element* data;
 };
 
 document* create_document(uint32_t elements);
