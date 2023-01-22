@@ -6,39 +6,70 @@
 
 typedef enum {ALL, ID, NAME} filter_type;
 
-typedef union {
-    uint32_t id;
-    string str;
-} filter_data;
-
 typedef struct {
     filter_type type;
-    filter_data* data;
+    union {
+        uint32_t id;
+        string str;
+    };
 } filter;
 
-typedef enum { CREATE, DELETE, SCAN} schema_query_type;
+typedef struct {
+    schema* schema;
+} create_schema_query;
 
 typedef struct {
-    schema schema;
-} create_schema_query_data;
+    string collection;
+} delete_schema_query;
 
 typedef struct {
-    string schema_name;
-} delete_schema_query_data;
+    string collection;
+} get_schema_query;
 
 typedef struct {
-    filter schema_name_filter; // ALL or NAME
-} scan_schema_query_data;
-
-typedef union {
-    create_schema_query_data create_query_data;
-    delete_schema_query_data delete_query_data;
-    scan_schema_query_data scan_query_data;
-} schema_query_data;
+    uint32_t parent_id; // nullable
+    string collection;
+    element* elements; // can be doc, but doc is harder to create
+} insert_query;
 
 typedef struct {
-    schema_query_type query_type;
-    schema_query_data query_data;
-} schema_query;
+    string collection;
+    element_filter* filters; // can process AND/OR in different place
+} find_query;
+
+typedef struct {
+    string collection;
+    element_filter* filters;
+    element* elements;
+} update_query;
+
+//_______________result________________
+typedef enum {
+    SCHEMA_RESULT_TYPE,
+    SCHEMA_ARRAY_RESULT_TYPE,
+    DOCUMENT_RESULT_TYPE,
+    DOCUMENT_ARRAY_RESULT_TYPE
+} query_result_data_type;
+
+typedef struct {
+    query_result_data_type type;
+    union {
+        schema* schema1;
+        schema* schemas;
+        element* element1;
+        element* elements;
+    };
+} query_result_data;
+
+typedef enum {BOOL_RESULT_TYPE, ERR_RESULT_TYPE, DATA_RESULT_TYPE} query_result_type;
+
+typedef struct {
+    query_result_type type;
+    union {
+        bool ok;
+        string err;
+        query_result_data* data;
+    };
+} query_result;
 
 #endif //ENORMEDB_QUERY_H
