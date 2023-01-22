@@ -19,4 +19,11 @@ WRITE_STATUS write_string(FILE* fp, string* str);
 size_t string_size(string* str);
 bool string_equals(void* first, void* second);
 
+READ_STATUS read_uint(FILE* fp, uint32_t* val);
+WRITE_STATUS write_uint(FILE* fp, uint32_t* val);
+READ_STATUS read_double(FILE* fp, double* val);
+WRITE_STATUS write_double(FILE* fp, double* val);
+READ_STATUS read_int32(FILE* fp, int32_t* val);
+WRITE_STATUS write_int32(FILE* fp, int32_t* val);
+
 #endif //ENORMEDB_TYPES_H

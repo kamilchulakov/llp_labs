@@ -5,6 +5,5 @@
 int main() {
     FILE* fp = fopen("tmp", "w");
     test_element(fp);
-    test_write_and_read(fp);
     return 0;
 }

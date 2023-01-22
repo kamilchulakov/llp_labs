@@ -1,31 +1,35 @@
 #include "query_executor.h"
+#include "logger.h"
+#include "pager.h"
 
-result nok() {
-    return (result) {.type = NOK, .data = NULL};
+query_result nok() {
+    return (query_result) { BOOL_RESULT_TYPE, false};
 }
 
-result ok() {
-    return (result) {.type = OK, .data = NULL};
+query_result ok() {
+    return (query_result) { BOOL_RESULT_TYPE, true};
 }
 
-
-result execute_create_schema_query(db_handler* db, create_schema_query_data* query_data);
-
-result execute_schema_query(db_handler* db, schema_query query) {
-    switch (query.query_type) {
-        case CREATE:
-            return execute_create_schema_query(db, &query.query_data.create_query_data);
-        case DELETE:
-            return nok();
-        case SCAN:
-            return nok();
+query_result get_schema_by_name(db_handler* db, string* col) {
+    uint32_t collection_page_id = db->db_file_header->first_collection_page_id;
+    page* pg = get_page(db, collection_page_id);
+    while (pg != NULL) {
+        if (!page_has_type(pg, PAGE_COLLECTION)) {
+            debug("page(id=%u) is not marked as PAGE_COLLECTION", pg->page_header.page_id);
+        }
+        collection* cl = get_collection(db, pg->page_header.page_id);
+        pg = get_page(db, pg->page_header.next_page_id);
     }
+    debug("schema %s was not found ", col->ch);
+    return nok();
 }
 
-result execute_create_schema_query(db_handler* db, create_schema_query_data* query_data) {
-    uint32_t page_id = get_and_set_page_id_seq(db);
-    // fseek to page
-    if (write_schema(db->fp, &query_data->schema) == WRITE_OK)
-        return ok();
-    return nok();
+query_result get_schema(db_handler* db, get_schema_query* query) {
+    debug("QUERY: get schema");
+    return get_schema_by_name(db, query->collection);
+}
+
+query_result create_schema(db_handler* db, create_schema_query* query) {
+    debug("QUERY: create schema");
+    return ok();
 }

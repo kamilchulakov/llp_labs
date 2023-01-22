@@ -17,7 +17,7 @@ WRITE_STATUS write_bool(FILE* fp, bool* bl) {
 }
 
 READ_STATUS read_string(FILE* fp, string* str) {
-    if (fread(&str->len, sizeof(int), 1, fp) != 1)
+    if (fread(&(str->len), sizeof(int), 1, fp) != 1)
         return READ_ERROR;
     str->ch = malloc(sizeof(char)*(str->len+1));
     str->ch = fgets(str->ch, str->len+1,  fp);
@@ -28,7 +28,7 @@ READ_STATUS read_string(FILE* fp, string* str) {
 }
 
 WRITE_STATUS write_string(FILE* fp, string* str) {
-    if (fwrite(&str->len, sizeof(int), 1, fp) != 1)
+    if (fwrite(&(str->len), sizeof(int), 1, fp) != 1)
         return WRITE_ERROR;
     if (fputs(str->ch, fp) == 1)
         return WRITE_OK;
@@ -42,4 +42,39 @@ size_t string_size(string* str) {
 
 bool string_equals(void* first, void* second) {
     return ((string *) first)->len == ((string *) second)->len && strcmp(((string *) first)->ch, ((string *) second)->ch) == 0;
+}
+
+READ_STATUS read_uint(FILE* fp, uint32_t* val) {
+    if (fread(val, sizeof(uint32_t), 1, fp) == 1)
+        return READ_OK;
+    return READ_ERROR;
+}
+
+WRITE_STATUS write_uint(FILE* fp, uint32_t* val) {
+    if (fwrite(val, sizeof(uint32_t), 1, fp) == 1)
+        return WRITE_OK;
+    return WRITE_ERROR;
+}
+
+WRITE_STATUS write_double(FILE* fp, double* val) {
+    if (fwrite(val, sizeof(double), 1, fp) == 1)
+        return WRITE_OK;
+    return WRITE_ERROR;
+}
+
+READ_STATUS read_double(FILE* fp, double* val) {
+    if (fread(val, sizeof(double), 1, fp) == 1)
+        return READ_OK;
+    return READ_ERROR;
+}
+READ_STATUS read_int32(FILE* fp, int32_t* val) {
+    if (fread(val, sizeof(int32_t), 1, fp) == 1)
+        return READ_OK;
+    return READ_ERROR;
+}
+
+WRITE_STATUS write_int32(FILE* fp, int32_t* val) {
+    if (fwrite(val, sizeof(int32_t), 1, fp) == 1)
+        return WRITE_OK;
+    return WRITE_ERROR;
 }

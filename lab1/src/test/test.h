@@ -19,4 +19,7 @@ void open_test_file_read(FILE* fp);
 void assert_int32_equals(void* first, void* second);
 void assert_element_equals(void* first, void* second);
 
+void print_running(char* test_name);
+void print_running_test(char* test_name);
+
 #endif //ENORMEDB_TEST_H

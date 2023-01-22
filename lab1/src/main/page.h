@@ -28,5 +28,6 @@ struct page {
 
 page* create_empty_page(uint32_t page_id);
 int debug_page(page* page);
+bool page_has_type(page* page, page_type);
 
 #endif //ENORMEDB_PAGE_H

@@ -1,19 +1,34 @@
 #include "schema.h"
 
-WRITE_STATUS write_schema_name(FILE* fp, schema* sch) {
-    return write_string(fp, &sch->name);
-}
-
-WRITE_STATUS write_schema_data(FILE* fp, schema_data* sch_data) {
+WRITE_STATUS write_schema_data(FILE* fp, schema* sch_data) {
     for (int i = 0; i < sch_data->field_count; ++i) {
-        if (write_field(fp, sch_data->fields[i]) != WRITE_OK) return WRITE_ERROR;
+        if (write_field(fp, &sch_data->fields[i]) != WRITE_OK) return WRITE_ERROR;
     }
     return WRITE_OK;
 }
 
 WRITE_STATUS write_schema(FILE* fp, schema* sch) {
-    if (write_schema_name(fp, sch) == WRITE_OK)
-        return write_schema_data(fp, &sch->data);
-
+    if (write_uint(fp, &sch->field_count) == WRITE_OK)
+        return write_schema_data(fp, sch);
     return WRITE_ERROR;
+}
+
+READ_STATUS read_fields(FILE* fp, schema* sch) {
+    sch->fields = malloc(sizeof(field)*sch->field_count);
+    if (sch->fields == NULL) return READ_ERROR;
+
+    for (int i = 0; i < sch->field_count; ++i) {
+        if (read_field(fp, &sch->fields[i]) == READ_ERROR) {
+            return READ_ERROR;
+        }
+    }
+
+    return READ_OK;
+}
+
+READ_STATUS read_schema(FILE* fp, schema* sch) {
+    if (read_uint(fp, &sch->field_count) == READ_OK) {
+        return read_fields(fp, sch);
+    }
+    return READ_ERROR;
 }

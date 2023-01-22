@@ -75,6 +75,10 @@ collection* get_collection(db_handler* handler, uint32_t page_id) {
     if (read_string(handler->fp, &col->name) != READ_OK)
         return NULL;
     fread(&(col->doc_page_id), sizeof(uint32_t), 1, handler->fp);
+    fread(&(col->last_doc_page_id), sizeof(uint32_t), 1, handler->fp);
+    col->sch = malloc(sizeof(schema));
+    if (col->sch == NULL || read_schema(handler->fp,  col->sch) == READ_ERROR)
+        return NULL;
     return col;
 }
 
