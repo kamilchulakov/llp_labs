@@ -23,6 +23,10 @@ void assert_true(bool pain) {
     assert(pain == true);
 }
 
+void assert_result_type(query_result result, query_result_type type) {
+    assert(result.type == type);
+}
+
 void assert_string_equals(void* first, void* second) {
     assert(string_equals(first, second));
 }
