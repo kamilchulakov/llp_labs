@@ -17,7 +17,7 @@ WRITE_STATUS write_bool(FILE* fp, bool* bl) {
 }
 
 READ_STATUS read_string(FILE* fp, string* str) {
-    if (fread(&(str->len), sizeof(int), 1, fp) != 1)
+    if (fread(&(str->len), sizeof(size_t), 1, fp) != 1)
         return READ_ERROR;
     str->ch = malloc(sizeof(char)*(str->len+1));
     str->ch = fgets(str->ch, str->len+1,  fp);
@@ -28,7 +28,7 @@ READ_STATUS read_string(FILE* fp, string* str) {
 }
 
 WRITE_STATUS write_string(FILE* fp, string* str) {
-    if (fwrite(&(str->len), sizeof(int), 1, fp) != 1)
+    if (fwrite(&(str->len), sizeof(size_t), 1, fp) != 1)
         return WRITE_ERROR;
     if (fputs(str->ch, fp) == 1)
         return WRITE_OK;
@@ -38,6 +38,13 @@ WRITE_STATUS write_string(FILE* fp, string* str) {
 
 size_t string_size(string* str) {
     return sizeof(int)+sizeof(char)*str->len;
+}
+
+string* string_of(char* ch) {
+    string* str = malloc(sizeof(string));
+    str->len = strlen(ch)+1;
+    str->ch = ch;
+    return str;
 }
 
 bool string_equals(void* first, void* second) {

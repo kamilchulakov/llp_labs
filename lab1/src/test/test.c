@@ -19,6 +19,10 @@ void assert_double_equals(void* first, void* second) {
     assert(*(double *) first == *(double *) second);
 }
 
+void assert_true(bool pain) {
+    assert(pain == true);
+}
+
 void assert_string_equals(void* first, void* second) {
     assert(string_equals(first, second));
 }

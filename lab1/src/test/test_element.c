@@ -1,5 +1,6 @@
 #include "test_element.h"
 #include "../main/element.h"
+#include "../main/db_file.h"
 
 // should cover at least element types: 4 bytes int[x], double[x], string[x], bool[x]
 
@@ -72,11 +73,13 @@ test_status test_string_element(FILE* fp) {
     return TEST_OK;
 }
 
-test_status test_element(FILE* fp) {
+test_status test_element() {
     print_running("test_element");
-    test_bool_element(fp);
-    test_int32_element(fp);
-    test_double_element(fp);
-    test_string_element(fp);
+    db_handler* db = open_db_file("tmp");
+    test_bool_element(db->fp);
+    test_int32_element(db->fp);
+    test_double_element(db->fp);
+    test_string_element(db->fp);
+    utilize_db_file(db);
     return TEST_OK;
 }

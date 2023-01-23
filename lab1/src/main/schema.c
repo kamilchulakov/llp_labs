@@ -32,3 +32,12 @@ READ_STATUS read_schema(FILE* fp, schema* sch) {
     }
     return READ_ERROR;
 }
+
+schema* new_schema(uint32_t field_count) {
+    schema* res = malloc(sizeof(schema));
+    if (res == NULL) return NULL;
+    res->fields = malloc(sizeof(field)*field_count);
+    if (res->fields == NULL) return NULL;
+    res->field_count = field_count;
+    return res;
+}

@@ -31,5 +31,5 @@ query_result get_schema(db_handler* db, get_schema_query* query) {
 
 query_result create_schema(db_handler* db, create_schema_query* query) {
     debug("QUERY: create schema");
-    return ok();
+    return nok();
 }

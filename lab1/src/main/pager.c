@@ -8,7 +8,7 @@ size_t calc_page_offset(uint32_t page_id) {
 int insert_empty_page(db_handler* db_handler) {
     page* page = create_empty_page(get_and_set_page_id_seq(db_handler));
     fseek(db_handler->fp, calc_page_offset(page->page_header.page_id), SEEK_SET);
-    db_handler->db_file_header->mem_info->allocated_mem += PAGE_SIZE;
+    db_handler->db_file_header->mem->allocated_mem += PAGE_SIZE;
     return fwrite(page, sizeof(struct page), 1, db_handler->fp);
 }
 

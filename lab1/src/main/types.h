@@ -10,12 +10,13 @@ READ_STATUS read_bool(FILE* fp, bool* bl);
 WRITE_STATUS write_bool(FILE* fp, bool* bl);
 
 typedef struct {
-    int len;
+    size_t len;
     char* ch;
 } string;
 
 READ_STATUS read_string(FILE* fp, string* str);
 WRITE_STATUS write_string(FILE* fp, string* str);
+string* string_of(char* ch);
 size_t string_size(string* str);
 bool string_equals(void* first, void* second);
 

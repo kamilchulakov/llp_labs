@@ -1,5 +1,6 @@
 #include "test_document.h"
 #include "../main/document.h"
+#include "../main/db_file.h"
 
 test_status test_document1(FILE* fp) {
     print_running_test("test_document1");
@@ -15,8 +16,10 @@ test_status test_document1(FILE* fp) {
     return TEST_OK;
 }
 
-test_status test_document(FILE* fp) {
+test_status test_document() {
     print_running("test_document");
-    test_document1(fp);
+    db_handler* db = open_db_file("tmp");
+    test_document1(db->fp);
+    utilize_db_file(db);
     return TEST_OK;
 }

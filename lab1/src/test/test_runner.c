@@ -1,11 +1,11 @@
 #include "test.h"
 #include "test_element.h"
 #include "test_document.h"
+#include "test_queries.h"
 
 int main() {
-    FILE* fp = fopen("tmp", "w");
-    test_element(fp);
-    fp = fopen("tmp", "w");
-    test_document(fp);
+    test_element();
+    test_document();
+    test_queries();
     return 0;
 }

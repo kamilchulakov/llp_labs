@@ -15,7 +15,7 @@ typedef struct {
 } mem_info;
 
 typedef struct {
-    mem_info* mem_info;
+    mem_info* mem;
     uint32_t page_id_seq; // page that can be allocated
 
     uint32_t first_collection_page_id;

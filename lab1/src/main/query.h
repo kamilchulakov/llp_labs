@@ -17,6 +17,7 @@ typedef struct {
 
 typedef struct {
     schema* schema;
+    string* collection;
 } create_schema_query;
 
 typedef struct {
