@@ -2,7 +2,7 @@
 #define ENORMEDB_QUERY_H
 
 #include "bson.h"
-#include "schema.h"
+#include "collection.h"
 #include "element.h"
 
 typedef enum {ALL, ID, NAME} filter_type;
@@ -16,8 +16,7 @@ typedef struct {
 } filter;
 
 typedef struct {
-    schema* schema;
-    string* collection;
+    collection* col;
 } create_schema_query;
 
 typedef struct {

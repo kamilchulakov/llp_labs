@@ -7,9 +7,9 @@
 test_status test_int32_element(FILE* fp) {
     print_running_test("test_int32_element");
     element* el = create_element_int32("int", INT32_MAX);
-    open_test_file_write(fp);
+    seek_db_header(fp);
     assert(write_element(fp, el) == WRITE_OK);
-    open_test_file_read(fp);
+    seek_db_header(fp);
     assert(read_element(fp, el) == READ_OK);
     assert(el->e_field->e_type == INT32);
     string expected_field_name = {.len = 3, .ch = "int"};
@@ -24,9 +24,9 @@ test_status test_double_element(FILE* fp) {
     element* el = create_element(DOUBLE, "double");
     double data = 4.2;
     el->double_data = data;
-    open_test_file_write(fp);
+    seek_db_header(fp);
     assert(write_element(fp, el) == WRITE_OK);
-    open_test_file_read(fp);
+    seek_db_header(fp);
     assert(read_element(fp, el) == READ_OK);
     assert(el->e_field->e_type == DOUBLE);
     string expected_field_name = {.len = 6, .ch = "double"};
@@ -41,9 +41,9 @@ test_status test_bool_element(FILE* fp) {
     element* el = create_element(BOOLEAN, "fails");
     bool bl = false;
     el->bool_data = bl;
-    open_test_file_write(fp);
+    seek_db_header(fp);
     assert(write_element(fp, el) == WRITE_OK);
-    open_test_file_read(fp);
+    seek_db_header(fp);
     assert(read_element(fp, el) == READ_OK);
     assert(el->e_field->e_type == BOOLEAN);
     string expected_field_name = {.len = 5, .ch = "fails"};
@@ -59,9 +59,9 @@ test_status test_string_element(FILE* fp) {
     el->string_data = malloc(sizeof(string));
     el->string_data->len = 5;
     el->string_data->ch = "data5";
-    open_test_file_write(fp);
+    seek_db_header(fp);
     assert(write_element(fp, el) == WRITE_OK);
-    open_test_file_read(fp);
+    seek_db_header(fp);
     el = create_element(BOOLEAN, "not bool");
     assert(read_element(fp, el) == READ_OK);
     assert(el->e_field->e_type == STRING);

@@ -33,8 +33,8 @@ WRITE_STATUS write_document(FILE* fp, document* doc) {
 }
 
 READ_STATUS read_document_header(FILE* fp, document* doc) {
-    if (fread(&doc->next_doc_page_id, sizeof(uint32_t), 1, fp) == 1 &&
-            fread(&doc->elements, sizeof(uint32_t), 1, fp) == 1)
+    if (read_uint(fp, &doc->next_doc_page_id) == READ_OK &&
+            read_uint(fp, &doc->elements) == READ_OK)
         return READ_OK;
     return READ_ERROR;
 }

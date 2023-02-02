@@ -5,9 +5,9 @@
 int main() {
 //    db_handler* db_handler = open_db_file("db2");
 //    debug_mem_info(db_handler);
-//    insert_empty_page(db_handler);
-//    insert_empty_page(db_handler);
-//    insert_empty_page(db_handler);
+//    allocate_page(db_handler);
+//    allocate_page(db_handler);
+//    allocate_page(db_handler);
 //    debug_mem_info(db_handler);
 //    get_page_and_debug(db_handler, 0);
 //    get_page_and_debug(db_handler, 1);
@@ -22,8 +22,8 @@ int main() {
 //    filter by_name = {NAME, &str};
 //    select_collection(db_handler, &by_name);
 //
-//    insert_empty_page(db_handler);
-//    insert_empty_page(db_handler);
+//    allocate_page(db_handler);
+//    allocate_page(db_handler);
 //    create_document_in_page(db_handler, 3, 0);
 //    create_document_in_page(db_handler, 4, 0);
 //    uint32_t collection_id = 0;
