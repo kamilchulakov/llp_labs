@@ -4,7 +4,7 @@
 db_file_header* create_header();
 mem_info* create_mem_info();
 db_handler* create_db_handler(char* filename, FILE* fp, db_file_header* header);
-size_t write_db_header(FILE* fp, db_file_header* header);
+WRITE_STATUS write_db_header(FILE* fp, db_file_header* header);
 
 size_t db_header_size() {
     return sizeof(db_file_header);
@@ -15,10 +15,7 @@ db_handler* open_db_file(char* db_name) {
     if (file == NULL)
         return NULL;
     db_file_header* header = create_header();
-    if (write_db_header(file, header) != 1) {
-        debug("can't write db header to file(%s)", db_name);
-        return NULL;
-    }
+
     db_handler* handler = create_db_handler(db_name, file, header);
     return handler;
 }
@@ -31,7 +28,7 @@ void utilize_db_file(db_handler* db) {
 }
 
 void seek_db_header(FILE* fp) {
-    fseek(fp, sizeof(db_file_header), SEEK_SET);
+    fseek(fp, 0, SEEK_SET);
 }
 
 db_handler* create_db_handler(char* filename, FILE* fp, db_file_header* header) {
@@ -51,9 +48,8 @@ db_file_header* create_header() {
     return header;
 }
 
-size_t write_db_header(FILE* fp, db_file_header* header) {
-    fseek(fp, 0, SEEK_SET);
-    return fwrite( header, sizeof(db_file_header), 1, fp);
+WRITE_STATUS write_db_header(FILE* fp, db_file_header* header) {
+    return WRITE_OK;
 }
 
 mem_info* create_mem_info() {

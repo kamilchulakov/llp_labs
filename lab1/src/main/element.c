@@ -7,8 +7,7 @@ element* create_element(ELEMENT_TYPE e_type, char* e_name) {
     element* el = malloc(sizeof(element));
     el->e_field = malloc(sizeof(field));
     el->e_field->e_type = e_type;
-    el->e_field->e_name.len = strlen(e_name);
-    el->e_field->e_name.ch = e_name;
+    el->e_field->e_name = string_of(e_name);
     return el;
 }
 
@@ -53,7 +52,7 @@ WRITE_STATUS write_element(FILE* fp, element* el) {
 }
 
 READ_STATUS read_element(FILE* fp, element* el) {
-    el->e_field = malloc(sizeof(field));
+    el->e_field = empty_field();
     if (el->e_field == NULL) return READ_ERROR;
     if (read_field(fp, el->e_field) != READ_OK)
         return READ_ERROR;

@@ -1,16 +1,6 @@
 #include "test.h"
 #include "../main/element.h"
 
-void open_test_file_write(FILE* fp) {
-    fclose(fp);
-    fp = fopen("tmp", "w");
-}
-
-void open_test_file_read(FILE* fp) {
-    fclose(fp);
-    fp = fopen("tmp", "r");
-}
-
 void assert_int32_equals(void* first, void* second) {
     assert(*(int32_t *) first == *(int32_t *) second);
 }

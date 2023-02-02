@@ -15,9 +15,6 @@ typedef enum {
     TEST_ERROR
 } test_status;
 
-void open_test_file_write(FILE* fp);
-void open_test_file_read(FILE* fp);
-
 void assert_int32_equals(void* first, void* second);
 void assert_element_equals(void* first, void* second);
 void assert_true(bool pain);

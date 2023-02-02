@@ -1,4 +1,4 @@
-add_library(tests STATIC test_document.c test.h test_element.c test_element.h test.c test_document.h test_queries.c test_queries.h test_collection.c test_collection.h)
+add_library(tests STATIC test_document.c test.h test_element.c test_element.h test.c test_document.h test_queries.c test_queries.h test_collection.c test_collection.h test_types.c test_types.h)
 target_link_libraries(tests db)
 add_executable(test test_runner.c)
 target_link_libraries(test tests)

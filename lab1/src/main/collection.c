@@ -28,7 +28,7 @@ READ_STATUS read_collection(FILE* fp, collection* col) {
     if (read_uint(fp, &(col->last_doc_page_id)) != READ_OK)
         return READ_ERROR;
     col->sch = malloc(sizeof(schema));
-    if (col->sch == NULL || read_schema(fp, col->sch) == READ_ERROR)
+    if (col->sch == NULL)
         return READ_ERROR;
-    return READ_OK;
+    return read_schema(fp, col->sch);
 }
