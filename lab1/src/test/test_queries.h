@@ -3,6 +3,6 @@
 
 #include "test.h"
 
-test_status test_queries();
+void test_queries();
 
 #endif //APP_TEST_QUERIES_H

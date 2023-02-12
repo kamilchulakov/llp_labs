@@ -1,7 +1,7 @@
 #include "test_queries.h"
 #include "../main/query_executor.h"
 
-test_status test_create_schema(db_handler* db) {
+void test_create_schema(db_handler* db) {
     print_running_test("test_create_schema");
 
     create_schema_query query = (create_schema_query) { .col = new_collection(string_of("ex"), new_schema(1))};
@@ -15,13 +15,11 @@ test_status test_create_schema(db_handler* db) {
     schema* written_schema = get_schema(db, &query1).data->schema1;
     assert(written_schema->field_count == 1);
     assert_element_equals(written_schema->fields, query.col->sch->fields);
-    return TEST_OK;
 }
 
-test_status test_queries() {
+void test_queries() {
     print_running("test_queries");
     db_handler* db = open_db_file("tmp");
     test_create_schema(db);
     utilize_db_file(db);
-    return TEST_OK;
 }

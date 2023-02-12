@@ -3,6 +3,6 @@
 
 #include "test.h"
 
-test_status test_types();
+void test_types();
 
 #endif //APP_TEST_TYPES_H

@@ -8,13 +8,6 @@
 #include "../main/types.h"
 #include "../main/query.h"
 
-#define TESTS_COUNT (size_t) 0
-
-typedef enum {
-    TEST_OK = 0,
-    TEST_ERROR
-} test_status;
-
 void assert_int32_equals(void* first, void* second);
 void assert_element_equals(void* first, void* second);
 void assert_true(bool pain);

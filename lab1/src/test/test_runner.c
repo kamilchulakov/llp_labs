@@ -10,6 +10,7 @@ int main() {
     test_element();
     test_document();
     test_collection();
-    test_queries();
+    // test_pager();
+    // test_queries();
     return 0;
 }

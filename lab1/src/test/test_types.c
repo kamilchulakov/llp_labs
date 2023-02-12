@@ -27,11 +27,10 @@ void test_bool(FILE* fp) {
     free(expected);
 }
 
-test_status test_types() {
+void test_types() {
     print_running("test_types");
     db_handler* db = open_db_file("tmp");
     test_bool(db->fp);
     test_uint(db->fp);
     utilize_db_file(db);
-    return TEST_OK;
 }
