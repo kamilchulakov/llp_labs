@@ -4,7 +4,7 @@
 #include <inttypes.h>
 #include "io.h"
 
-typedef enum { false = 0, true } bool;
+typedef enum { false = 0, true = 1} bool;
 
 READ_STATUS read_bool(FILE* fp, bool* bl);
 WRITE_STATUS write_bool(FILE* fp, bool* bl);

@@ -2,15 +2,15 @@
 #include "bson.h"
 
 READ_STATUS read_field(FILE* fp, field* e_field) {
-    if (fread(&e_field->e_type, sizeof(ELEMENT_TYPE), 1, fp) == 1) {
-        return read_string(fp, e_field->e_name);
+    if (fread(e_field, sizeof(field), 1, fp) == 1) {
+        return READ_OK;
     }
     return READ_ERROR;
 }
 
 WRITE_STATUS write_field(FILE* fp, field* e_field) {
-    if (fwrite(&e_field->e_type, sizeof(ELEMENT_TYPE), 1, fp) == 1) {
-        return write_string(fp, e_field->e_name);
+    if (fwrite((field*) (e_field), sizeof(field), 1, fp) == 1) {
+        return WRITE_OK;
     }
     return WRITE_ERROR;
 }

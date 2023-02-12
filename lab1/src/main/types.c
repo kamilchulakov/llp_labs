@@ -19,9 +19,10 @@ WRITE_STATUS write_bool(FILE* fp, bool* bl) {
 READ_STATUS read_string(FILE* fp, string* str) {
     if (fread(&(str->len), sizeof(size_t), 1, fp) != 1)
         return READ_ERROR;
-    str->ch = malloc(sizeof(char)*(str->len+1));
-    str->ch = fgets(str->ch, str->len+1,  fp);
+    str->ch = malloc(sizeof(char)*(str->len));
     if (str->ch == NULL)
+        return READ_ERROR;
+    if (fread(str->ch, sizeof(char), str->len,  fp) != str->len)
         return READ_ERROR;
     else
         return READ_OK;
@@ -43,7 +44,7 @@ size_t string_size(string* str) {
 string* string_of(char* ch) {
     string* str = malloc(sizeof(string));
     if (str == NULL) return NULL;
-    str->len = strlen(ch)+1;
+    str->len = strlen(ch);
     str->ch = ch;
     return str;
 }
