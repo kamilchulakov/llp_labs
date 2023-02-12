@@ -6,8 +6,8 @@
 #include "element.h"
 
 
-page* allocate_page(db_handler* db_handler);
-page* allocate_collection_page(db_handler* handler);
+page* allocate_page_typed(db_handler* db, page_type type);
+page* get_free_collection_page(db_handler* handler);
 
 page* get_page(db_handler* db_handler, uint32_t page_id);
 int get_page_and_debug(db_handler* db_handler, uint32_t page_id);

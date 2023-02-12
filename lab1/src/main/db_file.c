@@ -42,14 +42,17 @@ db_handler* create_db_handler(char* filename, FILE* fp, db_file_header* header) 
 db_file_header* create_header() {
     db_file_header* header = malloc(sizeof(db_file_header));
     header->mem = create_mem_info();
-    header->page_id_seq = 0;
+    header->page_id_seq = 1;
     header->first_collection_page_id = -1;
     header->first_free_collection_page_id = -1;
     return header;
 }
 
 WRITE_STATUS write_db_header(FILE* fp, db_file_header* header) {
-    return WRITE_OK;
+    seek_db_header(fp);
+    if (fwrite( header, sizeof(db_file_header), 1, fp) == 1)
+        return WRITE_OK;
+    return WRITE_ERROR;
 }
 
 mem_info* create_mem_info() {

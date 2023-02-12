@@ -27,11 +27,11 @@ query_result get_schema_by_name(db_handler* db, string* col) {
     page* pg = get_page(db, collection_page_id);
     while (pg != NULL) {
         if (!page_has_type(pg, PAGE_COLLECTION)) {
-            debug("page(id=%u) is not marked as PAGE_COLLECTION", pg->page_header.page_id);
+            debug("page(id=%u) is not marked as PAGE_COLLECTION", pg->page_id);
         }
-        collection* cl = get_collection(db, pg->page_header.page_id);
+        collection* cl = get_collection(db, pg->page_id);
         if (string_equals(cl->name,col)) return schema_result(cl->sch);
-        pg = get_page(db, pg->page_header.next_page_id);
+        pg = get_page(db, pg->next_page_id);
     }
     debug("schema %s was not found ", col->ch);
     return nok();
@@ -44,7 +44,7 @@ query_result get_schema(db_handler* db, get_schema_query* query) {
 
 query_result create_schema(db_handler* db, create_schema_query* query) {
     debug("QUERY: create schema(collection=%s)", query->col->name);
-    page* pg = allocate_collection_page(db);
+    page* pg = get_free_collection_page(db);
     if (write_collection_to_page(db, pg, query->col) == WRITE_OK)
         return ok();
     return nok();

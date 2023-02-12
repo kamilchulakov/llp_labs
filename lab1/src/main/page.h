@@ -10,7 +10,6 @@
 
 #define PAGE_SIZE 256
 
-typedef struct page page;
 typedef enum { PAGE_COLLECTION, PAGE_DOCUMENT, PAGE_EMPTY } page_type;
 
 typedef struct {
@@ -20,11 +19,7 @@ typedef struct {
     time_t last_modified;
     uint32_t used_mem; // in bytes, of PAGE_SIZE
     page_type type;
-} page_header;
-
-struct page {
-    page_header page_header;
-};
+} page;
 
 page* create_empty_page(uint32_t page_id);
 int debug_page(page* page);
