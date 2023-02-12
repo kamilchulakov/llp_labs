@@ -8,8 +8,8 @@
 int main() {
     test_types();
     test_element();
-    test_collection();
     test_document();
+    test_collection();
     test_queries();
     return 0;
 }

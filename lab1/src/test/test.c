@@ -31,7 +31,7 @@ void assert_element_equals(void* first, void* second) {
     ELEMENT_TYPE type = first_el->e_field->e_type;
 
     assert(type == second_el->e_field->e_type);
-    assert_string_equals(&first_el->e_field->e_name, &second_el->e_field->e_name);
+    assert_string_equals(first_el->e_field->e_name, second_el->e_field->e_name);
 
    if (type == INT32)
        assert_int32_equals(&first_el->int_data, &second_el->int_data);
