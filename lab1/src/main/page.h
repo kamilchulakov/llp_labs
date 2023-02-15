@@ -15,7 +15,8 @@ typedef enum { PAGE_COLLECTION, PAGE_DOCUMENT, PAGE_EMPTY } page_type;
 typedef struct {
     uint32_t page_id;
     bool is_full;
-    uint32_t next_page_id;
+    uint32_t prevPageId;
+    uint32_t nextPageId;
     time_t last_modified;
     uint32_t used_mem; // in bytes, of PAGE_SIZE
     page_type type;

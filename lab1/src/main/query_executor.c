@@ -17,35 +17,73 @@ query_result_data* schema_data(schema* sch) {
     return data;
 }
 
+query_result_data* collection_data(collection* col, uint32_t pageId) {
+    query_result_data* data = malloc(sizeof(query_result_data));
+    data->type = COLLECTION_RESULT_TYPE;
+    data->col = col;
+    data->pageId = pageId;
+    return data;
+}
+
 query_result schema_result(schema* sch) {
     return (query_result) {DATA_RESULT_TYPE, .data = schema_data(sch)};
 }
 
-query_result get_schema_by_name(db_handler* db, string* col) {
-    uint32_t collection_page_id = db->db_file_header->first_collection_page_id;
+query_result collection_result(collection* col, uint32_t pageId) {
+    return (query_result) {DATA_RESULT_TYPE, .data = collection_data(col, pageId)};
+}
+
+query_result get_collection_or_schema_by_name(db_handler* db, string* col, bool returnCollection) {
+    uint32_t collection_page_id = db->pagerData->lastCollectionPage;
     if (collection_page_id == -1) return nok();
     page* pg = get_page(db, collection_page_id);
     while (pg != NULL) {
         if (!page_has_type(pg, PAGE_COLLECTION)) {
-            debug("page(id=%u) is not marked as PAGE_COLLECTION", pg->page_id);
+            debug("page(id=%u) is not marked as PAGE_COLLECTION\n", pg->page_id);
         }
         collection* cl = get_collection(db, pg->page_id);
-        if (string_equals(cl->name,col)) return schema_result(cl->sch);
-        pg = get_page(db, pg->next_page_id);
+        if (string_equals(cl->name,col)) {
+            if (returnCollection == true)
+                return collection_result(cl, pg->page_id);
+            else
+                return schema_result(cl->sch);
+        }
+        pg = get_page(db, pg->prevPageId);
     }
-    debug("schema %s was not found ", col->ch);
+    debug("schema %s was not found\n", col->ch);
     return nok();
 }
 
 query_result get_schema(db_handler* db, get_schema_query* query) {
-    debug("GET_SCHEMA: collection=%s\n", query->collection->ch);
-    return get_schema_by_name(db, query->collection);
+    debug("executor.GET_SCHEMA: collection=%s\n", query->collection->ch);
+    return get_collection_or_schema_by_name(db, query->collection, false);
 }
 
 query_result create_schema(db_handler* db, create_schema_query* query) {
-    debug("CREATE_SCHEMA: collection=%s\n", query->col->name->ch);
+    debug("executor.CREATE_SCHEMA: collection=%s\n", query->col->name->ch);
     page* pg = get_free_collection_page(db);
     if (write_collection_to_page(db, pg, query->col) == WRITE_OK)
+        return ok();
+    return nok();
+}
+
+query_result delete_schema(db_handler* db, delete_schema_query* query) {
+    debug("executor.DELETE_SCHEMA: collection=%s\n", query->collection->ch);
+    query_result res = get_collection_or_schema_by_name(db, query->collection, true);
+    if (res.ok != true) {
+        debug("collection not found\n");
+        return nok();
+    }
+    if (res.type != COLLECTION_RESULT_TYPE) {
+        debug("collection was not given\n");
+        return nok();
+    }
+    if (res.data->col->elements_count != 0) {
+        debug("collection is not empty\n");
+        return nok();
+    }
+
+    if (free_page(db, res.data->pageId) == WRITE_OK)
         return ok();
     return nok();
 }

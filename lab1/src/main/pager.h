@@ -10,6 +10,7 @@ page* allocate_page_typed(db_handler* db, page_type type);
 page* get_free_collection_page(db_handler* handler);
 
 page* get_page(db_handler* db_handler, uint32_t page_id);
+WRITE_STATUS free_page(db_handler* db, uint32_t page_id);
 int get_page_and_debug(db_handler* db_handler, uint32_t page_id);
 int update_page_header(db_handler* handler, uint32_t page_id, page* pg);
 

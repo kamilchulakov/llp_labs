@@ -16,17 +16,17 @@
 //    printf("________________\n");
 //    printf("SELECT COLLECTION QUERY\n");
 //    if (dbHandler == NULL || dbHandler->fp == NULL ||
-//        dbHandler->db_file_header == NULL || dbHandler->db_file_header->page_id_seq == 0)
+//        dbHandler->pager_data == NULL || dbHandler->pager_data->page_id_seq == 0)
 //        return RESULT_ERROR;
 //    page* pg = get_page(dbHandler, 0);
 //    if (pg == NULL)
 //        return RESULT_ERROR;
-//    while (pg->page_header.next_page_id != 0 && pg->page_header.type == PAGE_COLLECTION) {
+//    while (pg->page_header.prevPageId != 0 && pg->page_header.type == PAGE_COLLECTION) {
 //        collection* col = get_collection(dbHandler, pg->page_header.page_id);
 //        if (col == NULL)
 //            return RESULT_ERROR;
 //        if (collection_fits_filter(col, filter)) debug_collection(col);
-//        pg = get_page(dbHandler, pg->page_header.next_page_id);
+//        pg = get_page(dbHandler, pg->page_header.prevPageId);
 //    }
 //    collection* col = get_collection(dbHandler, pg->page_header.page_id);
 //    if (col == NULL)
@@ -53,7 +53,7 @@
 //    printf("________________\n");
 //    printf("SELECT DOCUMENT QUERY\n");
 //    if (dbHandler == NULL || dbHandler->fp == NULL ||
-//        dbHandler->db_file_header == NULL || dbHandler->db_file_header->page_id_seq == 0)
+//        dbHandler->pager_data == NULL || dbHandler->pager_data->page_id_seq == 0)
 //        return RESULT_ERROR;
 //    page_with_collection* pg_with_col = find_page_with_collection(dbHandler, collection_filter);
 //    if (pg_with_col == NULL || pg_with_col->pg == NULL)
@@ -85,7 +85,7 @@
 //    page* pg = get_page(dbHandler, document_id);
 //    update_mem(dbHandler, pg, sizeof(field));
 //    document* doc = get_document(dbHandler, document_id);
-//    doc->elements += 1;
+//    doc->elements_count += 1;
 //    write_document_header(dbHandler->fp, doc);
 //    if (write_element(dbHandler->fp, el) == WRITE_OK) return RESULT_OK;
 //    return RESULT_ERROR;

@@ -49,16 +49,19 @@ typedef enum {
     SCHEMA_RESULT_TYPE,
     SCHEMA_ARRAY_RESULT_TYPE,
     DOCUMENT_RESULT_TYPE,
-    DOCUMENT_ARRAY_RESULT_TYPE
+    DOCUMENT_ARRAY_RESULT_TYPE,
+    COLLECTION_RESULT_TYPE
 } query_result_data_type;
 
 typedef struct {
     query_result_data_type type;
+    uint32_t pageId;
     union {
         schema* schema1;
         schema* schemas;
         element* element1;
         element* elements;
+        collection* col;
     };
 } query_result_data;
 

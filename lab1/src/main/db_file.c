@@ -1,20 +1,20 @@
 #include "db_file.h"
 #include "logger.h"
 
-db_file_header* create_header();
+pager_data* create_header();
 mem_info* create_mem_info();
-db_handler* create_db_handler(char* filename, FILE* fp, db_file_header* header);
-WRITE_STATUS write_db_header(FILE* fp, db_file_header* header);
+db_handler* create_db_handler(char* filename, FILE* fp, pager_data* header);
+WRITE_STATUS write_db_header(FILE* fp, pager_data* header);
 
 size_t db_header_size() {
-    return sizeof(db_file_header);
+    return sizeof(pager_data);
 }
 
 db_handler* open_db_file(char* db_name) {
     FILE* file = fopen(db_name, "w+");
     if (file == NULL)
         return NULL;
-    db_file_header* header = create_header();
+    pager_data* header = create_header();
 
     db_handler* handler = create_db_handler(db_name, file, header);
     return handler;
@@ -22,8 +22,8 @@ db_handler* open_db_file(char* db_name) {
 
 void utilize_db_file(db_handler* db) {
     remove(db->filename);
-    free(db->db_file_header->mem);
-    free(db->db_file_header);
+    free(db->pagerData->mem);
+    free(db->pagerData);
     free(db);
 }
 
@@ -31,26 +31,26 @@ void seek_db_header(FILE* fp) {
     fseek(fp, 0, SEEK_SET);
 }
 
-db_handler* create_db_handler(char* filename, FILE* fp, db_file_header* header) {
+db_handler* create_db_handler(char* filename, FILE* fp, pager_data* header) {
     db_handler* handler = malloc(sizeof(db_handler));
     handler->filename = filename;
     handler->fp = fp;
-    handler->db_file_header = header;
+    handler->pagerData = header;
     return handler;
 }
 
-db_file_header* create_header() {
-    db_file_header* header = malloc(sizeof(db_file_header));
+pager_data* create_header() {
+    pager_data* header = malloc(sizeof(pager_data));
     header->mem = create_mem_info();
     header->page_id_seq = 1;
-    header->first_collection_page_id = -1;
+    header->lastCollectionPage = -1;
     header->first_free_collection_page_id = -1;
     return header;
 }
 
-WRITE_STATUS write_db_header(FILE* fp, db_file_header* header) {
+WRITE_STATUS write_db_header(FILE* fp, pager_data* header) {
     seek_db_header(fp);
-    if (fwrite( header, sizeof(db_file_header), 1, fp) == 1)
+    if (fwrite(header, sizeof(pager_data), 1, fp) == 1)
         return WRITE_OK;
     return WRITE_ERROR;
 }
@@ -63,13 +63,13 @@ mem_info* create_mem_info() {
 }
 
 int debug_mem_info(db_handler* db_handler) {
-    return printf("\nAllocated mem:%u\nUsed mem:%u\n", db_handler->db_file_header->mem->allocated_mem, db_handler->db_file_header->mem->used_mem);
+    return printf("\nAllocated mem:%u\nUsed mem:%u\n", db_handler->pagerData->mem->allocated_mem, db_handler->pagerData->mem->used_mem);
 }
 
 uint32_t get_and_set_page_id(db_handler* db_handler) {
-    uint32_t curr_page_id = db_handler->db_file_header->page_id_seq;
-    db_handler->db_file_header->page_id_seq = curr_page_id+1;
-    db_handler->db_file_header->mem->allocated_mem += PAGE_SIZE;
-    write_db_header(db_handler->fp, db_handler->db_file_header);
+    uint32_t curr_page_id = db_handler->pagerData->page_id_seq;
+    db_handler->pagerData->page_id_seq = curr_page_id + 1;
+    db_handler->pagerData->mem->allocated_mem += PAGE_SIZE;
+    write_db_header(db_handler->fp, db_handler->pagerData);
     return curr_page_id;
 }
