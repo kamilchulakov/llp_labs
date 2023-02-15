@@ -1,3 +1,5 @@
+#include <stdio.h>
+#include <stdarg.h>
 #include "logger.h"
 
 void debug(const char* fmt, ... ) {

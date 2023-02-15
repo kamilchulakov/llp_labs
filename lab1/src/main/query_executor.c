@@ -38,12 +38,12 @@ query_result get_schema_by_name(db_handler* db, string* col) {
 }
 
 query_result get_schema(db_handler* db, get_schema_query* query) {
-    debug("QUERY: get schema(collection=%s)", query->collection);
+    debug("GET_SCHEMA: collection=%s\n", query->collection->ch);
     return get_schema_by_name(db, query->collection);
 }
 
 query_result create_schema(db_handler* db, create_schema_query* query) {
-    debug("QUERY: create schema(collection=%s)", query->col->name);
+    debug("CREATE_SCHEMA: collection=%s\n", query->col->name->ch);
     page* pg = get_free_collection_page(db);
     if (write_collection_to_page(db, pg, query->col) == WRITE_OK)
         return ok();
