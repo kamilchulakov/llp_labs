@@ -13,6 +13,10 @@ void assert_true(bool pain) {
     assert(pain == true);
 }
 
+void assert_false(bool pain) {
+    assert(pain == false);
+}
+
 void assert_result_type(query_result result, query_result_type type) {
     assert(result.type == type);
 }

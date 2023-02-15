@@ -42,7 +42,7 @@ query_result get_collection_or_schema_by_name(db_handler* db, string* col, bool 
             debug("page(id=%u) is not marked as PAGE_COLLECTION\n", pg->page_id);
         }
         collection* cl = get_collection(db, pg->page_id);
-        if (string_equals(cl->name,col)) {
+        if (string_equals(cl->name,col) == true) {
             if (returnCollection == true)
                 return collection_result(cl, pg->page_id);
             else
@@ -70,12 +70,8 @@ query_result create_schema(db_handler* db, create_schema_query* query) {
 query_result delete_schema(db_handler* db, delete_schema_query* query) {
     debug("executor.DELETE_SCHEMA: collection=%s\n", query->collection->ch);
     query_result res = get_collection_or_schema_by_name(db, query->collection, true);
-    if (res.ok != true) {
+    if (res.type != DATA_RESULT_TYPE || res.data->type != COLLECTION_RESULT_TYPE) {
         debug("collection not found\n");
-        return nok();
-    }
-    if (res.type != COLLECTION_RESULT_TYPE) {
-        debug("collection was not given\n");
         return nok();
     }
     if (res.data->col->elements_count != 0) {

@@ -17,9 +17,23 @@ void test_create_schema(db_handler* db) {
     assert_field_equals(written_schema->fields, query.col->sch->fields);
 }
 
+void test_delete_schema(db_handler* db) {
+    print_running_test("test_delete_schema");
+
+    delete_schema_query query = {.collection = string_of("ex")};
+    query_result result = delete_schema(db, &query);
+    assert_result_type(result, BOOL_RESULT_TYPE);
+    assert_true(result.ok);
+
+    get_schema_query query1 = (get_schema_query) {.collection = string_of("ex")};
+    result = get_schema(db, &query1);
+    assert_false(result.ok);
+}
+
 void test_queries() {
     print_running("test_queries");
     db_handler* db = open_db_file("tmp");
     test_create_schema(db);
+    test_delete_schema(db);
     utilize_db_file(db);
 }

@@ -74,6 +74,9 @@ WRITE_STATUS free_page(db_handler* db, uint32_t page_id) {
 
     db->pagerData->first_free_collection_page_id = page_id;
 
+    if (db->pagerData->lastCollectionPage == page_id)
+        db->pagerData->lastCollectionPage = -1;
+
     if (oldPg->prevPageId != -1) {
         debug("pager.FREE_PAGE: update prev page(id=%d)\n", oldPg->prevPageId);
         page* prevPg = get_page(db, oldPg->prevPageId);
