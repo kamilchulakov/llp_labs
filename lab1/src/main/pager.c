@@ -1,5 +1,6 @@
 #include <string.h>
 #include "pager.h"
+#include "logger.h"
 
 long calc_page_offset(uint32_t page_id) {
     return (long) db_header_size() + PAGE_SIZE * page_id;
@@ -31,6 +32,7 @@ page* get_free_collection_page(db_handler* handler) {
 }
 
 page* get_page(db_handler* db_handler, uint32_t page_id) {
+    debug("GET_PAGE: page_id=%d\n", page_id);
     page* pg = malloc(sizeof(page));
     fseek(db_handler->fp, calc_page_offset(page_id), SEEK_SET);
     if (fread(pg, sizeof(page), 1, db_handler->fp) != 1) return NULL;
