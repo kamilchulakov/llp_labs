@@ -13,7 +13,7 @@ void test_allocate_and_get(db_handler* db) {
     assert(pg->type == PAGE_COLLECTION);
     assert(pg->page_id == 1);
     assert(pg->next_page_id == -1);
-    assert(pg->used_mem == 42); // this magic will be replaced one day
+    assert(pg->used_mem == 42); // TODO: this magic will be replaced one day
 }
 
 void test_more_allocate_and_get(db_handler* db) {

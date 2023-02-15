@@ -52,9 +52,16 @@ WRITE_STATUS write_collection_to_page(db_handler* handler, page* pg, collection*
     return write_collection(handler->fp, col);
 }
 
+collection* empty_collection() {
+    collection* col = malloc(sizeof(collection));
+    if (col == NULL) return NULL;
+    col->name = string_of(NULL);
+    return col;
+}
+
 collection* get_collection(db_handler* handler, uint32_t page_id) {
     fseek(handler->fp, calc_page_offset(page_id)+sizeof(page), SEEK_SET);
-    collection* col = malloc(sizeof(collection));
+    collection* col = empty_collection();
     read_collection(handler->fp, col);
     return col;
 }

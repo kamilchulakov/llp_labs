@@ -25,13 +25,14 @@ void assert_boolean_equals(void* first, void* second) {
     assert(*(bool*) first == *(bool*) second );
 }
 
-void assert_element_equals(void* first, void* second) {
-    element* first_el = (element *) first;
-    element* second_el = (element *) second;
-    ELEMENT_TYPE type = first_el->e_field->e_type;
+void assert_field_equals(field* first, field* second) {
+    assert(first->e_type == second->e_type);
+    assert_string_equals(first->e_name, second->e_name);
+}
 
-    assert(type == second_el->e_field->e_type);
-    assert_string_equals(first_el->e_field->e_name, second_el->e_field->e_name);
+void assert_element_equals(element* first_el, element* second_el) {
+    assert_field_equals(first_el->e_field, second_el->e_field);
+    ELEMENT_TYPE type = first_el->e_field->e_type;
 
    if (type == INT32)
        assert_int32_equals(&first_el->int_data, &second_el->int_data);

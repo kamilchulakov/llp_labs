@@ -1,10 +1,11 @@
 #include "schema.h"
 
 WRITE_STATUS write_schema_data(FILE* fp, schema* sch_data) {
-    for (int i = 0; i < sch_data->field_count; ++i) {
-        if (write_field(fp, &sch_data->fields[i]) != WRITE_OK) return WRITE_ERROR;
-    }
-    return WRITE_OK;
+    if (fwrite(sch_data->fields, sizeof(field),
+               sch_data->field_count, fp) == sch_data->field_count)
+        return WRITE_OK;
+    else
+        return WRITE_ERROR;
 }
 
 WRITE_STATUS write_schema(FILE* fp, schema* sch) {

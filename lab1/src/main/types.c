@@ -44,7 +44,8 @@ size_t string_size(string* str) {
 string* string_of(char* ch) {
     string* str = malloc(sizeof(string));
     if (str == NULL) return NULL;
-    str->len = strlen(ch);
+    if (ch != NULL)
+        str->len = strlen(ch);
     str->ch = ch;
     return str;
 }

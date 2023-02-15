@@ -14,7 +14,7 @@ void test_create_schema(db_handler* db) {
     get_schema_query query1 = (get_schema_query) {.collection = string_of("ex")};
     schema* written_schema = get_schema(db, &query1).data->schema1;
     assert(written_schema->field_count == 1);
-    assert_element_equals(written_schema->fields, query.col->sch->fields);
+    assert_field_equals(written_schema->fields, query.col->sch->fields);
 }
 
 void test_queries() {
