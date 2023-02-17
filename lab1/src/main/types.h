@@ -14,11 +14,19 @@ typedef struct {
     char* ch;
 } string;
 
+typedef struct string_part string_part;
+struct string_part {
+    string* part;
+    string_part* nxt;
+};
+
 READ_STATUS read_string(FILE* fp, string* str);
 WRITE_STATUS write_string(FILE* fp, string* str);
 string* string_of(char* ch);
 size_t string_size(string* str);
 bool string_equals(void* first, void* second);
+
+string_part* split_string(string* str, size_t start);
 
 READ_STATUS read_uint(FILE* fp, uint32_t* val);
 WRITE_STATUS write_uint(FILE* fp, uint32_t* val);
