@@ -6,15 +6,15 @@ collection* new_collection(string* name, schema* sch) {
         return NULL;
     col->sch = sch;
     col->name = name;
-    col->doc_page_id = 0;
-    col->last_doc_page_id = 0;
+    col->doc_page_id = -1;
+    col->lastDocPageId = -1;
     return col;
 }
 
 WRITE_STATUS write_collection(FILE* fp, collection* col) {
     if (write_string(fp, col->name) == WRITE_OK &&
         write_uint(fp, &col->doc_page_id) == WRITE_OK &&
-        write_uint(fp, &col->last_doc_page_id) == WRITE_OK &&
+        write_uint(fp, &col->lastDocPageId) == WRITE_OK &&
         write_uint(fp, &col->elements_count) == WRITE_OK) {
         return write_schema(fp, col->sch);
     }
@@ -26,7 +26,7 @@ READ_STATUS read_collection(FILE* fp, collection* col) {
         return READ_ERROR;
     if (read_uint(fp, &(col->doc_page_id)) != READ_OK)
         return READ_ERROR;
-    if (read_uint(fp, &(col->last_doc_page_id)) != READ_OK)
+    if (read_uint(fp, &(col->lastDocPageId)) != READ_OK)
         return READ_ERROR;
     if (read_uint(fp, &(col->elements_count)) != READ_OK)
         return READ_ERROR;

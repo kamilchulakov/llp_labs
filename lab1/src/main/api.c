@@ -60,10 +60,10 @@
 //        return RESULT_ERROR;
 //    page* pg = get_page(dbHandler, pg_with_col->col->doc_page_id);
 //    document* doc = get_document(dbHandler, pg->page_header.page_id);
-//    while (pg->page_header.type == PAGE_DOCUMENT && doc->next_doc_page_id != 0) {
+//    while (pg->page_header.type == PAGE_DOCUMENT && doc->prevDocInCollectionPage != 0) {
 //        if (document_fits_filter(doc, document_filter)) debug_document(doc);
-//        pg = get_page(dbHandler, doc->next_doc_page_id);
-//        doc = get_document(dbHandler, doc->next_doc_page_id);
+//        pg = get_page(dbHandler, doc->prevDocInCollectionPage);
+//        doc = get_document(dbHandler, doc->prevDocInCollectionPage);
 //        if (doc == NULL)
 //            return RESULT_ERROR;
 //    }

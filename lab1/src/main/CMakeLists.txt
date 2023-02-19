@@ -19,7 +19,6 @@ add_library(
         types.h
         types.c
         io.h
-        operation.h
         api.c
         api.h query_executor.c query_executor.h schema.c schema.h bson.c logger.c logger.h collection.c)
 add_executable(app main.c)

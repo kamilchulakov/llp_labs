@@ -45,6 +45,8 @@ pager_data* create_header() {
     header->page_id_seq = 1;
     header->lastCollectionPage = -1;
     header->first_free_collection_page_id = -1;
+    header->lastDocumentPage = -1;
+    header->first_free_document_page_id = -1;
     return header;
 }
 

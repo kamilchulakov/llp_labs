@@ -30,7 +30,7 @@ typedef struct {
 typedef struct {
     uint32_t parent_id; // nullable
     string* collection;
-    element* elements; // can be doc, but doc is harder to create
+    document* doc;
 } insert_query;
 
 typedef struct {

@@ -7,7 +7,7 @@
 typedef struct {
     string* name;
     uint32_t doc_page_id;
-    uint32_t last_doc_page_id;
+    uint32_t lastDocPageId;
     schema* sch;
     uint32_t elements_count;
 } collection;

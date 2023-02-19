@@ -6,13 +6,14 @@ document* create_document(uint32_t elements) {
     document* doc = malloc(sizeof(document));
     if (doc) {
         doc->elements=elements;
-        doc->next_doc_page_id=0;
+        doc->prevDocInCollectionPage=-1;
+        doc->data = malloc(sizeof(element)*elements);
     }
     return doc;
 }
 
 WRITE_STATUS write_document_header(FILE* fp, document* doc) {
-    if (write_uint(fp, &doc->next_doc_page_id) == WRITE_OK
+    if (write_uint(fp, &doc->prevDocInCollectionPage) == WRITE_OK
         && write_uint(fp, &doc->elements) == WRITE_OK)
         return WRITE_OK;
     return WRITE_ERROR;
@@ -33,7 +34,7 @@ WRITE_STATUS write_document(FILE* fp, document* doc) {
 }
 
 READ_STATUS read_document_header(FILE* fp, document* doc) {
-    if (read_uint(fp, &doc->next_doc_page_id) == READ_OK &&
+    if (read_uint(fp, &doc->prevDocInCollectionPage) == READ_OK &&
             read_uint(fp, &doc->elements) == READ_OK)
         return READ_OK;
     return READ_ERROR;
@@ -52,6 +53,14 @@ READ_STATUS read_document(FILE* fp, document* doc) {
     if (read_document_header(fp, doc) == READ_OK)
         return read_document_data(fp, doc);
     return READ_ERROR;
+}
+
+schema* schema_from_document(document* doc) {
+    schema* sch = new_schema(doc->elements);
+    for (size_t i = 0; i < doc->elements; i++) {
+        sch->fields[i] = *doc->data[i].e_field;
+    }
+    return sch;
 }
 
 long size_document_header() {

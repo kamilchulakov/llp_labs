@@ -21,7 +21,7 @@ typedef struct {
     uint32_t lastCollectionPage;
     uint32_t first_free_collection_page_id; // page that is already allocated
 
-    uint32_t first_document_page_id;
+    uint32_t lastDocumentPage;
     uint32_t first_free_document_page_id; // page that is already allocated
 
     uint32_t first_string_page_id;

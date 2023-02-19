@@ -34,6 +34,26 @@ READ_STATUS read_schema(FILE* fp, schema* sch) {
     return READ_ERROR;
 }
 
+bool schema_equals(schema* first, schema* second) {
+    if (first->field_count != second->field_count) return false;
+    int field_is_used[first->field_count];
+    for (size_t i = 0; i < first->field_count; i++) {
+        bool find = false;
+        for (size_t j = 0; j < first->field_count; j++) {
+            if (field_equals(&first->fields[i], &second->fields[j]) == true) {
+                if (field_is_used[j] != 1) {
+                    field_is_used[j] = 1;
+                    find = true;
+                    break;
+                }
+            }
+        }
+        if (find == false)
+            return false;
+    }
+    return true;
+}
+
 schema* new_schema(uint32_t field_count) {
     schema* res = malloc(sizeof(schema));
     if (res == NULL) return NULL;

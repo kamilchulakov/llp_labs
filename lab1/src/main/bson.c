@@ -22,3 +22,9 @@ field* empty_field() {
     if (fld->e_name == NULL) return NULL;
     return fld;
 }
+
+bool field_equals(field* first, field* second) {
+    if (first->e_type != second->e_type) return false;
+    if (string_equals(first->e_name, second->e_name) == false) return false;
+    return true;
+}

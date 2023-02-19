@@ -61,7 +61,7 @@ void test_free_page(db_handler* db) {
     assert(db->pagerData->first_free_collection_page_id == 2);
 
     page* pg2 = get_page(db, 2);
-    assert(pg2->type == PAGE_EMPTY);
+    assert(pg2->type == PAGE_COLLECTION);
     assert(pg2->page_id == 2);
     assert(pg2->nextPageId == -1);
     assert(pg2->prevPageId == -1);
