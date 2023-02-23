@@ -149,6 +149,11 @@ WRITE_STATUS write_collection_to_page(db_handler* handler, uint32_t page_id, col
 }
 
 WRITE_STATUS write_document_to_page(db_handler* db, page* pg, document* doc) {
+    // calc doc size
+
+    // split if needed
+
+    // to write every part
     fseek(db->fp, calc_page_offset(pg->page_id)+sizeof(page), SEEK_SET);
     return write_document(db->fp, doc);
 }

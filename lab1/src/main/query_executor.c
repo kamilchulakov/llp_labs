@@ -85,8 +85,8 @@ query_result delete_schema(db_handler* db, delete_schema_query* query) {
 }
 
 query_result collection_insert(db_handler* db, insert_query* query) {
-    debug("executor.INSERT_DOCUMENT: (collection=%s, elements=%d)\n",
-          query->collection->ch, query->doc->elements);
+    debug("executor.INSERT_DOCUMENT: (collection=%s, count=%d)\n",
+          query->collection->ch, query->doc->data.count);
     document* doc = query->doc;
     query_result res = get_collection_or_schema_by_name(db, query->collection, true);
     if (res.type != DATA_RESULT_TYPE || res.data->type != COLLECTION_RESULT_TYPE) {

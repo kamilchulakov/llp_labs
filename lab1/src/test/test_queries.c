@@ -40,17 +40,17 @@ void test_insert_document(db_handler* db) {
     create_schema(db, &schemaQuery);
 
     insert_query insertQuery = {0, string_of("ex"), create_document(1)};
-    insertQuery.doc->data->e_field = empty_field();
-    insertQuery.doc->data->e_field->e_name = string_of("not int");
+    insertQuery.doc->data.elements->e_field = empty_field();
+    insertQuery.doc->data.elements->e_field->e_name = string_of("not int");
     query_result res = collection_insert(db, &insertQuery);
     assert_false(res.ok);
 
-    insertQuery.doc->data->e_field->e_name = string_of("int");
-    insertQuery.doc->data->e_field->e_type = DOUBLE;
+    insertQuery.doc->data.elements->e_field->e_name = string_of("int");
+    insertQuery.doc->data.elements->e_field->e_type = DOUBLE;
     res = collection_insert(db, &insertQuery);
     assert_false(res.ok);
 
-    insertQuery.doc->data->e_field->e_type = INT32;
+    insertQuery.doc->data.elements->e_field->e_type = INT32;
     res = collection_insert(db, &insertQuery);
     assert_true(res.ok);
 

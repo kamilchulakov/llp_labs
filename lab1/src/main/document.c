@@ -11,8 +11,8 @@ document* create_document(uint32_t elements) {
         doc->prevBrotherPage=-1;
         doc->brotherPage=-1;
         doc->collectionPage=-1;
-        doc->elements=elements;
-        doc->data = malloc(sizeof(element)*elements);
+        doc->data.count=elements;
+        doc->data.elements=malloc(sizeof(element)*elements);
     }
     return doc;
 }
@@ -22,15 +22,16 @@ WRITE_STATUS write_document_header(FILE* fp, document* doc) {
         && write_uint(fp, &doc->childPage) == WRITE_OK
         && write_uint(fp, &doc->prevBrotherPage) == WRITE_OK
         && write_uint(fp, &doc->brotherPage) == WRITE_OK
-        && write_uint(fp, &doc->collectionPage) == WRITE_OK
-        && write_uint(fp, &doc->elements) == WRITE_OK)
+        && write_uint(fp, &doc->collectionPage) == WRITE_OK)
         return WRITE_OK;
     return WRITE_ERROR;
 }
 
 WRITE_STATUS write_document_data(FILE* fp, document* doc) {
-    element* el = (element* ) doc->data;
-    for (int i = 0; i < doc->elements; ++i) {
+    if (write_uint(fp, &doc->data.count) != WRITE_OK)
+        return WRITE_ERROR;
+    element* el = (element* ) doc->data.elements;
+    for (int i = 0; i < doc->data.count; ++i) {
         if (write_element(fp, &el[i]) != WRITE_OK) return WRITE_ERROR;
     }
     return WRITE_OK;
@@ -47,16 +48,16 @@ READ_STATUS read_document_header(FILE* fp, document* doc) {
         && read_uint(fp, &doc->childPage) == READ_OK
         && read_uint(fp, &doc->prevBrotherPage) == READ_OK
         && read_uint(fp, &doc->brotherPage) == READ_OK
-        && read_uint(fp, &doc->collectionPage) == READ_OK
-        && read_uint(fp, &doc->elements) == READ_OK)
+        && read_uint(fp, &doc->collectionPage) == READ_OK)
         return READ_OK;
     return READ_ERROR;
 }
 
 READ_STATUS read_document_data(FILE* fp, document* doc) {
-    doc->data = malloc(sizeof(element)*doc->elements);
-    element* el = (element* ) doc->data;
-    for (int i = 0; i < doc->elements; ++i) {
+    if (read_uint(fp, &doc->data.count) != READ_OK) return READ_ERROR;
+    doc->data.elements = malloc(sizeof(element)*doc->data.count);
+    element* el = (element* ) doc->data.elements;
+    for (int i = 0; i < doc->data.count; ++i) {
         if (read_element(fp, &el[i]) != READ_OK) return READ_ERROR;
     }
     return READ_OK;
@@ -69,9 +70,9 @@ READ_STATUS read_document(FILE* fp, document* doc) {
 }
 
 schema* schema_from_document(document* doc) {
-    schema* sch = new_schema(doc->elements);
-    for (size_t i = 0; i < doc->elements; i++) {
-        sch->fields[i] = *doc->data[i].e_field;
+    schema* sch = new_schema(doc->data.count);
+    for (size_t i = 0; i < doc->data.count; i++) {
+        sch->fields[i] = *doc->data.elements[i].e_field;
     }
     return sch;
 }

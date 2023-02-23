@@ -14,9 +14,11 @@ typedef struct {
     uint32_t brotherPage;
     uint32_t collectionPage;
 
-    uint32_t nextPartPage;
-    uint32_t elements;
-    element* data;
+    struct document_data {
+        uint32_t nextPage;
+        uint32_t count;
+        element* elements;
+    } data;
 } document;
 
 document* create_document(uint32_t elements);
@@ -24,6 +26,7 @@ document* create_document(uint32_t elements);
 size_t document_header_size();
 
 WRITE_STATUS write_document(FILE* fp, document* doc);
+WRITE_STATUS write_document_data(FILE* fp, document* doc);
 WRITE_STATUS write_document_header(FILE* fp, document* doc);
 READ_STATUS read_document(FILE* fp, document* doc);
 schema* schema_from_document(document* doc);
