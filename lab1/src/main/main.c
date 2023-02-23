@@ -1,37 +1,14 @@
 #include "db_file.h"
-#include "pager.h"
-#include "api.h"
 
 int main() {
-//    db_handler* db_handler = open_db_file("db2");
-//    debug_mem_info(db_handler);
-//    allocate_page(db_handler);
-//    allocate_page(db_handler);
-//    allocate_page(db_handler);
-//    debug_mem_info(db_handler);
-//    get_page_and_debug(db_handler, 0);
-//    get_page_and_debug(db_handler, 1);
-//    get_page_and_debug(db_handler, 2);
-//    create_collection_in_page(db_handler, 0, "collection");
-//    create_collection_in_page(db_handler, 1, "second");
-//    create_collection_in_page(db_handler, 2, "third");
-//
-//    filter all = {ALL};
-//    select_collection(db_handler, &all);
-//    string str = {5, "third"};
-//    filter by_name = {NAME, &str};
-//    select_collection(db_handler, &by_name);
-//
-//    allocate_page(db_handler);
-//    allocate_page(db_handler);
-//    create_document_in_page(db_handler, 3, 0);
-//    create_document_in_page(db_handler, 4, 0);
-//    uint32_t collection_id = 0;
-//    filter collection_id_filter = {ID, &collection_id};
-//    select_document(db_handler, &collection_id_filter, &all);
-//
-//    element* el = create_element_int32("int", 100);
-//    insert_element(db_handler, 3, el);
-//    select_document(db_handler, &collection_id_filter, &all);
+    db_handler* db = open_db_file("db2");
+
+    document* doc = create_document(1);
+    doc->data[0] = *create_element(STRING, "element");
+    doc->data[0].string_data = string_of("HORRIBLY BIG STRING AAAAAAAAAAAAAAA");
+    printf("document: %lu\n", sizeof(document));
+    printf("real: %lu\n", sizeof(*doc)+sizeof(*doc->data)+sizeof(*doc->data->string_data));
+    printf("calc: %lu\n", sizeof(element)*doc->elements+sizeof(uint32_t)*7);
+    utilize_db_file(db);
     return 0;
 }

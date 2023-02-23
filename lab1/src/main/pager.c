@@ -169,7 +169,7 @@ collection* get_collection(db_handler* handler, uint32_t page_id) {
 
 document* get_document(db_handler* handler, uint32_t page_id) {
     fseek(handler->fp, calc_page_offset(page_id)+sizeof(page), SEEK_SET);
-    document* doc = malloc(size_document_header());
+    document* doc = malloc(sizeof(document));
     read_document(handler->fp, doc);
     return doc;
 }

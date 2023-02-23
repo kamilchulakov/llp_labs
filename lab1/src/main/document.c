@@ -76,6 +76,8 @@ schema* schema_from_document(document* doc) {
     return sch;
 }
 
-long size_document_header() {
-    return sizeof(uint32_t)*2;
+
+
+size_t document_header_size() {
+    return sizeof(uint32_t)*7;
 }
