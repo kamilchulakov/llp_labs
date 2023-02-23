@@ -5,4 +5,3 @@ set(CMAKE_C_STANDARD 11)
 
 add_subdirectory(src/main)
 add_subdirectory(src/test)
-add_subdirectory(examples)
