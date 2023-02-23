@@ -173,8 +173,3 @@ document* get_document(db_handler* handler, uint32_t page_id) {
     read_document(handler->fp, doc);
     return doc;
 }
-
-
-int debug_document(document* doc) {
-    return printf("DOCUMENT: NEXT_DOC_PAGE_ID:%u ELEMENTS:%u\n", doc->prevDocInCollectionPage, doc->elements);
-}

@@ -1,19 +1,28 @@
 #include <stdlib.h>
+#include <glob.h>
 
 #include "document.h"
 
 document* create_document(uint32_t elements) {
     document* doc = malloc(sizeof(document));
     if (doc) {
+        doc->parentPage=-1;
+        doc->childPage=-1;
+        doc->prevBrotherPage=-1;
+        doc->brotherPage=-1;
+        doc->collectionPage=-1;
         doc->elements=elements;
-        doc->prevDocInCollectionPage=-1;
         doc->data = malloc(sizeof(element)*elements);
     }
     return doc;
 }
 
 WRITE_STATUS write_document_header(FILE* fp, document* doc) {
-    if (write_uint(fp, &doc->prevDocInCollectionPage) == WRITE_OK
+    if (write_uint(fp, &doc->parentPage) == WRITE_OK
+        && write_uint(fp, &doc->childPage) == WRITE_OK
+        && write_uint(fp, &doc->prevBrotherPage) == WRITE_OK
+        && write_uint(fp, &doc->brotherPage) == WRITE_OK
+        && write_uint(fp, &doc->collectionPage) == WRITE_OK
         && write_uint(fp, &doc->elements) == WRITE_OK)
         return WRITE_OK;
     return WRITE_ERROR;
@@ -34,8 +43,12 @@ WRITE_STATUS write_document(FILE* fp, document* doc) {
 }
 
 READ_STATUS read_document_header(FILE* fp, document* doc) {
-    if (read_uint(fp, &doc->prevDocInCollectionPage) == READ_OK &&
-            read_uint(fp, &doc->elements) == READ_OK)
+    if (read_uint(fp, &doc->parentPage) == READ_OK
+        && read_uint(fp, &doc->childPage) == READ_OK
+        && read_uint(fp, &doc->prevBrotherPage) == READ_OK
+        && read_uint(fp, &doc->brotherPage) == READ_OK
+        && read_uint(fp, &doc->collectionPage) == READ_OK
+        && read_uint(fp, &doc->elements) == READ_OK)
         return READ_OK;
     return READ_ERROR;
 }

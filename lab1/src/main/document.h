@@ -7,8 +7,13 @@
 #include "element.h"
 #include "schema.h"
 
-typedef struct document {
-    uint32_t prevDocInCollectionPage;
+typedef struct {
+    uint32_t parentPage;
+    uint32_t childPage;
+    uint32_t prevBrotherPage;
+    uint32_t brotherPage;
+
+    uint32_t collectionPage;
     uint32_t elements;
     element* data;
 } document;

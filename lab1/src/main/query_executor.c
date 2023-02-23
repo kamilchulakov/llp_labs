@@ -87,6 +87,7 @@ query_result delete_schema(db_handler* db, delete_schema_query* query) {
 query_result collection_insert(db_handler* db, insert_query* query) {
     debug("executor.INSERT_DOCUMENT: (collection=%s, elements=%d)\n",
           query->collection->ch, query->doc->elements);
+    document* doc = query->doc;
     query_result res = get_collection_or_schema_by_name(db, query->collection, true);
     if (res.type != DATA_RESULT_TYPE || res.data->type != COLLECTION_RESULT_TYPE) {
         debug("collection not found\n");
@@ -94,17 +95,22 @@ query_result collection_insert(db_handler* db, insert_query* query) {
     }
 
     schema* sch = res.data->col->sch;
-    if (schema_equals(sch, schema_from_document(query->doc)) == false) {
+    if (schema_equals(sch, schema_from_document(doc)) == false) {
         debug("document schema is different from collection schema\n");
         return nok();
     }
 
+    doc->collectionPage = res.data->pageId;
+
     page* pg = get_free_document_page(db);
-    query->doc->prevDocInCollectionPage = res.data->col->lastDocPageId;
-    if (write_document_to_page(db, pg, query->doc) == WRITE_OK) {
-        res.data->col->lastDocPageId = pg->page_id;
-        if (write_collection_to_page(db, res.data->pageId, res.data->col) == WRITE_OK)
-            return ok();
+    if (query->parent_id == 0) {
+        doc->prevBrotherPage = res.data->col->lastDocPageId;
+
+        if (write_document_to_page(db, pg, doc) == WRITE_OK) {
+            res.data->col->lastDocPageId = pg->page_id;
+            if (write_collection_to_page(db, res.data->pageId, res.data->col) == WRITE_OK)
+                return ok();
+        }
     }
 
     return nok();
