@@ -11,6 +11,7 @@ typedef struct {
         double double_data;
         bool bool_data;
         string* string_data;
+        string_part* string_split;
     };
 } element;
 

@@ -37,8 +37,6 @@ WRITE_STATUS write_element_data(FILE* fp, element* el) {
         return write_bool(fp, &el->bool_data);
     if (el->e_field->e_type == INT32)
         return write_int32(fp, &el->int_data);
-    if (el->e_field->e_type == STRING)
-        return write_string(fp, el->string_data);
     if (el->e_field->e_type == DOUBLE)
         return write_double(fp, &el->double_data);
     return WRITE_ERROR;

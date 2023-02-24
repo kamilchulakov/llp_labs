@@ -18,6 +18,11 @@ void set_document_prev_page(page* pg, db_handler* db) {
     db->pagerData->lastDocumentPage = pg->page_id;
 }
 
+void set_string_prev_page(page* pg, db_handler* db) {
+    pg->prevPageId = db->pagerData->lastStringPage;
+    db->pagerData->lastStringPage = pg->page_id;
+}
+
 page* allocate_page_typed(db_handler* db, page_type type) {
     page* pg = create_empty_page(get_and_set_page_id(db));
     pg->type = type;
@@ -27,6 +32,9 @@ page* allocate_page_typed(db_handler* db, page_type type) {
             break;
         case PAGE_DOCUMENT:
             set_document_prev_page(pg, db);
+            break;
+        case PAGE_STRING:
+            set_string_prev_page(pg, db);
             break;
         case PAGE_EMPTY:
             debug("pager.ALLOCATE_PAGE: unsupported page type\n");
@@ -148,14 +156,46 @@ WRITE_STATUS write_collection_to_page(db_handler* handler, uint32_t page_id, col
     return write_collection(handler->fp, col);
 }
 
+uint32_t write_string_paged(db_handler* db, string_part_page str) {
+    page* pg = allocate_page_typed(db, PAGE_STRING);
+    fseek(db->fp, calc_page_offset(pg->page_id)+sizeof(page), SEEK_SET);
+    if (write_uint(db->fp, &str.nxt) == WRITE_OK &&
+        write_string(db->fp, str.part) == WRITE_OK)
+        return pg->page_id;
+
+    return 0;
+}
+
+WRITE_STATUS write_document_strings(db_handler* db, document* doc) {
+    for (int i = 0; i < doc->data.count; ++i) {
+        element* el = &doc->data.elements[i];
+        if (el->e_field->e_type == STRING) {
+            if (write_field(db->fp, el->e_field) != WRITE_OK)
+                return WRITE_ERROR;
+            el->string_split = split_string(el->string_data, 0);
+            string_part* curr = el->string_split;
+            uint32_t page_id = -1;
+            while (curr) {
+                string_part_page part = {.part = curr->part, .nxt = page_id};
+                page_id = write_string_paged(db, part);
+                curr = curr->nxt;
+            }
+        }
+    }
+    return WRITE_OK;
+}
+
 WRITE_STATUS write_document_to_page(db_handler* db, page* pg, document* doc) {
+    fseek(db->fp, calc_page_offset(pg->page_id)+sizeof(page), SEEK_SET);
+    if (write_document_header(db->fp, doc) != WRITE_OK) return WRITE_ERROR;
     // calc doc size
 
     // split if needed
 
-    // to write every part
-    fseek(db->fp, calc_page_offset(pg->page_id)+sizeof(page), SEEK_SET);
-    return write_document(db->fp, doc);
+    // to write every part data
+    if (write_document_data(db->fp, doc) != WRITE_OK)
+        return WRITE_ERROR;
+    return write_document_strings(db, doc);
 }
 
 collection* empty_collection() {
@@ -177,4 +217,8 @@ document* get_document(db_handler* handler, uint32_t page_id) {
     document* doc = malloc(sizeof(document));
     read_document(handler->fp, doc);
     return doc;
+}
+
+READ_STATUS read_element_paged(db_handler* db, element* el) {
+
 }

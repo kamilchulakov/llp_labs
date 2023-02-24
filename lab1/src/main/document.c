@@ -32,7 +32,7 @@ WRITE_STATUS write_document_data(FILE* fp, document* doc) {
         return WRITE_ERROR;
     element* el = (element* ) doc->data.elements;
     for (int i = 0; i < doc->data.count; ++i) {
-        if (write_element(fp, &el[i]) != WRITE_OK) return WRITE_ERROR;
+        if (el[i].e_field->e_type != STRING && write_element(fp, &el[i]) != WRITE_OK) return WRITE_ERROR;
     }
     return WRITE_OK;
 }

@@ -24,7 +24,7 @@ typedef struct {
     uint32_t lastDocumentPage;
     uint32_t first_free_document_page_id; // page that is already allocated
 
-    uint32_t first_string_page_id;
+    uint32_t lastStringPage;
     uint32_t first_free_string_page_id; // page that is already allocated
 } pager_data;
 

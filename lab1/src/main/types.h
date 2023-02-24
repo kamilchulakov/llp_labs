@@ -20,6 +20,11 @@ struct string_part {
     string_part* nxt;
 };
 
+typedef struct {
+    string* part;
+    uint32_t nxt;
+} string_part_page;
+
 READ_STATUS read_string(FILE* fp, string* str);
 WRITE_STATUS write_string(FILE* fp, string* str);
 string* string_of(char* ch);

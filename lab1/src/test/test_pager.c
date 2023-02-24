@@ -82,11 +82,34 @@ void test_free_page(db_handler* db) {
     assert(pg1->used_mem == 42);
 }
 
+void test_write_document_splits_strings(db_handler* db) {
+    print_running_test("test_write_document_splits_strings");
+    string* str = string_of("1) THIS IS REALLY BIG STRING I MEAN HUGE I MEAN YOU TOTALLY KNOW IT\n"
+                            "2) THIS IS REALLY BIG STRING I MEAN HUGE I MEAN YOU TOTALLY KNOW IT\n"
+                            "3) THIS IS REALLY BIG STRING I MEAN HUGE I MEAN YOU TOTALLY KNOW IT\n"
+                            "4) THIS IS REALLY BIG STRING I MEAN HUGE I MEAN YOU TOTALLY KNOW IT\n"
+                            "5) THIS IS REALLY BIG STRING I MEAN HUGE I MEAN YOU TOTALLY KNOW IT\n"
+                            "6) THIS IS REALLY BIG STRING I MEAN HUGE I MEAN YOU TOTALLY KNOW IT\n");
+    document* doc = create_document(1);
+    doc->data.elements = create_element(STRING, "str");
+    doc->data.elements->string_data = str;
+
+    page* pg = allocate_page_typed(db, PAGE_DOCUMENT);
+    assert(write_document_to_page(db, pg, doc) == WRITE_OK);
+
+    pg = get_page(db, 5);
+    assert(pg->type == PAGE_STRING);
+
+    pg = get_page(db, 6);
+    assert(pg->type == PAGE_STRING);
+}
+
 void test_pager() {
     print_running("test_pager");
     db_handler* db = open_db_file("tmp");
     test_allocate_and_get(db);
     test_more_allocate_and_get(db);
     test_free_page(db);
+    test_write_document_splits_strings(db);
     utilize_db_file(db);
 }

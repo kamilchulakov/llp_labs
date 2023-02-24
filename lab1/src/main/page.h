@@ -10,7 +10,7 @@
 
 #define PAGE_SIZE 256
 
-typedef enum { PAGE_COLLECTION, PAGE_DOCUMENT, PAGE_EMPTY } page_type;
+typedef enum { PAGE_COLLECTION, PAGE_DOCUMENT, PAGE_STRING, PAGE_EMPTY } page_type;
 
 typedef struct {
     uint32_t page_id;
