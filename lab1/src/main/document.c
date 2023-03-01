@@ -82,6 +82,14 @@ schema* schema_from_document(document* doc) {
 
 
 
-size_t document_header_size() {
+size_t document_static_size() {
     return sizeof(uint32_t)*7;
+}
+
+size_t document_dynamic_size(document* doc) {
+    return doc->data.count*sizeof(element);
+}
+
+size_t document_size(document* doc) {
+    return document_static_size() + document_dynamic_size(doc);
 }

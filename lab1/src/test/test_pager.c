@@ -109,6 +109,13 @@ void test_write_document_splits_strings(db_handler* db) {
     assert(res->data.nextPage == -1);
 }
 
+void test_write_too_big_document(db_handler* db) {
+    print_running_test("test_write_too_big_document");
+    page* pg = get_page(db, 4);
+    document* doc = create_document(20);
+    assert(write_document_to_page(db, pg, doc) == WRITE_ERROR);
+}
+
 void test_pager() {
     print_running("test_pager");
     db_handler* db = open_db_file("tmp");
@@ -116,5 +123,6 @@ void test_pager() {
     test_more_allocate_and_get(db);
     test_free_page(db);
     test_write_document_splits_strings(db);
+    test_write_too_big_document(db);
     utilize_db_file(db);
 }

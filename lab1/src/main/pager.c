@@ -2,6 +2,8 @@
 #include "pager.h"
 #include "logger.h"
 
+#define MAX_DOCUMENT_SIZE ((size_t) (PAGE_SIZE - sizeof(page)))
+
 page* write_page(db_handler *db, const page *pg);
 
 long calc_page_offset(uint32_t page_id) {
@@ -198,11 +200,9 @@ void split_document_strings(db_handler* db, document* doc) {
 }
 
 WRITE_STATUS write_document_to_page(db_handler* db, page* pg, document* doc) {
-    // calc doc size
+    // can't write if too big
+    if (document_size(doc) > MAX_DOCUMENT_SIZE) return WRITE_ERROR;
 
-    // split if needed
-
-    // to write every part data
     split_document_strings(db, doc);
     fseek(db->fp, calc_page_offset(pg->page_id)+sizeof(page), SEEK_SET);
     if (write_document_header(db->fp, doc) != WRITE_OK ||

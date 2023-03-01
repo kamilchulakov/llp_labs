@@ -23,7 +23,7 @@ typedef struct {
 
 document* create_document(uint32_t elements);
 
-size_t document_header_size();
+size_t document_size(document* doc);
 
 WRITE_STATUS write_document(FILE* fp, document* doc);
 WRITE_STATUS write_document_data(FILE* fp, document* doc);
