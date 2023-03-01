@@ -96,12 +96,16 @@ void test_write_document_splits_strings(db_handler* db) {
 
     page* pg = allocate_page_typed(db, PAGE_DOCUMENT);
     assert(write_document_to_page(db, pg, doc) == WRITE_OK);
+    assert(pg->page_id == 4);
 
     pg = get_page(db, 5);
     assert(pg->type == PAGE_STRING);
 
     pg = get_page(db, 6);
     assert(pg->type == PAGE_STRING);
+
+    document* res = get_document(db, 4);
+    assert(res->data.elements->string_split->pageId == 5);
 }
 
 void test_pager() {

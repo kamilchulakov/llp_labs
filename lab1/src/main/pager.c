@@ -36,9 +36,9 @@ page* allocate_page_typed(db_handler* db, page_type type) {
         case PAGE_STRING:
             set_string_prev_page(pg, db);
             break;
-        case PAGE_EMPTY:
+        default:
             debug("pager.ALLOCATE_PAGE: unsupported page type\n");
-            break;
+            exit(-1);
     }
     return write_page(db, pg);
 }
@@ -156,28 +156,19 @@ WRITE_STATUS write_collection_to_page(db_handler* handler, uint32_t page_id, col
     return write_collection(handler->fp, col);
 }
 
-uint32_t write_string_paged(db_handler* db, string_part_page str) {
-    page* pg = allocate_page_typed(db, PAGE_STRING);
-    fseek(db->fp, calc_page_offset(pg->page_id)+sizeof(page), SEEK_SET);
-    if (write_uint(db->fp, &str.nxt) == WRITE_OK &&
-        write_string(db->fp, str.part) == WRITE_OK)
-        return pg->page_id;
-
-    return 0;
+WRITE_STATUS write_string_paged(db_handler* db, string_part* part) {
+    fseek(db->fp, calc_page_offset(part->pageId)+sizeof(page), SEEK_SET);
+    return write_string_split(db->fp, part);
 }
 
 WRITE_STATUS write_document_strings(db_handler* db, document* doc) {
     for (int i = 0; i < doc->data.count; ++i) {
         element* el = &doc->data.elements[i];
         if (el->e_field->e_type == STRING) {
-            if (write_field(db->fp, el->e_field) != WRITE_OK)
-                return WRITE_ERROR;
-            el->string_split = split_string(el->string_data, 0);
             string_part* curr = el->string_split;
-            uint32_t page_id = -1;
             while (curr) {
-                string_part_page part = {.part = curr->part, .nxt = page_id};
-                page_id = write_string_paged(db, part);
+                if (write_string_paged(db, curr) == WRITE_ERROR)
+                    return WRITE_ERROR;
                 curr = curr->nxt;
             }
         }
@@ -185,15 +176,37 @@ WRITE_STATUS write_document_strings(db_handler* db, document* doc) {
     return WRITE_OK;
 }
 
+void allocate_string_pages(db_handler* db, string_part* split) {
+    string_part* curr = split;
+    string_part* prev = NULL;
+    while (curr) {
+        curr->pageId = allocate_page_typed(db, PAGE_STRING)->page_id;
+        if (prev) prev->nxtPageId = curr->pageId;
+        prev = curr;
+        curr = curr->nxt;
+    }
+}
+
+void split_document_strings(db_handler* db, document* doc) {
+    for (int i = 0; i < doc->data.count; ++i) {
+        element* el = &doc->data.elements[i];
+        if (el->e_field->e_type == STRING) {
+            el->string_split = split_string(el->string_data, 0);
+            allocate_string_pages(db, el->string_split);
+        }
+    }
+}
+
 WRITE_STATUS write_document_to_page(db_handler* db, page* pg, document* doc) {
-    fseek(db->fp, calc_page_offset(pg->page_id)+sizeof(page), SEEK_SET);
-    if (write_document_header(db->fp, doc) != WRITE_OK) return WRITE_ERROR;
     // calc doc size
 
     // split if needed
 
     // to write every part data
-    if (write_document_data(db->fp, doc) != WRITE_OK)
+    split_document_strings(db, doc);
+    fseek(db->fp, calc_page_offset(pg->page_id)+sizeof(page), SEEK_SET);
+    if (write_document_header(db->fp, doc) != WRITE_OK ||
+        write_document_data(db->fp, doc) != WRITE_OK)
         return WRITE_ERROR;
     return write_document_strings(db, doc);
 }
@@ -208,17 +221,13 @@ collection* empty_collection() {
 collection* get_collection(db_handler* handler, uint32_t page_id) {
     fseek(handler->fp, calc_page_offset(page_id)+sizeof(page), SEEK_SET);
     collection* col = empty_collection();
-    read_collection(handler->fp, col);
+    if (read_collection(handler->fp, col) == READ_ERROR) return NULL;
     return col;
 }
 
 document* get_document(db_handler* handler, uint32_t page_id) {
     fseek(handler->fp, calc_page_offset(page_id)+sizeof(page), SEEK_SET);
     document* doc = malloc(sizeof(document));
-    read_document(handler->fp, doc);
+    if (read_document(handler->fp, doc) == READ_ERROR) return NULL;
     return doc;
-}
-
-READ_STATUS read_element_paged(db_handler* db, element* el) {
-
 }

@@ -78,6 +78,30 @@ string_part* split_string(string* str, size_t start) {
     return part;
 }
 
+READ_STATUS read_string_split(FILE* fp, string_part *part) {
+    if (read_string(fp, part->part) == READ_OK &&
+        read_uint(fp, &part->pageId) == READ_OK &&
+        read_uint(fp, &part->nxtPageId) == READ_OK)
+        return READ_OK;
+    return READ_ERROR;
+}
+
+READ_STATUS read_string_header_in_document(FILE* fp, string_part *part) {
+    return read_uint(fp, &part->pageId);
+}
+
+WRITE_STATUS write_string_split(FILE* fp, string_part *part) {
+    if (write_string(fp, part->part) == WRITE_OK &&
+        write_uint(fp, &part->pageId) == WRITE_OK &&
+        write_uint(fp, &part->nxtPageId) == WRITE_OK)
+        return WRITE_OK;
+    return WRITE_ERROR;
+}
+
+WRITE_STATUS write_string_header_in_document(FILE* fp, string_part* part) {
+    return write_uint(fp, &part->pageId);
+}
+
 READ_STATUS read_uint(FILE* fp, uint32_t* val) {
     if (fread(val, sizeof(uint32_t), 1, fp) == 1)
         return READ_OK;

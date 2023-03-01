@@ -23,9 +23,9 @@ READ_STATUS read_element_data(FILE* fp, element* el) {
     if (el->e_field->e_type == INT32)
         return read_int32(fp, &el->int_data);
     if (el->e_field->e_type == STRING) {
-        el->string_data = malloc(sizeof(string));
-        if (el->string_data == NULL) return READ_ERROR;
-        return read_string(fp, el->string_data);
+        el->string_split = malloc(sizeof(string_part));
+        if (el->string_split == NULL) return READ_ERROR;
+        return read_string_header_in_document(fp, el->string_split);
     }
     if (el->e_field->e_type == DOUBLE)
         return read_double(fp, &el->double_data);
@@ -39,6 +39,8 @@ WRITE_STATUS write_element_data(FILE* fp, element* el) {
         return write_int32(fp, &el->int_data);
     if (el->e_field->e_type == DOUBLE)
         return write_double(fp, &el->double_data);
+    if (el->e_field->e_type == STRING)
+        return write_string_header_in_document(fp, el->string_split); // head
     return WRITE_ERROR;
 }
 

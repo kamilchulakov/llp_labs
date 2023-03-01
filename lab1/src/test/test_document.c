@@ -10,6 +10,7 @@ void test_document_element(FILE* fp) {
     doc = malloc(sizeof(document));
     fseek(fp, 0, SEEK_SET);
     assert(read_document(fp, doc) == READ_OK);
+    assert(doc->data.count == 1);
     element* expected_el = create_element_int32("8B", 64);
     assert_element_equals( doc->data.elements, expected_el);
 }

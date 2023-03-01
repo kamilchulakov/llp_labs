@@ -17,13 +17,10 @@ typedef struct {
 typedef struct string_part string_part;
 struct string_part {
     string* part;
+    uint32_t pageId;
     string_part* nxt;
+    uint32_t nxtPageId;
 };
-
-typedef struct {
-    string* part;
-    uint32_t nxt;
-} string_part_page;
 
 READ_STATUS read_string(FILE* fp, string* str);
 WRITE_STATUS write_string(FILE* fp, string* str);
@@ -32,6 +29,10 @@ size_t string_size(string* str);
 bool string_equals(void* first, void* second);
 
 string_part* split_string(string* str, size_t start);
+READ_STATUS read_string_split(FILE* fp, string_part *part);
+READ_STATUS read_string_header_in_document(FILE* fp, string_part *part);
+WRITE_STATUS write_string_split(FILE* fp, string_part *part);
+WRITE_STATUS write_string_header_in_document(FILE* fp, string_part *part);
 
 READ_STATUS read_uint(FILE* fp, uint32_t* val);
 WRITE_STATUS write_uint(FILE* fp, uint32_t* val);
