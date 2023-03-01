@@ -12,6 +12,7 @@ document* create_document(uint32_t elements) {
         doc->brotherPage=-1;
         doc->collectionPage=-1;
         doc->data.count=elements;
+        doc->data.nextPage=-1;
         doc->data.elements=malloc(sizeof(element)*elements);
     }
     return doc;
@@ -28,7 +29,8 @@ WRITE_STATUS write_document_header(FILE* fp, document* doc) {
 }
 
 WRITE_STATUS write_document_data(FILE* fp, document* doc) {
-    if (write_uint(fp, &doc->data.count) != WRITE_OK)
+    if (write_uint(fp, &doc->data.count) != WRITE_OK ||
+        write_uint(fp, &doc->data.nextPage) != WRITE_OK)
         return WRITE_ERROR;
     element* el = (element* ) doc->data.elements;
     for (int i = 0; i < doc->data.count; ++i) {
@@ -54,7 +56,8 @@ READ_STATUS read_document_header(FILE* fp, document* doc) {
 }
 
 READ_STATUS read_document_data(FILE* fp, document* doc) {
-    if (read_uint(fp, &doc->data.count) != READ_OK) return READ_ERROR;
+    if (read_uint(fp, &doc->data.count) != READ_OK ||
+        read_uint(fp, &doc->data.nextPage) != READ_OK) return READ_ERROR;
     doc->data.elements = malloc(sizeof(element)*doc->data.count);
     element* el = (element* ) doc->data.elements;
     for (int i = 0; i < doc->data.count; ++i) {

@@ -106,6 +106,7 @@ void test_write_document_splits_strings(db_handler* db) {
 
     document* res = get_document(db, 4);
     assert(res->data.elements->string_split->pageId == 5);
+    assert(res->data.nextPage == -1);
 }
 
 void test_pager() {
