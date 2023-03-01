@@ -49,9 +49,9 @@ void assert_element_equals(element* first_el, element* second_el) {
 }
 
 void print_running(char* test_name) {
-    printf("IN: %s\n", test_name);
+    printf("\n| IN: %s\n", test_name);
 }
 
 void print_running_test(char* test_name) {
-    printf("RUNNING: %s\n", test_name);
+    printf("-> RUNNING: %s\n", test_name);
 }
