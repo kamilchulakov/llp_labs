@@ -2,7 +2,7 @@
 #include "pager.h"
 #include "logger.h"
 
-#define MAX_DOCUMENT_DATA_SIZE ((size_t) ((PAGE_SIZE - sizeof(page)) / sizeof(element)) - 2)
+#define MAX_DOCUMENT_DATA_SIZE (size_t) ((PAGE_SIZE - sizeof(page) - sizeof(document)) / sizeof(element))
 
 page* write_page(db_handler *db, const page *pg);
 
