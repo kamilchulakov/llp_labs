@@ -39,6 +39,10 @@ void test_insert_document(db_handler* db) {
     schemaQuery.col->sch->fields->e_type = INT32;
     create_schema(db, &schemaQuery);
 
+    collection* col = get_collection(db, 1);
+    assert(col->lastDocPageId == -1);
+    assert(col->doc_page_id == -1);
+
     insert_query insertQuery = {0, string_of("ex"), create_document(1)};
     insertQuery.doc->data.elements->e_field = empty_field();
     insertQuery.doc->data.elements->e_field->e_name = string_of("not int");
@@ -59,7 +63,7 @@ void test_insert_document(db_handler* db) {
     assert(pg->nextPageId == -1);
     assert(pg->prevPageId == -1);
 
-    collection* col = get_collection(db, 1);
+    col = get_collection(db, 1);
     assert(col->lastDocPageId == 2);
     assert(col->doc_page_id == -1);
 }

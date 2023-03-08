@@ -17,6 +17,7 @@ int update_page_header(db_handler* handler, uint32_t page_id, page* pg);
 
 WRITE_STATUS write_collection_to_page(db_handler* handler, uint32_t page_id, collection* col);
 WRITE_STATUS write_document_to_page(db_handler* db, page* pg, document* doc);
+WRITE_STATUS write_document_to_page_but_split_if_needed(db_handler* db, page* pg, document* doc);
 
 int update_collection_doc_id(db_handler* handler, uint32_t page_id, uint32_t doc_page_id);
 collection* get_collection(db_handler* handler, uint32_t page_id);

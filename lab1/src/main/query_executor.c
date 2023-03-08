@@ -106,7 +106,7 @@ query_result collection_insert(db_handler* db, insert_query* query) {
     if (query->parent_id == 0) {
         doc->prevBrotherPage = res.data->col->lastDocPageId;
 
-        if (write_document_to_page(db, pg, doc) == WRITE_OK) {
+        if (write_document_to_page_but_split_if_needed(db, pg, doc) == WRITE_OK) {
             res.data->col->lastDocPageId = pg->page_id;
             if (write_collection_to_page(db, res.data->pageId, res.data->col) == WRITE_OK)
                 return ok();

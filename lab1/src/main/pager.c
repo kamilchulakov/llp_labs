@@ -2,7 +2,7 @@
 #include "pager.h"
 #include "logger.h"
 
-#define MAX_DOCUMENT_SIZE ((size_t) (PAGE_SIZE - sizeof(page)))
+#define MAX_DOCUMENT_DATA_SIZE ((size_t) ((PAGE_SIZE - sizeof(page)) / sizeof(element)) - 2)
 
 page* write_page(db_handler *db, const page *pg);
 
@@ -200,8 +200,12 @@ void split_document_strings(db_handler* db, document* doc) {
 }
 
 WRITE_STATUS write_document_to_page(db_handler* db, page* pg, document* doc) {
-    // can't write if too big
-    if (document_size(doc) > MAX_DOCUMENT_SIZE) return WRITE_ERROR;
+    if (doc->data.count > MAX_DOCUMENT_DATA_SIZE) {
+        debug("pager.WRITE_DOCUMENT_TO_PAGE: document is too big\n");
+        return WRITE_ERROR;
+    }
+
+    debug("pager.WRITE_DOCUMENT_TO_PAGE: page(id=%d)\n", pg->page_id);
 
     split_document_strings(db, doc);
     fseek(db->fp, calc_page_offset(pg->page_id)+sizeof(page), SEEK_SET);
@@ -209,6 +213,37 @@ WRITE_STATUS write_document_to_page(db_handler* db, page* pg, document* doc) {
         write_document_data(db->fp, doc) != WRITE_OK)
         return WRITE_ERROR;
     return write_document_strings(db, doc);
+}
+
+typedef struct {
+    page* pg;
+    union {
+        document* doc;
+    };
+} pagedData;
+
+WRITE_STATUS write_document_to_page_but_split_if_needed(db_handler* db, page* pg, document* doc) {
+    if (doc->data.count <= MAX_DOCUMENT_DATA_SIZE)
+        return write_document_to_page(db, pg, doc);
+
+
+    int count = doc->data.count - MAX_DOCUMENT_DATA_SIZE;
+    pagedData prev = { pg, copy_document(doc, 0, MAX_DOCUMENT_DATA_SIZE - 1, true) };
+    pagedData curr;
+    uint32_t pos = MAX_DOCUMENT_DATA_SIZE;
+
+    while (count > 0) {
+        curr.doc = copy_document(doc, pos, pos + MAX_DOCUMENT_DATA_SIZE - 1, false);
+        curr.pg = get_free_document_page(db);
+        prev.doc->data.nextPage = curr.pg->page_id;
+        if (write_document_to_page(db, prev.pg, prev.doc) != WRITE_OK)
+            return WRITE_ERROR;
+        prev = curr;
+        pos += MAX_DOCUMENT_DATA_SIZE;
+        count -= MAX_DOCUMENT_DATA_SIZE;
+    }
+
+    return write_document_to_page(db, prev.pg, prev.doc);
 }
 
 collection* empty_collection() {

@@ -18,6 +18,25 @@ document* create_document(uint32_t elements) {
     return doc;
 }
 
+document* copy_document(document* doc, uint32_t elementsFrom, uint32_t elementsTo, bool withHeader) {
+    uint32_t goodElementsTo = elementsTo;
+    if (elementsTo >= doc->data.count)
+        goodElementsTo = doc->data.count - 1;
+
+    document* res = create_document(goodElementsTo - elementsFrom + 1);
+    for (uint32_t i = elementsFrom; i <= goodElementsTo; ++i) {
+        res->data.elements[i - elementsFrom] = doc->data.elements[i];
+    }
+    if (withHeader == true) {
+        res->collectionPage =         doc->collectionPage;
+        res->prevBrotherPage =         doc->prevBrotherPage;
+        res->brotherPage =         doc->brotherPage;
+        res->childPage =         doc->childPage;
+        res->parentPage =         doc->parentPage;
+    }
+    return res;
+}
+
 WRITE_STATUS write_document_header(FILE* fp, document* doc) {
     if (write_uint(fp, &doc->parentPage) == WRITE_OK
         && write_uint(fp, &doc->childPage) == WRITE_OK
@@ -32,9 +51,8 @@ WRITE_STATUS write_document_data(FILE* fp, document* doc) {
     if (write_uint(fp, &doc->data.count) != WRITE_OK ||
         write_uint(fp, &doc->data.nextPage) != WRITE_OK)
         return WRITE_ERROR;
-    element* el = (element* ) doc->data.elements;
     for (int i = 0; i < doc->data.count; ++i) {
-        if (write_element(fp, &el[i]) != WRITE_OK) return WRITE_ERROR;
+        if (write_element(fp, doc->data.elements+i) != WRITE_OK) return WRITE_ERROR;
     }
     return WRITE_OK;
 }
@@ -59,9 +77,8 @@ READ_STATUS read_document_data(FILE* fp, document* doc) {
     if (read_uint(fp, &doc->data.count) != READ_OK ||
         read_uint(fp, &doc->data.nextPage) != READ_OK) return READ_ERROR;
     doc->data.elements = malloc(sizeof(element)*doc->data.count);
-    element* el = (element* ) doc->data.elements;
     for (int i = 0; i < doc->data.count; ++i) {
-        if (read_element(fp, &el[i]) != READ_OK) return READ_ERROR;
+        if (read_element(fp, doc->data.elements+i) != READ_OK) return READ_ERROR;
     }
     return READ_OK;
 }

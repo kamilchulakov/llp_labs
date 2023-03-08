@@ -4,12 +4,14 @@
 
 void test_allocate_and_get(db_handler* db) {
     print_running_test("test_allocate_and_get");
+    assert(db->pagerData->page_id_seq == 1);
     assert(db->pagerData->lastCollectionPage == -1);
     assert(db->pagerData->first_free_collection_page_id == -1);
 
     allocate_page_typed(db, PAGE_COLLECTION);
     page* pg = get_page(db, 1);
 
+    assert(db->pagerData->page_id_seq == 2);
     assert(pg->type == PAGE_COLLECTION);
     assert(pg->page_id == 1);
     assert(pg->prevPageId == -1);
@@ -116,6 +118,26 @@ void test_write_too_big_document(db_handler* db) {
     assert(write_document_to_page(db, pg, doc) == WRITE_ERROR);
 }
 
+void test_split_document(db_handler* db) {
+    print_running_test("test_split_document");
+
+    document* doc = create_document(20);
+    doc->parentPage = 10;
+    doc->childPage = 5;
+    doc->brotherPage = 3;
+    doc->prevBrotherPage = 2;
+    doc->collectionPage = 1;
+    for (int i = 0; i < 20; ++i) {
+        doc->data.elements[i] = *create_element_int32("el", i);
+    }
+
+    page* pg = allocate_page_typed(db, PAGE_DOCUMENT);
+    assert(pg->page_id == 7);
+    assert(write_document_to_page_but_split_if_needed(db, pg, doc) == WRITE_OK);
+    assert(get_document(db, 7)->data.nextPage == 8);
+    assert(get_document(db, 8)->data.nextPage == -1);
+}
+
 void test_pager() {
     print_running("test_pager");
     db_handler* db = open_db_file("tmp");
@@ -124,5 +146,6 @@ void test_pager() {
     test_free_page(db);
     test_write_document_splits_strings(db);
     test_write_too_big_document(db);
+    test_split_document(db);
     utilize_db_file(db);
 }
