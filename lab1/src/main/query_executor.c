@@ -203,9 +203,11 @@ query_result collection_find(db_handler* db, find_query* query) {
 
         document* doc = get_document(db, pg->page_id);
 
-        currNode->curr = doc;
-        currNode->nxt = malloc(sizeof(document_list));
-        currNode = currNode->nxt;
+        if (document_satisfies_filter(doc, query->filters) == true) {
+            currNode->curr = doc;
+            currNode->nxt = malloc(sizeof(document_list));
+            currNode = currNode->nxt;
+        }
 
         pg = get_page(db, doc->prevCollectionDocument);
     }

@@ -108,20 +108,23 @@ void test_insert_document_with_parent(db_handler* db) {
     assert(parentDoc->prevBrotherPage == 3);
 }
 
+void assertDocumentCount(query_result *result, uint32_t expected) {
+    uint32_t count = 0;
+    document_list* curr = (*result).data->documents;
+    while (curr->curr) {
+        count++;
+        curr = curr->nxt;
+    }
+    assert(count == expected);
+}
+
 void test_find_all(db_handler* db) {
     print_running_test("test_find_all");
 
     query_result result = find_all(db);
     assert_result_type(result, DATA_RESULT_TYPE);
     assert(result.data->type == DOCUMENT_LIST_RESULT_TYPE);
-
-    uint32_t count = 0;
-    document_list* curr = result.data->documents;
-    while (curr->curr) {
-        count++;
-        curr = curr->nxt;
-    }
-    assert(count == 4);
+    assertDocumentCount(&result, 4);
 }
 
 void test_collection_find(db_handler* db) {
@@ -131,14 +134,21 @@ void test_collection_find(db_handler* db) {
     query_result result = collection_find(db, &query);
     assert_result_type(result, DATA_RESULT_TYPE);
     assert(result.data->type == DOCUMENT_LIST_RESULT_TYPE);
+    assertDocumentCount(&result, 4);
 
-    uint32_t count = 0;
-    document_list* curr = result.data->documents;
-    while (curr->curr) {
-        count++;
-        curr = curr->nxt;
-    }
-    assert(count == 4);
+    query.filters = malloc(sizeof(complex_filter));
+    query.filters->type = ELEMENT_FILTER;
+    query.filters->el_filter = create_element_filter(CMP_LT, create_element_int32("int", 1));
+    result = collection_find(db, &query);
+    assert_result_type(result, DATA_RESULT_TYPE);
+    assert(result.data->type == DOCUMENT_LIST_RESULT_TYPE);
+    assertDocumentCount(&result, 1);
+
+    query.filters->el_filter = create_element_filter(CMP_EQ, create_element_int32("int", 32));
+    result = collection_find(db, &query);
+    assert_result_type(result, DATA_RESULT_TYPE);
+    assert(result.data->type == DOCUMENT_LIST_RESULT_TYPE);
+    assertDocumentCount(&result, 3);
 }
 
 void test_queries() {

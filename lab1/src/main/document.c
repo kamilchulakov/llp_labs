@@ -139,6 +139,7 @@ bool document_satisfies_operator_filter(document* doc, operator_filter* filter) 
 }
 
 bool document_satisfies_filter(document* doc, complex_filter* filter) {
+    if (filter == NULL) return true;
     switch (filter->type) {
         case ELEMENT_FILTER:
             return document_satisfies_element_filter(doc, filter->el_filter);
