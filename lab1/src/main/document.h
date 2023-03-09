@@ -11,7 +11,7 @@ typedef struct {
     uint32_t parentPage;
     uint32_t childPage;
     uint32_t prevBrotherPage;
-    uint32_t brotherPage;
+    uint32_t prevCollectionDocument;
     uint32_t collectionPage;
 
     struct document_data {
@@ -31,5 +31,7 @@ WRITE_STATUS write_document_header(FILE* fp, document* doc);
 READ_STATUS read_document_header(FILE* fp, document* doc);
 READ_STATUS read_document(FILE* fp, document* doc);
 schema* schema_from_document(document* doc);
+
+bool document_satisfies_filter(document* doc, complex_filter* filter);
 
 #endif

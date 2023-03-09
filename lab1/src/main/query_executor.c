@@ -25,12 +25,23 @@ query_result_data* collection_data(collection* col, uint32_t pageId) {
     return data;
 }
 
+query_result_data* document_list_data(document_list* lst) {
+    query_result_data* data = malloc(sizeof(query_result_data));
+    data->type = DOCUMENT_LIST_RESULT_TYPE;
+    data->documents = lst;
+    return data;
+}
+
 query_result schema_result(schema* sch) {
     return (query_result) {DATA_RESULT_TYPE, .data = schema_data(sch)};
 }
 
 query_result collection_result(collection* col, uint32_t pageId) {
     return (query_result) {DATA_RESULT_TYPE, .data = collection_data(col, pageId)};
+}
+
+query_result document_list_result(document_list* lst) {
+    return (query_result) {DATA_RESULT_TYPE, .data = document_list_data(lst)};
 }
 
 query_result get_collection_or_schema_by_name(db_handler* db, string* col, bool returnCollection) {
@@ -120,9 +131,15 @@ query_result collection_insert(db_handler* db, insert_query* query) {
         }
 
         pg = get_free_document_page(db); // what if allocated, but other things are ruined?
-        doc->parentPage = query->parent->parent_id;
+        if (pg == NULL)
+            return nok();
 
-        if (write_document_to_page_but_split_if_needed(db, pg, doc) == WRITE_OK) {
+        doc->parentPage = query->parent->parent_id;
+        doc->prevCollectionDocument = res.data->col->lastDocPageId;
+        res.data->col->lastDocPageId = pg->page_id;
+
+        if (write_document_to_page_but_split_if_needed(db, pg, doc) == WRITE_OK &&
+                write_collection_to_page(db, res.data->pageId, res.data->col) == WRITE_OK) {
             if (parentDoc->childPage == -1) {
                 parentDoc->childPage = pg->page_id;
                 if (write_document_header_to_page(db, doc->parentPage, parentDoc) == WRITE_OK)
@@ -130,12 +147,9 @@ query_result collection_insert(db_handler* db, insert_query* query) {
             } else {
                 uint32_t brotherPage = parentDoc->childPage;
                 doc->prevBrotherPage = brotherPage;
-                document* brother = get_document(db, brotherPage);
-                brother->brotherPage = pg->page_id;
                 parentDoc->childPage = pg->page_id;
 
-                if (write_document_header_to_page(db, brotherPage, brother) == WRITE_OK &&
-                    write_document_header_to_page(db, doc->parentPage, parentDoc) == WRITE_OK &&
+                if (write_document_header_to_page(db, doc->parentPage, parentDoc) == WRITE_OK &&
                     write_document_header_to_page(db, pg->page_id, doc) == WRITE_OK    )
                     return ok();
             }
@@ -143,4 +157,58 @@ query_result collection_insert(db_handler* db, insert_query* query) {
     }
 
     return nok();
+}
+
+query_result find_all(db_handler* db) {
+    if (db->pagerData->lastDocumentPage == -1)
+        return nok();
+    page* pg = get_page(db, db->pagerData->lastDocumentPage);
+    document_list* resList = malloc(sizeof(document_list));
+    document_list* currNode = resList;
+    while (pg != NULL) {
+        if (!page_has_type(pg, PAGE_DOCUMENT)) {
+            debug("page(id=%u) is not marked as PAGE_DOCUMENT\n", pg->page_id);
+        }
+
+        document* doc = get_document(db, pg->page_id);
+
+        currNode->curr = doc;
+        currNode->nxt = malloc(sizeof(document_list));
+        currNode = currNode->nxt;
+        pg = get_page(db, pg->prevPageId);
+    }
+
+    return document_list_result(resList);
+}
+
+query_result collection_find(db_handler* db, find_query* query) {
+    if (query->collection == NULL) {
+        debug("executor.COLLECTION_FIND without COLLECTION");
+        return nok();
+    }
+    query_result col_res = get_collection_or_schema_by_name(db, query->collection, true);
+    if (col_res.type != DATA_RESULT_TYPE || col_res.data->type != COLLECTION_RESULT_TYPE)
+        return nok();
+    collection* col = col_res.data->col;
+
+    if (col->lastDocPageId == -1)
+        return nok();
+    page* pg = get_page(db, col->lastDocPageId);
+    document_list* resList = malloc(sizeof(document_list));
+    document_list* currNode = resList;
+    while (pg != NULL) {
+        if (!page_has_type(pg, PAGE_DOCUMENT)) {
+            debug("page(id=%u) is not marked as PAGE_DOCUMENT\n", pg->page_id);
+        }
+
+        document* doc = get_document(db, pg->page_id);
+
+        currNode->curr = doc;
+        currNode->nxt = malloc(sizeof(document_list));
+        currNode = currNode->nxt;
+
+        pg = get_page(db, doc->prevCollectionDocument);
+    }
+
+    return document_list_result(resList);
 }

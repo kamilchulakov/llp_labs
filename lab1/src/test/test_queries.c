@@ -84,15 +84,20 @@ void test_insert_document_with_parent(db_handler* db) {
 
     document* parentDoc = get_document(db, 2);
     assert(parentDoc->childPage == 3);
+    assert(db->pagerData->lastDocumentPage == 3);
+    assert(get_collection(db, 1)->lastDocPageId == 3);
 
     parent->parent_id = 2;
     res = collection_insert(db, &insertQuery);
     assert_true(res.ok);
+    assert(db->pagerData->lastDocumentPage == 4);
+    assert(get_collection(db, 1)->lastDocPageId == 4);
 
     parentDoc = get_document(db, 2);
-    document* brotherDoc = get_document(db, 3);
+    document* newDoc = get_document(db, 4);
     assert(parentDoc->childPage == 4);
-    assert(brotherDoc->brotherPage == 4);
+    assert(newDoc->prevCollectionDocument == 3);
+    assert(get_collection(db, 1)->lastDocPageId == 4);
 
     parent->parent_id = 4;
     res = collection_insert(db, &insertQuery);
@@ -103,6 +108,39 @@ void test_insert_document_with_parent(db_handler* db) {
     assert(parentDoc->prevBrotherPage == 3);
 }
 
+void test_find_all(db_handler* db) {
+    print_running_test("test_find_all");
+
+    query_result result = find_all(db);
+    assert_result_type(result, DATA_RESULT_TYPE);
+    assert(result.data->type == DOCUMENT_LIST_RESULT_TYPE);
+
+    uint32_t count = 0;
+    document_list* curr = result.data->documents;
+    while (curr->curr) {
+        count++;
+        curr = curr->nxt;
+    }
+    assert(count == 4);
+}
+
+void test_collection_find(db_handler* db) {
+    print_running_test("test_collection_find");
+
+    find_query query = {string_of("ex"), NULL};
+    query_result result = collection_find(db, &query);
+    assert_result_type(result, DATA_RESULT_TYPE);
+    assert(result.data->type == DOCUMENT_LIST_RESULT_TYPE);
+
+    uint32_t count = 0;
+    document_list* curr = result.data->documents;
+    while (curr->curr) {
+        count++;
+        curr = curr->nxt;
+    }
+    assert(count == 4);
+}
+
 void test_queries() {
     print_running("test_queries");
     db_handler* db = open_db_file("tmp");
@@ -110,5 +148,7 @@ void test_queries() {
     test_delete_schema(db);
     test_insert_document(db);
     test_insert_document_with_parent(db);
+    test_find_all(db);
+    test_collection_find(db);
     utilize_db_file(db);
 }

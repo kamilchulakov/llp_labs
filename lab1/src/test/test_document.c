@@ -25,14 +25,14 @@ void test_copy_document() {
     original->data.elements[2] = *create_element_int32("el-1", 12);
     original->parentPage = 10;
     original->childPage = 5;
-    original->brotherPage = 3;
+    original->prevCollectionDocument = 3;
     original->prevBrotherPage = 2;
     original->collectionPage = 1;
 
     document* copy = copy_document(original, 0, 0, false);
     assert(copy->collectionPage == -1);
     assert(copy->prevBrotherPage == -1);
-    assert(copy->brotherPage == -1);
+    assert(copy->prevCollectionDocument == -1);
     assert(copy->parentPage == -1);
     assert(copy->childPage == -1);
     assert(copy->data.count == 1);
@@ -41,7 +41,7 @@ void test_copy_document() {
     copy = copy_document(original, 1, 2, true);
     assert(copy->collectionPage == 1);
     assert(copy->prevBrotherPage == 2);
-    assert(copy->brotherPage == 3);
+    assert(copy->prevCollectionDocument == 3);
     assert(copy->parentPage == 10);
     assert(copy->childPage == 5);
     assert(copy->data.count == 2);

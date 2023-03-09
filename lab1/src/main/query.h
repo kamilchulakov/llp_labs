@@ -5,16 +5,6 @@
 #include "collection.h"
 #include "element.h"
 
-typedef enum {ALL, ID, NAME} filter_type;
-
-typedef struct {
-    filter_type type;
-    union {
-        uint32_t id;
-        string str;
-    };
-} filter;
-
 typedef struct {
     collection* col;
 } create_schema_query;
@@ -39,8 +29,8 @@ typedef struct {
 } insert_query;
 
 typedef struct {
-    string* collection;
-    element_filter* filters; // can process AND/OR in different place
+    string* collection; // nullable
+    complex_filter* filters; // only top level checks
 } find_query;
 
 typedef struct {
@@ -54,9 +44,15 @@ typedef enum {
     SCHEMA_RESULT_TYPE,
     SCHEMA_ARRAY_RESULT_TYPE,
     DOCUMENT_RESULT_TYPE,
-    DOCUMENT_ARRAY_RESULT_TYPE,
+    DOCUMENT_LIST_RESULT_TYPE,
     COLLECTION_RESULT_TYPE
 } query_result_data_type;
+
+typedef struct document_list document_list;
+struct document_list{
+    document* curr;
+    document_list* nxt;
+};
 
 typedef struct {
     query_result_data_type type;
@@ -65,7 +61,7 @@ typedef struct {
         schema* schema1;
         schema* schemas;
         element* element1;
-        element* elements;
+        document_list* documents;
         collection* col;
     };
 } query_result_data;

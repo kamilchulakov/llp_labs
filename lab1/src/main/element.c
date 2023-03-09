@@ -59,3 +59,117 @@ READ_STATUS read_element(FILE* fp, element* el) {
     else
         return read_element_data(fp, el);
 }
+
+element_filter* create_element_filter(
+        CMP_TYPE op_type,
+        element* el) {
+    element_filter* flt = malloc(sizeof(element_filter));
+    if (flt == NULL) return NULL;
+    flt->type = op_type;
+    flt->el = el;
+    return flt;
+}
+
+element_filter* create_element_filter_linked(
+        CMP_TYPE op_type,
+        element* el,
+        element_filter* prev,
+        element_filter* nxt) {
+    element_filter* flt = create_element_filter(op_type, el);
+    if (flt != NULL) flt->nxt = nxt;
+    if (prev != NULL) prev->nxt = flt;
+    return flt;
+}
+
+bool cmp_elements(CMP_TYPE cmp_type, element* first, element* second) {
+    switch (cmp_type) {
+        case CMP_EQ:
+            switch (first->e_field->e_type) {
+                case DOUBLE:
+                case BOOLEAN:
+                case INT32:
+                    if (first->int_data == second->int_data)
+                        return true;
+                    else
+                        return false;
+                case STRING:
+                    return string_equals(first->string_data, second->string_data);
+            }
+        case CMP_NEQ:
+            switch (first->e_field->e_type) {
+                case DOUBLE:
+                case BOOLEAN:
+                case INT32:
+                    if (first->int_data != second->int_data)
+                        return true;
+                    else
+                        return false;
+                case STRING:
+                    if (string_equals(first->string_data, second->string_data) == false)
+                        return true;
+                    else return false;
+            }
+        case CMP_GT:
+            switch (first->e_field->e_type) {
+                case DOUBLE:
+                    if (first->double_data > second->double_data) return true;
+                    return false;
+                case BOOLEAN:
+                case INT32:
+                    if (first->int_data > second->int_data)
+                        return true;
+                    return false;
+                case STRING:
+                    if (strcmp(first->string_data->ch, second->string_data->ch) > 0)
+                        return true;
+                    return false;
+            }
+        case CMP_GTE:
+            switch (first->e_field->e_type) {
+                case DOUBLE:
+                    if (first->double_data >= second->double_data) return true;
+                    return false;
+                case BOOLEAN:
+                case INT32:
+                    if (first->int_data >= second->int_data)
+                        return true;
+                    return false;
+                case STRING:
+                    if (strcmp(first->string_data->ch, second->string_data->ch) >= 0)
+                        return true;
+                    return false;
+            }
+        case CMP_LT:
+            switch (first->e_field->e_type) {
+                case DOUBLE:
+                    if (first->double_data < second->double_data) return true;
+                    return false;
+                case BOOLEAN:
+                case INT32:
+                    if (first->int_data < second->int_data)
+                        return true;
+                    return false;
+                case STRING:
+                    if (strcmp(first->string_data->ch, second->string_data->ch) < 0)
+                        return true;
+                    return false;
+            }
+        case CMP_LTE:
+            switch (first->e_field->e_type) {
+                case DOUBLE:
+                    if (first->double_data <= second->double_data) return true;
+                    return false;
+                case BOOLEAN:
+                case INT32:
+                    if (first->int_data <= second->int_data)
+                        return true;
+                    return false;
+                case STRING:
+                    if (strcmp(first->string_data->ch, second->string_data->ch) <= 0)
+                        return true;
+                    return false;
+            }
+        case CMP_REGEX:
+			break;
+    }
+}

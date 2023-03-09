@@ -124,7 +124,7 @@ void test_split_document(db_handler* db) {
     document* doc = create_document(20);
     doc->parentPage = 10;
     doc->childPage = 5;
-    doc->brotherPage = 3;
+    doc->prevCollectionDocument = 3;
     doc->prevBrotherPage = 2;
     doc->collectionPage = 1;
     for (int i = 0; i < 20; ++i) {

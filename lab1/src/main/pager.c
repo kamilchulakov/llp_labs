@@ -93,6 +93,7 @@ page* get_free_document_page(db_handler* db) {
 
 page* get_page(db_handler* db_handler, uint32_t page_id) {
     debug("pager.GET_PAGE: page(id=%d)\n", page_id);
+    if (page_id < 1) return NULL;
     page* pg = malloc(sizeof(page));
     fseek(db_handler->fp, calc_page_offset(page_id), SEEK_SET);
     if (fread(pg, sizeof(page), 1, db_handler->fp) != 1) return NULL;
@@ -230,7 +231,6 @@ typedef struct {
 WRITE_STATUS write_document_to_page_but_split_if_needed(db_handler* db, page* pg, document* doc) {
     if (doc->data.count <= MAX_DOCUMENT_DATA_SIZE)
         return write_document_to_page(db, pg, doc);
-
 
     int count = doc->data.count - MAX_DOCUMENT_DATA_SIZE;
     pagedData prev = { pg, copy_document(doc, 0, MAX_DOCUMENT_DATA_SIZE - 1, true) };
