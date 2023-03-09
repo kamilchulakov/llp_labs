@@ -28,6 +28,7 @@ size_t document_size(document* doc);
 WRITE_STATUS write_document(FILE* fp, document* doc);
 WRITE_STATUS write_document_data(FILE* fp, document* doc);
 WRITE_STATUS write_document_header(FILE* fp, document* doc);
+READ_STATUS read_document_header(FILE* fp, document* doc);
 READ_STATUS read_document(FILE* fp, document* doc);
 schema* schema_from_document(document* doc);
 

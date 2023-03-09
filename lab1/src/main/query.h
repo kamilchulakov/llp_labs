@@ -28,7 +28,12 @@ typedef struct {
 } get_schema_query;
 
 typedef struct {
-    uint32_t parent_id; // nullable
+    uint32_t parent_id;
+
+} parent_ref;
+
+typedef struct {
+    parent_ref* parent; // nullable
     string* collection;
     document* doc;
 } insert_query;

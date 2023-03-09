@@ -102,14 +102,43 @@ query_result collection_insert(db_handler* db, insert_query* query) {
 
     doc->collectionPage = res.data->pageId;
 
-    page* pg = get_free_document_page(db);
-    if (query->parent_id == 0) {
+    page* pg;
+    if (query->parent == NULL) {
+        pg = get_free_document_page(db);
         doc->prevBrotherPage = res.data->col->lastDocPageId;
 
         if (write_document_to_page_but_split_if_needed(db, pg, doc) == WRITE_OK) {
             res.data->col->lastDocPageId = pg->page_id;
             if (write_collection_to_page(db, res.data->pageId, res.data->col) == WRITE_OK)
                 return ok();
+        }
+    } else {
+        document* parentDoc = get_document_header(db, query->parent->parent_id);
+        if (parentDoc == NULL) {
+            debug("no parent document(id=%d)\n", query->parent->parent_id);
+            return nok();
+        }
+
+        pg = get_free_document_page(db); // what if allocated, but other things are ruined?
+        doc->parentPage = query->parent->parent_id;
+
+        if (write_document_to_page_but_split_if_needed(db, pg, doc) == WRITE_OK) {
+            if (parentDoc->childPage == -1) {
+                parentDoc->childPage = pg->page_id;
+                if (write_document_header_to_page(db, doc->parentPage, parentDoc) == WRITE_OK)
+                    return ok();
+            } else {
+                uint32_t brotherPage = parentDoc->childPage;
+                doc->prevBrotherPage = brotherPage;
+                document* brother = get_document(db, brotherPage);
+                brother->brotherPage = pg->page_id;
+                parentDoc->childPage = pg->page_id;
+
+                if (write_document_header_to_page(db, brotherPage, brother) == WRITE_OK &&
+                    write_document_header_to_page(db, doc->parentPage, parentDoc) == WRITE_OK &&
+                    write_document_header_to_page(db, pg->page_id, doc) == WRITE_OK    )
+                    return ok();
+            }
         }
     }
 

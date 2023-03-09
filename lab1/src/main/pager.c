@@ -215,6 +215,11 @@ WRITE_STATUS write_document_to_page(db_handler* db, page* pg, document* doc) {
     return write_document_strings(db, doc);
 }
 
+WRITE_STATUS write_document_header_to_page(db_handler* db, uint32_t pageId, document* doc) {
+    fseek(db->fp, calc_page_offset(pageId) + sizeof(page), SEEK_SET);
+    return write_document_header(db->fp, doc);
+}
+
 typedef struct {
     page* pg;
     union {
@@ -264,5 +269,14 @@ document* get_document(db_handler* handler, uint32_t page_id) {
     fseek(handler->fp, calc_page_offset(page_id)+sizeof(page), SEEK_SET);
     document* doc = malloc(sizeof(document));
     if (read_document(handler->fp, doc) == READ_ERROR) return NULL;
+    return doc;
+}
+
+document* get_document_header(db_handler* db, uint32_t page_id) {
+    page* pg = get_page(db, page_id);
+    if (pg->type != PAGE_DOCUMENT) return NULL;
+    document *doc = malloc(sizeof(document));
+    if (doc == NULL) return NULL;
+    if (read_document_header(db->fp, doc) == READ_ERROR) return NULL;
     return doc;
 }

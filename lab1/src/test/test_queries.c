@@ -43,7 +43,7 @@ void test_insert_document(db_handler* db) {
     assert(col->lastDocPageId == -1);
     assert(col->doc_page_id == -1);
 
-    insert_query insertQuery = {0, string_of("ex"), create_document(1)};
+    insert_query insertQuery = {NULL, string_of("ex"), create_document(1)};
     insertQuery.doc->data.elements->e_field = empty_field();
     insertQuery.doc->data.elements->e_field->e_name = string_of("not int");
     query_result res = collection_insert(db, &insertQuery);
@@ -68,11 +68,47 @@ void test_insert_document(db_handler* db) {
     assert(col->doc_page_id == -1);
 }
 
+void test_insert_document_with_parent(db_handler* db) {
+    print_running_test("test_insert_document_with_parent");
+
+    parent_ref* parent = malloc(sizeof(parent_ref));
+    parent->parent_id = 1;
+    insert_query insertQuery = {parent, string_of("ex"), create_document(1)};
+    insertQuery.doc->data.elements = create_element_int32("int", 32);
+    query_result res = collection_insert(db, &insertQuery);
+    assert_false(res.ok);
+
+    parent->parent_id = 2;
+    res = collection_insert(db, &insertQuery);
+    assert_true(res.ok);
+
+    document* parentDoc = get_document(db, 2);
+    assert(parentDoc->childPage == 3);
+
+    parent->parent_id = 2;
+    res = collection_insert(db, &insertQuery);
+    assert_true(res.ok);
+
+    parentDoc = get_document(db, 2);
+    document* brotherDoc = get_document(db, 3);
+    assert(parentDoc->childPage == 4);
+    assert(brotherDoc->brotherPage == 4);
+
+    parent->parent_id = 4;
+    res = collection_insert(db, &insertQuery);
+    assert_true(res.ok);
+
+    parentDoc = get_document(db, 4);
+    assert(parentDoc->childPage == 5);
+    assert(parentDoc->prevBrotherPage == 3);
+}
+
 void test_queries() {
     print_running("test_queries");
     db_handler* db = open_db_file("tmp");
     test_create_schema(db);
     test_delete_schema(db);
     test_insert_document(db);
+    test_insert_document_with_parent(db);
     utilize_db_file(db);
 }
