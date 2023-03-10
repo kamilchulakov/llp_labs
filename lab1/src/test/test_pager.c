@@ -55,6 +55,7 @@ void test_more_allocate_and_get(db_handler* db) {
 
 void test_free_page(db_handler* db) {
     print_running_test("test_free_page");
+
     assert(db->pagerData->lastCollectionPage == 3);
     assert(db->pagerData->first_free_collection_page_id == -1);
 
@@ -82,6 +83,10 @@ void test_free_page(db_handler* db) {
     assert(pg1->nextPageId == 3);
     assert(pg1->prevPageId == -1);
     assert(pg1->used_mem == 42);
+
+    assert(free_page(db, 3) == WRITE_OK);
+    assert(db->pagerData->lastCollectionPage == 1);
+    assert(db->pagerData->first_free_collection_page_id == 3);
 }
 
 void test_write_document_splits_strings(db_handler* db) {

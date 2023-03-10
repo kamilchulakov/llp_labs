@@ -9,7 +9,9 @@ document* create_document(uint32_t elements) {
         doc->parentPage=-1;
         doc->childPage=-1;
         doc->prevBrotherPage=-1;
+        doc->nextBrotherPage=-1;
         doc->prevCollectionDocument=-1;
+        doc->nextCollectionDocument=-1;
         doc->collectionPage=-1;
         doc->data.count=elements;
         doc->data.nextPage=-1;
@@ -30,7 +32,9 @@ document* copy_document(document* doc, uint32_t elementsFrom, uint32_t elementsT
     if (withHeader == true) {
         res->collectionPage =         doc->collectionPage;
         res->prevBrotherPage =         doc->prevBrotherPage;
+        res->nextBrotherPage =         doc->nextBrotherPage;
         res->prevCollectionDocument =         doc->prevCollectionDocument;
+        res->nextCollectionDocument =  doc->nextCollectionDocument;
         res->childPage =         doc->childPage;
         res->parentPage =         doc->parentPage;
     }
@@ -41,7 +45,9 @@ WRITE_STATUS write_document_header(FILE* fp, document* doc) {
     if (write_uint(fp, &doc->parentPage) == WRITE_OK
         && write_uint(fp, &doc->childPage) == WRITE_OK
         && write_uint(fp, &doc->prevBrotherPage) == WRITE_OK
+        && write_uint(fp, &doc->nextBrotherPage) == WRITE_OK
         && write_uint(fp, &doc->prevCollectionDocument) == WRITE_OK
+        && write_uint(fp, &doc->nextCollectionDocument) == WRITE_OK
         && write_uint(fp, &doc->collectionPage) == WRITE_OK)
         return WRITE_OK;
     return WRITE_ERROR;
@@ -67,7 +73,9 @@ READ_STATUS read_document_header(FILE* fp, document* doc) {
     if (read_uint(fp, &doc->parentPage) == READ_OK
         && read_uint(fp, &doc->childPage) == READ_OK
         && read_uint(fp, &doc->prevBrotherPage) == READ_OK
+        && read_uint(fp, &doc->nextBrotherPage) == READ_OK
         && read_uint(fp, &doc->prevCollectionDocument) == READ_OK
+        && read_uint(fp, &doc->nextCollectionDocument) == READ_OK
         && read_uint(fp, &doc->collectionPage) == READ_OK)
         return READ_OK;
     return READ_ERROR;
@@ -95,20 +103,6 @@ schema* schema_from_document(document* doc) {
         sch->fields[i] = *doc->data.elements[i].e_field;
     }
     return sch;
-}
-
-
-
-size_t document_static_size() {
-    return sizeof(uint32_t)*7;
-}
-
-size_t document_dynamic_size(document* doc) {
-    return doc->data.count*sizeof(element);
-}
-
-size_t document_size(document* doc) {
-    return document_static_size() + document_dynamic_size(doc);
 }
 
 bool document_satisfies_element_filter(document* doc, element_filter* filter) {

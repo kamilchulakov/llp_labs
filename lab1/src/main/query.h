@@ -34,8 +34,7 @@ typedef struct {
 } find_query;
 
 typedef struct {
-    string* collection;
-    element_filter* filters;
+    find_query* find;
     element* elements;
 } update_query;
 
@@ -50,7 +49,8 @@ typedef enum {
 
 typedef struct document_list document_list;
 struct document_list{
-    document* curr;
+    document* currDoc;
+    uint32_t pageId;
     document_list* nxt;
 };
 

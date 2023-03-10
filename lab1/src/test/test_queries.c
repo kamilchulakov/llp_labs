@@ -108,10 +108,10 @@ void test_insert_document_with_parent(db_handler* db) {
     assert(parentDoc->prevBrotherPage == 3);
 }
 
-void assertDocumentCount(query_result *result, uint32_t expected) {
+void assert_documents_count(query_result *result, uint32_t expected) {
     uint32_t count = 0;
     document_list* curr = (*result).data->documents;
-    while (curr->curr) {
+    while (curr->currDoc) {
         count++;
         curr = curr->nxt;
     }
@@ -124,7 +124,7 @@ void test_find_all(db_handler* db) {
     query_result result = find_all(db);
     assert_result_type(result, DATA_RESULT_TYPE);
     assert(result.data->type == DOCUMENT_LIST_RESULT_TYPE);
-    assertDocumentCount(&result, 4);
+    assert_documents_count(&result, 4);
 }
 
 void test_collection_find(db_handler* db) {
@@ -134,7 +134,7 @@ void test_collection_find(db_handler* db) {
     query_result result = collection_find(db, &query);
     assert_result_type(result, DATA_RESULT_TYPE);
     assert(result.data->type == DOCUMENT_LIST_RESULT_TYPE);
-    assertDocumentCount(&result, 4);
+    assert_documents_count(&result, 4);
 
     query.filters = malloc(sizeof(complex_filter));
     query.filters->type = ELEMENT_FILTER;
@@ -142,13 +142,20 @@ void test_collection_find(db_handler* db) {
     result = collection_find(db, &query);
     assert_result_type(result, DATA_RESULT_TYPE);
     assert(result.data->type == DOCUMENT_LIST_RESULT_TYPE);
-    assertDocumentCount(&result, 1);
+    assert_documents_count(&result, 1);
 
     query.filters->el_filter = create_element_filter(CMP_EQ, create_element_int32("int", 32));
     result = collection_find(db, &query);
     assert_result_type(result, DATA_RESULT_TYPE);
     assert(result.data->type == DOCUMENT_LIST_RESULT_TYPE);
-    assertDocumentCount(&result, 3);
+    assert_documents_count(&result, 3);
+}
+
+void test_collection_remove(db_handler* db) {
+    print_running_test("test_collection_remove");
+
+    find_query query = {string_of("ex"), NULL};
+    assert_true(collection_remove(db, &query).ok);
 }
 
 void test_queries() {
@@ -160,5 +167,6 @@ void test_queries() {
     test_insert_document_with_parent(db);
     test_find_all(db);
     test_collection_find(db);
+    test_collection_remove(db);
     utilize_db_file(db);
 }

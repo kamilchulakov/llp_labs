@@ -172,7 +172,8 @@ query_result find_all(db_handler* db) {
 
         document* doc = get_document(db, pg->page_id);
 
-        currNode->curr = doc;
+        currNode->currDoc = doc;
+        currNode->pageId = pg->page_id;
         currNode->nxt = malloc(sizeof(document_list));
         currNode = currNode->nxt;
         pg = get_page(db, pg->prevPageId);
@@ -204,7 +205,8 @@ query_result collection_find(db_handler* db, find_query* query) {
         document* doc = get_document(db, pg->page_id);
 
         if (document_satisfies_filter(doc, query->filters) == true) {
-            currNode->curr = doc;
+            currNode->currDoc = doc;
+            currNode->pageId = pg->page_id;
             currNode->nxt = malloc(sizeof(document_list));
             currNode = currNode->nxt;
         }
@@ -213,4 +215,16 @@ query_result collection_find(db_handler* db, find_query* query) {
     }
 
     return document_list_result(resList);
+}
+
+query_result collection_remove(db_handler* db, find_query* query) {
+    query_result find_result = collection_find(db, query);
+    if (find_result.type != DATA_RESULT_TYPE || find_result.data->type != DOCUMENT_LIST_RESULT_TYPE)
+        return nok();
+    document_list* curr = find_result.data->documents;
+    while (curr->currDoc != NULL) {
+        if (remove_document(db, curr->pageId) != WRITE_OK) return nok();
+        curr = curr->nxt;
+    }
+    return ok();
 }

@@ -111,10 +111,13 @@ WRITE_STATUS free_page(db_handler* db, uint32_t page_id) {
             if (db->pagerData->first_free_collection_page_id != -1) {
                 pg->prevPageId = db->pagerData->first_free_collection_page_id;
             }
+            break;
         }
         case PAGE_DOCUMENT:
-            break;
-        case PAGE_EMPTY:
+            pg->type = PAGE_DOCUMENT;
+            if (db->pagerData->first_free_document_page_id != -1) {
+                pg->prevPageId = db->pagerData->first_free_document_page_id;
+            }
             break;
     }
 
@@ -126,10 +129,14 @@ WRITE_STATUS free_page(db_handler* db, uint32_t page_id) {
             db->pagerData->first_free_collection_page_id = page_id;
 
             if (db->pagerData->lastCollectionPage == page_id)
-                db->pagerData->lastCollectionPage = -1;
+                db->pagerData->lastCollectionPage = oldPg->prevPageId;
+            break;
         }
 
         case PAGE_DOCUMENT:
+            db->pagerData->first_free_document_page_id = page_id;
+            if (db->pagerData->lastDocumentPage == page_id)
+                db->pagerData->lastDocumentPage = oldPg->prevPageId;
             break;
         case PAGE_EMPTY:
             break;
@@ -274,9 +281,61 @@ document* get_document(db_handler* handler, uint32_t page_id) {
 
 document* get_document_header(db_handler* db, uint32_t page_id) {
     page* pg = get_page(db, page_id);
+    if (pg == NULL) return NULL;
     if (pg->type != PAGE_DOCUMENT) return NULL;
     document *doc = malloc(sizeof(document));
     if (doc == NULL) return NULL;
     if (read_document_header(db->fp, doc) == READ_ERROR) return NULL;
     return doc;
+}
+
+WRITE_STATUS remove_document(db_handler* db, uint32_t page_id) {
+    document* doc = get_document(db, page_id);
+    if (doc == NULL) return WRITE_ERROR;
+    if (free_page(db, page_id) != WRITE_OK) return WRITE_ERROR;
+
+    document* prevCollectionDoc = get_document_header(db, doc->prevCollectionDocument);
+    document* nextCollectionDoc = get_document_header(db, doc->nextCollectionDocument);
+    if (prevCollectionDoc) {
+        prevCollectionDoc->nextCollectionDocument = doc->nextCollectionDocument;
+        if (write_document_header_to_page(db, doc->prevCollectionDocument, prevCollectionDoc) != WRITE_OK)
+            return WRITE_ERROR;
+    }
+    if (nextCollectionDoc) {
+        nextCollectionDoc->prevCollectionDocument = doc->prevCollectionDocument;
+        if (write_document_header_to_page(db, doc->nextCollectionDocument, nextCollectionDoc) != WRITE_OK)
+            return WRITE_ERROR;
+    }
+
+    document* prevBrother = get_document_header(db, doc->prevBrotherPage);
+    document* nextBrother = get_document_header(db, doc->nextBrotherPage);
+    if (prevBrother) {
+        prevBrother->nextBrotherPage = doc->nextBrotherPage;
+        if (write_document_header_to_page(db, doc->prevBrotherPage, prevBrother) != WRITE_OK)
+            return WRITE_ERROR;
+    }
+    if (nextBrother) {
+        nextBrother->prevBrotherPage = doc->prevBrotherPage;
+        if (write_document_header_to_page(db, doc->nextBrotherPage, nextBrother) != WRITE_OK)
+            return WRITE_ERROR;
+    }
+
+    document* child = get_document_header(db, doc->childPage);
+    while (child) {
+        child->parentPage = doc->parentPage;
+        if (write_document_header_to_page(db, doc->childPage, child) != WRITE_OK)
+            return WRITE_ERROR;
+        child = get_document_header(db, child->prevBrotherPage);
+    }
+
+    document* part = doc;
+    while (part->data.nextPage != -1) {
+        // TODO: free_document_strings
+        uint32_t pageId = part->data.nextPage;
+        part = get_document_header(db, pageId);
+        if (free_page(db, pageId) != WRITE_OK)
+            return WRITE_ERROR;
+    }
+
+    return WRITE_OK;
 }
