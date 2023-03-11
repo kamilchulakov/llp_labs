@@ -149,13 +149,36 @@ void test_collection_find(db_handler* db) {
     assert_result_type(result, DATA_RESULT_TYPE);
     assert(result.data->type == DOCUMENT_LIST_RESULT_TYPE);
     assert_documents_count(&result, 3);
+
+    insert_query insertQuery = {NULL, string_of("ex"), create_document(1)};
+    insertQuery.doc->data.elements = create_element_int32("int", 32);
+    assert_true(collection_insert(db, &insertQuery).ok);
+    result = collection_find(db, &query);
+    assert_documents_count(&result, 4);
 }
 
 void test_collection_remove(db_handler* db) {
     print_running_test("test_collection_remove");
 
     find_query query = {string_of("ex"), NULL};
+    query.filters = malloc(sizeof(complex_filter));
+    query.filters->type = ELEMENT_FILTER;
+    query.filters->el_filter = create_element_filter(CMP_EQ, create_element_int32("int", 32));
     assert_true(collection_remove(db, &query).ok);
+
+    query.filters = NULL;
+    query_result result = collection_find(db, &query);
+    assert_documents_count(&result, 1);
+    assert(db->pagerData->page_id_seq == 7);
+    assert(db->pagerData->first_free_document_page_id == 3);
+
+    insert_query insertQuery = {NULL, string_of("ex"), create_document(1)};
+    insertQuery.doc->data.elements = create_element_int32("int", 32);
+    assert_true(collection_insert(db, &insertQuery).ok);
+    assert_true(collection_insert(db, &insertQuery).ok);
+    assert_true(collection_insert(db, &insertQuery).ok);
+    assert(db->pagerData->page_id_seq == 7);
+    assert(db->pagerData->first_free_document_page_id == 6);
 }
 
 void test_queries() {

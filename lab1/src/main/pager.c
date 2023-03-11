@@ -294,6 +294,13 @@ WRITE_STATUS remove_document(db_handler* db, uint32_t page_id) {
     if (doc == NULL) return WRITE_ERROR;
     if (free_page(db, page_id) != WRITE_OK) return WRITE_ERROR;
 
+    collection* col = get_collection(db, doc->collectionPage);
+    if (page_id == col->lastDocPageId) {
+        col->lastDocPageId = doc->prevCollectionDocument;
+        if (write_collection_to_page(db, doc->collectionPage, col) != WRITE_OK)
+            return WRITE_ERROR;
+    }
+
     document* prevCollectionDoc = get_document_header(db, doc->prevCollectionDocument);
     document* nextCollectionDoc = get_document_header(db, doc->nextCollectionDocument);
     if (prevCollectionDoc) {

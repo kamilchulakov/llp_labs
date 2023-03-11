@@ -96,7 +96,7 @@ query_result delete_schema(db_handler* db, delete_schema_query* query) {
 }
 
 query_result collection_insert(db_handler* db, insert_query* query) {
-    debug("executor.INSERT_DOCUMENT: (collection=%s, count=%d)\n",
+    debug("executor.INSERT_DOCUMENT: (collection=%s, data.count=%d)\n",
           query->collection->ch, query->doc->data.count);
     document* doc = query->doc;
     query_result res = get_collection_or_schema_by_name(db, query->collection, true);
@@ -116,12 +116,22 @@ query_result collection_insert(db_handler* db, insert_query* query) {
     page* pg;
     if (query->parent == NULL) {
         pg = get_free_document_page(db);
-        doc->prevBrotherPage = res.data->col->lastDocPageId;
+        uint32_t lastDocPageId = res.data->col->lastDocPageId;
+        doc->prevCollectionDocument = lastDocPageId;
 
         if (write_document_to_page_but_split_if_needed(db, pg, doc) == WRITE_OK) {
             res.data->col->lastDocPageId = pg->page_id;
-            if (write_collection_to_page(db, res.data->pageId, res.data->col) == WRITE_OK)
-                return ok();
+            if (write_collection_to_page(db, res.data->pageId, res.data->col) != WRITE_OK)
+                return nok();
+            if (lastDocPageId != -1) {
+                document* docToUpdate = get_document_header(db, lastDocPageId);
+                docToUpdate->nextCollectionDocument = pg->page_id;
+                if (write_document_header_to_page(db, lastDocPageId, docToUpdate) == WRITE_OK)
+                    return ok();
+                else
+                    return nok();
+            }
+            return ok();
         }
     } else {
         document* parentDoc = get_document_header(db, query->parent->parent_id);
