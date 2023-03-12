@@ -3,7 +3,8 @@
 #include "io.h"
 #include "page.h"
 
-#define MAX_STRING_LEN ((size_t) (PAGE_SIZE - sizeof(page) - sizeof(uint32_t)) / sizeof(char))
+#define MAX_STRING_LEN ((size_t) (PAGE_SIZE - sizeof(page) - 3*sizeof(uint32_t)) / sizeof(char)) \
+// 3 = len, pageId, nxtPageId
 
 READ_STATUS read_bool(FILE* fp, bool* bl) {
     if (fread(bl, sizeof(bool), 1, fp) == 1)
@@ -63,10 +64,14 @@ string* string_of_len(size_t len) {
 }
 
 bool string_equals(string* first, string* second) {
-    return first->len == second->len && strcmp(first->ch, second->ch) == 0;
+    if (first == NULL || second == NULL) return false;
+    if (first->len == second->len && strcmp(first->ch, second->ch) == 0)
+        return true;
+    return false;
 }
 
 string_part* split_string(string* str, size_t start) {
+    size_t len = str->len;
     if (str == NULL || str->len <= 0) return NULL;
     string_part* part = malloc(sizeof(string_part));
     if (part == NULL) return NULL;
@@ -79,11 +84,12 @@ string_part* split_string(string* str, size_t start) {
     if (part->part == NULL) return NULL;
     part->part->len = curr_size;
     for (size_t i = 0; i < curr_size; i++) {
-        part->part->ch[i] = str->ch[start+i];
+        part->part->ch[i] = str->ch[start + i];
     }
 
     str->len -= curr_size;
     part->nxt = split_string(str, start + curr_size);
+    str->len = len;
     return part;
 }
 

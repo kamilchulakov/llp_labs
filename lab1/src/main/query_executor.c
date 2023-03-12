@@ -188,7 +188,7 @@ query_result find_all(db_handler* db) {
         currNode = currNode->nxt;
         pg = get_page(db, pg->prevPageId);
     }
-
+    debug("__________________________________\n");
     return document_list_result(resList);
 }
 
@@ -224,18 +224,38 @@ query_result collection_find(db_handler* db, find_query* query) {
 
         pg = get_page(db, doc->prevCollectionDocument);
     }
-
+    debug("__________________________________\n");
     return document_list_result(resList);
 }
 
 query_result collection_remove(db_handler* db, find_query* query) {
+    debug("executor.COLLECTION_REMOVE: find\n");
     query_result find_result = collection_find(db, query);
     if (find_result.type != DATA_RESULT_TYPE || find_result.data->type != DOCUMENT_LIST_RESULT_TYPE)
         return nok();
+    debug("executor.COLLECTION_REMOVE: remove\n");
     document_list* curr = find_result.data->documents;
     while (curr->currDoc != NULL) {
         if (remove_document(db, curr->pageId) != WRITE_OK) return nok();
         curr = curr->nxt;
     }
+    debug("__________________________________\n");
+    return ok();
+}
+
+query_result collection_update(db_handler* db, update_query* query) {
+    debug("executor.COLLECTION_UPDATE: find\n");
+    query_result find_result = collection_find(db, query->find);
+    if (find_result.type != DATA_RESULT_TYPE || find_result.data->type != DOCUMENT_LIST_RESULT_TYPE)
+        return nok();
+    debug("executor.COLLECTION_UPDATE: update\n");
+
+    document_list* curr = find_result.data->documents;
+    while (curr->currDoc != NULL) {
+        if (update_raw_document(db, curr->pageId, query->elements) != WRITE_OK)
+            return nok();
+        curr = curr->nxt;
+    }
+    debug("__________________________________\n");
     return ok();
 }

@@ -43,6 +43,8 @@ void test_split_string() {
 
     free(str);
     free(parts);
+
+    // TODO: test very big string!!!
 }
 
 void test_types() {

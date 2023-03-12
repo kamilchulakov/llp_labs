@@ -209,6 +209,42 @@ void test_find_document_with_big_string(db_handler* db) {
     assert_element_equals(res->currDoc->data.elements, expected);
 }
 
+void test_collection_update(db_handler* db) {
+    print_running_test("test_collection_update");
+
+    find_query find = {string_of("hex"), NULL};
+    find.filters = malloc(sizeof(complex_filter));
+    find.filters->type = ELEMENT_FILTER;
+    find.filters->el_filter = create_element_filter(CMP_EQ, create_element(STRING, "big string"));
+    find.filters->el_filter->el->string_data = string_of("small string");
+    update_query query = {&find, create_element(STRING, "big string")};
+    query.elements->string_data = string_of("not small string");
+
+    assert_true(collection_update(db, &query).ok);
+    assert(db->pagerData->firstFreeStringPageId == 11);
+    assert(db->pagerData->lastStringPage == 12);
+    assert(get_page(db, 12)->prevPageId == 9);
+}
+
+void test_collection_update_for_big_string(db_handler* db) {
+    print_running_test("test_collection_update");
+
+    find_query find = {string_of("hex"), NULL};
+    find.filters = malloc(sizeof(complex_filter));
+    find.filters->type = ELEMENT_FILTER;
+    find.filters->el_filter = create_element_filter(CMP_EQ, create_element(STRING, "big string"));
+    find.filters->el_filter->el->string_data = bigString();
+    update_query query = {&find, create_element(STRING, "big string")};
+    query.elements->string_data = bigString();
+
+    assert_true(collection_update(db, &query).ok);
+    assert(db->pagerData->firstFreeStringPageId == 9);
+    assert(get_page(db, 9)->prevPageId == 8);
+    assert(get_page(db, 8)->prevPageId == 11);
+    assert(db->pagerData->lastStringPage == 14);
+    assert(get_page(db, 14)->prevPageId == 13);
+}
+
 void test_queries() {
     print_running("test_queries");
     db_handler* db = open_db_file("tmp");
@@ -220,5 +256,7 @@ void test_queries() {
     test_collection_find(db);
     test_collection_remove(db);
     test_find_document_with_big_string(db);
+    test_collection_update(db);
+    test_collection_update_for_big_string(db);
     utilize_db_file(db);
 }

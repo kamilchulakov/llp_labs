@@ -98,8 +98,8 @@ void test_write_document_splits_strings(db_handler* db) {
     doc->data.elements->string_data = str;
 
     page* pg = allocate_page_typed(db, PAGE_DOCUMENT);
-    assert(write_document_to_page(db, pg, doc) == WRITE_OK);
     assert(pg->page_id == 4);
+    assert(write_document_to_page(db, pg->page_id, doc) == WRITE_OK);
 
     assert(get_page(db, 5)->type == PAGE_STRING);
     assert(get_page(db, 6)->type == PAGE_STRING);
@@ -114,7 +114,7 @@ void test_write_too_big_document(db_handler* db) {
     print_running_test("test_write_too_big_document");
     page* pg = get_page(db, 4);
     document* doc = create_document(20);
-    assert(write_document_to_page(db, pg, doc) == WRITE_ERROR);
+    assert(write_document_to_page(db, pg->page_id, doc) == WRITE_ERROR);
 }
 
 void test_split_document(db_handler* db) {
@@ -133,7 +133,11 @@ void test_split_document(db_handler* db) {
     page* pg = allocate_page_typed(db, PAGE_DOCUMENT);
     assert(pg->page_id == 7);
     assert(write_document_to_page_but_split_if_needed(db, pg, doc) == WRITE_OK);
-    assert(get_document(db, 7)->data.nextPage == 8);
+    document* doc7 = get_document(db, 7);
+    assert(doc7->data.count == 10);
+    assert(doc7->data.nextPage == 8);
+    assert(doc7->data.nextDoc->data.count == 10);
+    assert(doc7->data.nextDoc->data.nextPage == -1);
     assert(get_document(db, 8)->data.nextPage == -1);
 }
 

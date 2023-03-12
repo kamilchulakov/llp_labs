@@ -134,26 +134,11 @@ bool document_satisfies_operator_filter(document* doc, operator_filter* filter) 
 
 bool document_satisfies_filter(document* doc, complex_filter* filter) {
     if (filter == NULL) return true;
+    // TODO: test filters
     switch (filter->type) {
         case ELEMENT_FILTER:
             return document_satisfies_element_filter(doc, filter->el_filter);
         case OPERATOR_FILTER:
             return document_satisfies_operator_filter(doc, filter->op_filter);
     }
-}
-
-bool update_document(document* doc, element* elements) {
-    if (doc->data.nextPage == -1)
-        return false;
-    if (elements == NULL)
-        return true;
-    uint32_t j = 0;
-    for (uint32_t i = 0; i < doc->data.count; ++i) {
-        if (doc->data.elements[i].e_field == elements[j].e_field) {
-            doc->data.elements[i] = elements[j];
-            j++;
-            if (elements+j == NULL) return true;
-        }
-    }
-    return false;
 }

@@ -27,6 +27,7 @@ void set_string_prev_page(page* pg, db_handler* db) {
 
 page* allocate_page_typed(db_handler* db, page_type type) {
     page* pg = create_empty_page(get_and_set_page_id(db));
+    debug("pager.ALLOCATE_PAGE: page(id=%u)\n", pg->page_id);
     pg->type = type;
     switch (type) {
         case PAGE_COLLECTION:
@@ -119,6 +120,15 @@ WRITE_STATUS free_page(db_handler* db, uint32_t page_id) {
                 pg->prevPageId = db->pagerData->firstFreeDocumentPageId;
             }
             break;
+        case PAGE_STRING:
+            pg->type = PAGE_STRING;
+            if (db->pagerData->firstFreeStringPageId != -1) {
+                pg->prevPageId = db->pagerData->firstFreeStringPageId;
+            }
+            break;
+        default:
+            debug("pager.FREE_PAGE: unsupported page type\n");
+            exit(-1);
     }
 
     if (write_page(db, pg) == NULL)
@@ -138,7 +148,10 @@ WRITE_STATUS free_page(db_handler* db, uint32_t page_id) {
             if (db->pagerData->lastDocumentPage == page_id)
                 db->pagerData->lastDocumentPage = oldPg->prevPageId;
             break;
-        case PAGE_EMPTY:
+        case PAGE_STRING:
+            db->pagerData->firstFreeStringPageId = page_id;
+            if (db->pagerData->lastStringPage == page_id)
+                db->pagerData->lastStringPage = oldPg->prevPageId;
             break;
     }
 
@@ -176,6 +189,16 @@ READ_STATUS read_string_split_page(db_handler* db, string_part* part) {
     return read_string_split(db->fp, part);
 }
 
+string_part* read_string_split_by_page(db_handler* db, uint32_t pageId) {
+    string_part* part = malloc(sizeof(string_part));
+    part->part = string_of_len(0);
+    if (part == NULL) return NULL;
+    part->pageId = pageId;
+    if (read_string_split_page(db, part) != WRITE_OK)
+        return NULL;
+    return part;
+}
+
 READ_STATUS read_string_paged(db_handler* db, string* toRead, string_part* part) {
     if (toRead == NULL || toRead->ch == NULL || toRead->len != part->len) return READ_ERROR;
     string_part* curr = part;
@@ -183,9 +206,9 @@ READ_STATUS read_string_paged(db_handler* db, string* toRead, string_part* part)
     while (curr->pageId > 0) {
         if (read_string_split_page(db, curr) != READ_OK)
             return READ_ERROR;
+        curr->pageId = curr->nxtPageId;
         if (strncat(toRead->ch, curr->part->ch, curr->part->len) == NULL)
             return READ_ERROR;
-        curr->pageId = curr->nxtPageId;
     }
     return READ_OK;
 }
@@ -243,16 +266,16 @@ void split_document_strings(db_handler* db, document* doc) {
     }
 }
 
-WRITE_STATUS write_document_to_page(db_handler* db, page* pg, document* doc) {
+WRITE_STATUS write_document_to_page(db_handler* db, uint32_t page_id, document* doc) {
     if (doc->data.count > MAX_DOCUMENT_DATA_SIZE) {
         debug("pager.WRITE_DOCUMENT_TO_PAGE: document is too big\n");
         return WRITE_ERROR;
     }
 
-    debug("pager.WRITE_DOCUMENT_TO_PAGE: page(id=%d)\n", pg->page_id);
+    debug("pager.WRITE_DOCUMENT_TO_PAGE: page(id=%d)\n", page_id);
 
     split_document_strings(db, doc);
-    fseek(db->fp, calc_page_offset(pg->page_id)+sizeof(page), SEEK_SET);
+    fseek(db->fp, calc_page_offset(page_id)+sizeof(page), SEEK_SET);
     if (write_document_header(db->fp, doc) != WRITE_OK ||
         write_document_data(db->fp, doc) != WRITE_OK)
         return WRITE_ERROR;
@@ -270,12 +293,11 @@ struct pagedData {
     union {
         document* doc;
     };
-    pagedData* nxt;
 };
 
 WRITE_STATUS write_document_to_page_but_split_if_needed(db_handler* db, page* pg, document* doc) {
     if (doc->data.count <= MAX_DOCUMENT_DATA_SIZE)
-        return write_document_to_page(db, pg, doc);
+        return write_document_to_page(db, pg->page_id, doc);
 
     int count = doc->data.count - MAX_DOCUMENT_DATA_SIZE;
     pagedData prev = { pg, copy_document(doc, 0, MAX_DOCUMENT_DATA_SIZE - 1, true) };
@@ -286,14 +308,14 @@ WRITE_STATUS write_document_to_page_but_split_if_needed(db_handler* db, page* pg
         curr.doc = copy_document(doc, pos, pos + MAX_DOCUMENT_DATA_SIZE - 1, false);
         curr.pg = get_free_document_page(db);
         prev.doc->data.nextPage = curr.pg->page_id;
-        if (write_document_to_page(db, prev.pg, prev.doc) != WRITE_OK)
+        if (write_document_to_page(db, prev.pg->page_id, prev.doc) != WRITE_OK)
             return WRITE_ERROR;
         prev = curr;
         pos += MAX_DOCUMENT_DATA_SIZE;
         count -= MAX_DOCUMENT_DATA_SIZE;
     }
 
-    return write_document_to_page(db, prev.pg, prev.doc);
+    return write_document_to_page(db, prev.pg->page_id, prev.doc);
 }
 
 collection* empty_collection() {
@@ -311,13 +333,45 @@ collection* get_collection(db_handler* handler, uint32_t page_id) {
 }
 
 document* get_document(db_handler* db, uint32_t page_id) {
-    // TODO: read all document parts...
     fseek(db->fp, calc_page_offset(page_id)+sizeof(page), SEEK_SET);
     document* doc = malloc(sizeof(document));
     if (read_document(db->fp, doc) == READ_ERROR) return NULL;
     if (read_document_strings(db, doc) != READ_OK)
         return NULL;
+    document* curr = doc;
+    while (curr->data.nextPage != -1) {
+        curr->data.nextDoc = get_document(db, curr->data.nextPage);
+        curr = curr->data.nextDoc;
+        if (curr == NULL) return NULL;
+    }
     return doc;
+}
+
+document* get_raw_document(db_handler* db, uint32_t page_id) {
+    fseek(db->fp, calc_page_offset(page_id)+sizeof(page), SEEK_SET);
+    document* doc = malloc(sizeof(document));
+    if (read_document(db->fp, doc) == READ_ERROR) return NULL;
+    document* curr = doc;
+    while (curr->data.nextPage != -1) {
+        curr->data.nextDoc = get_document(db, curr->data.nextPage);
+        curr = curr->data.nextDoc;
+        if (curr == NULL) return NULL;
+    }
+    return doc;
+}
+
+WRITE_STATUS clear_document_string(db_handler* db, string_part* str) {
+    uint32_t currPg = str->pageId;
+    string_part* currStr;
+    while (currPg > 0) {
+        currStr = read_string_split_by_page(db, currPg);
+        if (currStr == NULL)
+            return WRITE_ERROR;
+        if (free_page(db, currPg) != WRITE_OK)
+            return WRITE_ERROR;
+        currPg = currStr->nxtPageId;
+    }
+    return WRITE_OK;
 }
 
 document* get_document_header(db_handler* db, uint32_t page_id) {
@@ -388,13 +442,24 @@ WRITE_STATUS remove_document(db_handler* db, uint32_t page_id) {
     return WRITE_OK;
 }
 
-WRITE_STATUS write_document_update(db_handler* db, uint32_t pageId, document* doc) {
-    pagedData* originalDoc;
-    pagedData* newPaged;
-    pagedData* originalCurr = originalDoc;
-    pagedData* newCurr = newPaged;
-    while (originalCurr != NULL && newCurr != NULL) {
-        newCurr->pg = originalCurr->pg;
+WRITE_STATUS update_raw_document(db_handler* db, uint32_t pageId, element* elements) {
+    document* doc = get_raw_document(db, pageId);
+    if (doc == NULL || elements == NULL)
+        return WRITE_ERROR;
+    uint32_t count = (uint32_t) doc->data.count;
+    for (uint32_t i = 0; i < count; ++i) {
+        for (uint32_t j = 0; j < 1; ++j) {
+            if (field_equals(doc->data.elements[i].e_field, elements[j].e_field) == true) {
+                if (elements[j].e_field->e_type == STRING) {
+                    if (clear_document_string(db, doc->data.elements[i].string_split) != WRITE_OK)
+                        return WRITE_ERROR;
+                }
+                doc->data.elements[i] = elements[j];
+                j++;
+            }
+        }
     }
-    return WRITE_ERROR;
+    if (doc->data.nextDoc != NULL)
+        return update_raw_document(db, doc->data.nextPage, elements);
+    return write_document_to_page(db, pageId, doc);
 }
