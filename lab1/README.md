@@ -1,6 +1,6 @@
 # Setup
 ## Dependencies
-- [cmake](.github/cmake.jpg)
+- [cmake](../.github/cmake.jpg)
 - make
 
 ## Makefile
