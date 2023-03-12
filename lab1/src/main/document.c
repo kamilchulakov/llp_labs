@@ -140,4 +140,5 @@ bool document_satisfies_filter(document* doc, complex_filter* filter) {
         case OPERATOR_FILTER:
             return document_satisfies_operator_filter(doc, filter->op_filter);
     }
+    return false;
 }

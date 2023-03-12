@@ -172,4 +172,5 @@ bool cmp_elements(CMP_TYPE cmp_type, element* first, element* second) {
         case CMP_REGEX:
 			break;
     }
+    return false;
 }

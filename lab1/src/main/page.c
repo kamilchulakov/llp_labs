@@ -12,10 +12,6 @@ page* create_empty_page(uint32_t page_id) {
     return pg;
 }
 
-int debug_page(page* page) {
-    return printf("\nPAGE_ID:%u USED_MEM:%u PAGE_TYPE:%u TIME:%ld\n", page->page_id, page->used_mem, page->type, page->last_modified);
-}
-
 bool page_has_type(page* page, page_type type) {
     if (page->type == type)
         return true;
