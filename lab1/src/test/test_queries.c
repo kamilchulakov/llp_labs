@@ -194,11 +194,17 @@ void test_find_document_with_big_string(db_handler* db) {
     assert(db->pagerData->pageIdSeq == 8);
     assert_true(collection_insert(db, &insertQuery).ok);
     assert(db->pagerData->firstFreeDocumentPageId == -1);
-    assert(db->pagerData->pageIdSeq != 8);
+    assert(db->pagerData->pageIdSeq == 10);
+    assert(db->pagerData->lastStringPage == 9);
+    assert(get_page(db, 8)->type == PAGE_STRING);
+    assert(get_page(db, 9)->prevPageId == 8);
+    assert(get_page(db, 9)->type == PAGE_STRING);
 
     insertQuery.doc->data.elements = create_element(STRING, "big string");
     insertQuery.doc->data.elements->string_data = string_of("small string");
     assert_true(collection_insert(db, &insertQuery).ok);
+    assert(db->pagerData->pageIdSeq == 12);
+    assert(db->pagerData->lastStringPage == 11);
 
     find_query findQuery = {string_of("hex"), NULL};
     document_list* res = collection_find(db, &findQuery).data->documents;
@@ -220,14 +226,19 @@ void test_collection_update(db_handler* db) {
     update_query query = {&find, create_element(STRING, "big string")};
     query.elements->string_data = string_of("not small string");
 
+    assert(db->pagerData->pageIdSeq == 12);
+    assert(db->pagerData->lastStringPage == 11);
+    assert(db->pagerData->firstFreeStringPageId == -1);
     assert_true(collection_update(db, &query).ok);
-    assert(db->pagerData->firstFreeStringPageId == 11);
-    assert(db->pagerData->lastStringPage == 12);
-    assert(get_page(db, 12)->prevPageId == 9);
+    assert(db->pagerData->pageIdSeq == 12);
+    assert(db->pagerData->firstFreeStringPageId == -1);
+    assert(db->pagerData->lastStringPage == 11); // reused 11
+    assert(get_page(db, 11)->prevPageId == 9);
+    assert(get_page(db, 9)->nextPageId == 11);
 }
 
 void test_collection_update_for_big_string(db_handler* db) {
-    print_running_test("test_collection_update");
+    print_running_test("test_collection_update_for_big_string");
 
     find_query find = {string_of("hex"), NULL};
     find.filters = malloc(sizeof(complex_filter));
@@ -237,12 +248,16 @@ void test_collection_update_for_big_string(db_handler* db) {
     update_query query = {&find, create_element(STRING, "big string")};
     query.elements->string_data = bigString();
 
-    assert_true(collection_update(db, &query).ok);
-    assert(db->pagerData->firstFreeStringPageId == 9);
+    assert(db->pagerData->lastStringPage == 11);
+    assert(get_page(db, 11)->prevPageId == 9);
     assert(get_page(db, 9)->prevPageId == 8);
-    assert(get_page(db, 8)->prevPageId == 11);
-    assert(db->pagerData->lastStringPage == 14);
-    assert(get_page(db, 14)->prevPageId == 13);
+    assert(get_page(db, 8)->prevPageId == -1);
+    assert_true(collection_update(db, &query).ok);
+    assert(db->pagerData->firstFreeStringPageId == -1);
+    assert(db->pagerData->lastStringPage == 8);
+    assert(get_page(db, 9)->prevPageId == 11);
+    assert(get_page(db, 8)->prevPageId == 9);
+    assert(get_page(db, 11)->prevPageId == -1);
 }
 
 void test_queries() {

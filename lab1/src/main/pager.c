@@ -92,6 +92,27 @@ page* get_free_document_page(db_handler* db) {
     }
 }
 
+page* get_free_string_page(db_handler* db) {
+    page* pg;
+    if (db->pagerData->firstFreeStringPageId != -1) {
+        debug("pager.GET_FREE_STRING_PAGE: reused page(id=%d)\n", db->pagerData->firstFreeStringPageId);
+        pg = get_page(db, db->pagerData->firstFreeStringPageId);
+        db->pagerData->firstFreeStringPageId = pg->prevPageId;
+        set_string_prev_page(pg, db);
+    } else {
+        pg = allocate_page_typed(db, PAGE_STRING);
+    }
+
+    if (pg->prevPageId != -1) {
+        page* pgToUpdate = get_page(db, pg->prevPageId);
+        pgToUpdate->nextPageId = pg->page_id;
+        if (write_page(db, pgToUpdate) == NULL)
+            return NULL;
+    }
+
+    return write_page(db, pg);
+}
+
 page* get_page(db_handler* db_handler, uint32_t page_id) {
     debug("pager.GET_PAGE: page(id=%d)\n", page_id);
     if (page_id < 1) return NULL;
@@ -247,7 +268,7 @@ void allocate_string_pages(db_handler* db, string_part* split) {
     string_part* curr = split;
     string_part* prev = NULL;
     while (curr) {
-        curr->pageId = allocate_page_typed(db, PAGE_STRING)->page_id;
+        curr->pageId = get_free_string_page(db)->page_id;
         if (prev) prev->nxtPageId = curr->pageId;
         prev = curr;
         curr = curr->nxt;
@@ -384,10 +405,22 @@ document* get_document_header(db_handler* db, uint32_t page_id) {
     return doc;
 }
 
+WRITE_STATUS clear_all_document_strings(db_handler* db, document* doc) {
+    uint32_t count = (uint32_t) doc->data.count;
+    for (uint32_t i = 0; i < count; ++i) {
+        if (doc->data.elements[i].e_field->e_type == STRING) {
+            if (clear_document_string(db, doc->data.elements[i].string_split) != WRITE_OK)
+                return WRITE_ERROR;
+        }
+    }
+    return WRITE_OK;
+}
+
 WRITE_STATUS remove_document(db_handler* db, uint32_t page_id) {
     document* doc = get_document(db, page_id);
     if (doc == NULL) return WRITE_ERROR;
     if (free_page(db, page_id) != WRITE_OK) return WRITE_ERROR;
+    if (clear_all_document_strings(db, doc) != WRITE_OK) return WRITE_ERROR;
 
     collection* col = get_collection(db, doc->collectionPage);
     if (page_id == col->lastDocPageId) {
@@ -432,7 +465,8 @@ WRITE_STATUS remove_document(db_handler* db, uint32_t page_id) {
 
     document* part = doc;
     while (part->data.nextPage != -1) {
-        // TODO: free_document_strings
+        if (clear_all_document_strings(db, part) != WRITE_OK)
+            return WRITE_ERROR;
         uint32_t pageId = part->data.nextPage;
         part = get_document_header(db, pageId);
         if (free_page(db, pageId) != WRITE_OK)
