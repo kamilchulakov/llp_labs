@@ -260,6 +260,25 @@ void test_collection_update_for_big_string(db_handler* db) {
     assert(get_page(db, 11)->prevPageId == -1);
 }
 
+void test_clear(db_handler* db) {
+    print_running_test("test_clear");
+
+    find_query find = {string_of("ex"), NULL};
+    collection_remove(db, &find);
+    assert(db->pagerData->firstFreeDocumentPageId == 2);
+    assert(get_page(db, 2)->prevPageId == 3);
+    assert(get_page(db, 3)->prevPageId == 4);
+    assert(get_page(db, 4)->prevPageId == 5);
+    assert(get_page(db, 5)->prevPageId == -1);
+
+    find.collection = string_of("hex");
+    assert_true(collection_remove(db, &find).ok);
+    assert(db->pagerData->firstFreeDocumentPageId == 6);
+    assert(get_page(db, 6)->prevPageId == 10);
+    assert(get_page(db, 10)->prevPageId == 2);
+    assert(get_page(db, 2)->prevPageId == 3);
+}
+
 void test_queries() {
     print_running("test_queries");
     db_handler* db = open_db_file("tmp");
@@ -273,5 +292,6 @@ void test_queries() {
     test_find_document_with_big_string(db);
     test_collection_update(db);
     test_collection_update_for_big_string(db);
+    test_clear(db);
     utilize_db_file(db);
 }

@@ -3,7 +3,7 @@
 #include "io.h"
 #include "page.h"
 
-#define MAX_STRING_LEN ((size_t) (PAGE_SIZE - sizeof(page) - 3*sizeof(uint32_t)) / sizeof(char)) \
+#define MAX_STRING_LEN ((size_t) (PAGE_SIZE - sizeof(page) - sizeof(size_t) - 2*sizeof(uint32_t)) / sizeof(char)) \
 // 3 = len, pageId, nxtPageId
 
 READ_STATUS read_bool(FILE* fp, bool* bl) {

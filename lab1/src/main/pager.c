@@ -74,22 +74,23 @@ page* get_free_collection_page(db_handler* handler) {
 }
 
 page* get_free_document_page(db_handler* db) {
+    page* pg;
     if (db->pagerData->firstFreeDocumentPageId != -1) {
         debug("pager.GET_FREE_DOCUMENT_PAGE: reused page(id=%d)\n", db->pagerData->firstFreeDocumentPageId);
-        page* pg = get_page(db, db->pagerData->firstFreeDocumentPageId);
+        pg = get_page(db, db->pagerData->firstFreeDocumentPageId);
         db->pagerData->firstFreeDocumentPageId = pg->prevPageId;
         set_document_prev_page(pg, db);
-        return pg;
     } else {
-        page* pg = allocate_page_typed(db, PAGE_DOCUMENT);
-        if (pg->prevPageId != -1) {
-            page* pgToUpdate = get_page(db, pg->prevPageId);
-            pgToUpdate->nextPageId = pg->page_id;
-            if (write_page(db, pgToUpdate) == NULL)
-                return NULL;
-        }
-        return pg;
+        pg = allocate_page_typed(db, PAGE_DOCUMENT);
     }
+    if (pg->prevPageId != -1) {
+        page* pgToUpdate = get_page(db, pg->prevPageId);
+        pgToUpdate->nextPageId = pg->page_id;
+        if (write_page(db, pgToUpdate) == NULL)
+            return NULL;
+    }
+
+    return write_page(db, pg);
 }
 
 page* get_free_string_page(db_handler* db) {
@@ -374,7 +375,7 @@ document* get_raw_document(db_handler* db, uint32_t page_id) {
     if (read_document(db->fp, doc) == READ_ERROR) return NULL;
     document* curr = doc;
     while (curr->data.nextPage != -1) {
-        curr->data.nextDoc = get_document(db, curr->data.nextPage);
+        curr->data.nextDoc = get_raw_document(db, curr->data.nextPage);
         curr = curr->data.nextDoc;
         if (curr == NULL) return NULL;
     }
@@ -417,7 +418,7 @@ WRITE_STATUS clear_all_document_strings(db_handler* db, document* doc) {
 }
 
 WRITE_STATUS remove_document(db_handler* db, uint32_t page_id) {
-    document* doc = get_document(db, page_id);
+    document* doc = get_raw_document(db, page_id);
     if (doc == NULL) return WRITE_ERROR;
     if (free_page(db, page_id) != WRITE_OK) return WRITE_ERROR;
     if (clear_all_document_strings(db, doc) != WRITE_OK) return WRITE_ERROR;
@@ -481,8 +482,9 @@ WRITE_STATUS update_raw_document(db_handler* db, uint32_t pageId, element* eleme
     if (doc == NULL || elements == NULL)
         return WRITE_ERROR;
     uint32_t count = (uint32_t) doc->data.count;
+    uint32_t sz = (uint32_t) sizeof(*elements) / sizeof(element);
     for (uint32_t i = 0; i < count; ++i) {
-        for (uint32_t j = 0; j < 1; ++j) {
+        for (uint32_t j = 0; j < sz; ++j) {
             if (field_equals(doc->data.elements[i].e_field, elements[j].e_field) == true) {
                 if (elements[j].e_field->e_type == STRING) {
                     if (clear_document_string(db, doc->data.elements[i].string_split) != WRITE_OK)

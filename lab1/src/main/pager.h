@@ -24,5 +24,6 @@ WRITE_STATUS update_raw_document(db_handler* db, uint32_t pageId, element* eleme
 collection* get_collection(db_handler* handler, uint32_t page_id);
 document* get_document(db_handler* db, uint32_t page_id);
 document* get_document_header(db_handler* db, uint32_t page_id);
+document* get_raw_document(db_handler* db, uint32_t page_id);
 
 #endif //ENORMEDB_PAGER_H
