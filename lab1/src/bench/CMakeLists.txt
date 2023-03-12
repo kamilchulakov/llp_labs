@@ -1,0 +1,5 @@
+add_library(benchmarks STATIC mem.c)
+target_link_libraries(benchmarks db tests)
+add_executable(bench bench.c)
+target_link_libraries(bench benchmarks)
+add_custom_command(TARGET bench POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:bench> ${PROJECT_SOURCE_DIR}/bench)
