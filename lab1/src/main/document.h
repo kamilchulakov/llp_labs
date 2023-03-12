@@ -36,5 +36,6 @@ READ_STATUS read_document_header(FILE* fp, document* doc);
 schema* schema_from_document(document* doc);
 
 bool document_satisfies_filter(document* doc, complex_filter* filter);
+bool update_document(document* doc, element* elements);
 
 #endif

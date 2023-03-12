@@ -169,16 +169,44 @@ void test_collection_remove(db_handler* db) {
     query.filters = NULL;
     query_result result = collection_find(db, &query);
     assert_documents_count(&result, 1);
-    assert(db->pagerData->page_id_seq == 7);
-    assert(db->pagerData->first_free_document_page_id == 3);
+    assert(db->pagerData->pageIdSeq == 7);
+    assert(db->pagerData->firstFreeDocumentPageId == 3);
 
     insert_query insertQuery = {NULL, string_of("ex"), create_document(1)};
     insertQuery.doc->data.elements = create_element_int32("int", 32);
     assert_true(collection_insert(db, &insertQuery).ok);
     assert_true(collection_insert(db, &insertQuery).ok);
     assert_true(collection_insert(db, &insertQuery).ok);
-    assert(db->pagerData->page_id_seq == 7);
-    assert(db->pagerData->first_free_document_page_id == 6);
+    assert(db->pagerData->pageIdSeq == 7);
+    assert(db->pagerData->firstFreeDocumentPageId == 6);
+}
+
+void test_find_document_with_big_string(db_handler* db) {
+    print_running_test("test_find_document_with_big_string");
+
+    insert_query insertQuery = {NULL, string_of("hex"), create_document(1)};
+    insertQuery.doc->data.elements = create_element(STRING, "big string");
+    insertQuery.doc->data.elements->string_data = bigString();
+    create_schema_query schemaQuery = {new_collection(string_of("hex"), schema_from_document(insertQuery.doc))};
+    assert_true(create_schema(db, &schemaQuery).ok);
+
+    assert(db->pagerData->firstFreeDocumentPageId == 6);
+    assert(db->pagerData->pageIdSeq == 8);
+    assert_true(collection_insert(db, &insertQuery).ok);
+    assert(db->pagerData->firstFreeDocumentPageId == -1);
+    assert(db->pagerData->pageIdSeq != 8);
+
+    insertQuery.doc->data.elements = create_element(STRING, "big string");
+    insertQuery.doc->data.elements->string_data = string_of("small string");
+    assert_true(collection_insert(db, &insertQuery).ok);
+
+    find_query findQuery = {string_of("hex"), NULL};
+    document_list* res = collection_find(db, &findQuery).data->documents;
+    element* expected = create_element(STRING, "big string");
+    expected->string_data = bigString();
+    assert_element_equals(res->nxt->currDoc->data.elements, expected);
+    expected->string_data = string_of("small string");
+    assert_element_equals(res->currDoc->data.elements, expected);
 }
 
 void test_queries() {
@@ -191,5 +219,6 @@ void test_queries() {
     test_find_all(db);
     test_collection_find(db);
     test_collection_remove(db);
+    test_find_document_with_big_string(db);
     utilize_db_file(db);
 }

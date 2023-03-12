@@ -194,9 +194,10 @@ query_result find_all(db_handler* db) {
 
 query_result collection_find(db_handler* db, find_query* query) {
     if (query->collection == NULL) {
-        debug("executor.COLLECTION_FIND without COLLECTION");
+        debug("executor.COLLECTION_FIND without COLLECTION\n");
         return nok();
     }
+    debug("executor.COLLECTION_FIND\n");
     query_result col_res = get_collection_or_schema_by_name(db, query->collection, true);
     if (col_res.type != DATA_RESULT_TYPE || col_res.data->type != COLLECTION_RESULT_TYPE)
         return nok();

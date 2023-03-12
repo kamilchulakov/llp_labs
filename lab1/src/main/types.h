@@ -18,6 +18,7 @@ typedef struct string_part string_part;
 struct string_part {
     string* part;
     uint32_t pageId;
+    size_t len;
     string_part* nxt;
     uint32_t nxtPageId;
 };
@@ -25,8 +26,9 @@ struct string_part {
 READ_STATUS read_string(FILE* fp, string* str);
 WRITE_STATUS write_string(FILE* fp, string* str);
 string* string_of(char* ch);
+string* string_of_len(size_t len);
 size_t string_size(string* str);
-bool string_equals(void* first, void* second);
+bool string_equals(string* first, string* second);
 
 string_part* split_string(string* str, size_t start);
 READ_STATUS read_string_split(FILE* fp, string_part *part);

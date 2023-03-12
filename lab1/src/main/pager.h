@@ -18,9 +18,10 @@ WRITE_STATUS write_collection_to_page(db_handler* handler, uint32_t page_id, col
 WRITE_STATUS write_document_to_page(db_handler* db, page* pg, document* doc);
 WRITE_STATUS write_document_to_page_but_split_if_needed(db_handler* db, page* pg, document* doc);
 WRITE_STATUS write_document_header_to_page(db_handler* db, uint32_t pageId, document* doc);
+WRITE_STATUS write_document_update(db_handler* db, uint32_t pageId, document* doc);
 
 collection* get_collection(db_handler* handler, uint32_t page_id);
-document* get_document(db_handler* handler, uint32_t page_id);
+document* get_document(db_handler* db, uint32_t page_id);
 document* get_document_header(db_handler* db, uint32_t page_id);
 
 #endif //ENORMEDB_PAGER_H

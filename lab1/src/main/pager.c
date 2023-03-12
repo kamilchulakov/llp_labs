@@ -54,10 +54,10 @@ page* write_page(db_handler *db, const page *pg) {
 }
 
 page* get_free_collection_page(db_handler* handler) {
-    if (handler->pagerData->first_free_collection_page_id != -1) {
-        debug("pager.GET_FREE_COLLECTION_PAGE: reused page(id=%d)\n", handler->pagerData->first_free_collection_page_id);
-        page* pg = get_page(handler, handler->pagerData->first_free_collection_page_id);
-        handler->pagerData->first_free_collection_page_id = pg->prevPageId;
+    if (handler->pagerData->firstFreeCollectionPageId != -1) {
+        debug("pager.GET_FREE_COLLECTION_PAGE: reused page(id=%d)\n", handler->pagerData->firstFreeCollectionPageId);
+        page* pg = get_page(handler, handler->pagerData->firstFreeCollectionPageId);
+        handler->pagerData->firstFreeCollectionPageId = pg->prevPageId;
         set_collection_prev_page(pg, handler);
         return pg;
     } else {
@@ -73,10 +73,10 @@ page* get_free_collection_page(db_handler* handler) {
 }
 
 page* get_free_document_page(db_handler* db) {
-    if (db->pagerData->first_free_document_page_id != -1) {
-        debug("pager.GET_FREE_DOCUMENT_PAGE: reused page(id=%d)\n", db->pagerData->first_free_document_page_id);
-        page* pg = get_page(db, db->pagerData->first_free_document_page_id);
-        db->pagerData->first_free_document_page_id = pg->prevPageId;
+    if (db->pagerData->firstFreeDocumentPageId != -1) {
+        debug("pager.GET_FREE_DOCUMENT_PAGE: reused page(id=%d)\n", db->pagerData->firstFreeDocumentPageId);
+        page* pg = get_page(db, db->pagerData->firstFreeDocumentPageId);
+        db->pagerData->firstFreeDocumentPageId = pg->prevPageId;
         set_document_prev_page(pg, db);
         return pg;
     } else {
@@ -108,15 +108,15 @@ WRITE_STATUS free_page(db_handler* db, uint32_t page_id) {
     switch (oldPg->type) {
         case PAGE_COLLECTION: {
             pg->type = PAGE_COLLECTION;
-            if (db->pagerData->first_free_collection_page_id != -1) {
-                pg->prevPageId = db->pagerData->first_free_collection_page_id;
+            if (db->pagerData->firstFreeCollectionPageId != -1) {
+                pg->prevPageId = db->pagerData->firstFreeCollectionPageId;
             }
             break;
         }
         case PAGE_DOCUMENT:
             pg->type = PAGE_DOCUMENT;
-            if (db->pagerData->first_free_document_page_id != -1) {
-                pg->prevPageId = db->pagerData->first_free_document_page_id;
+            if (db->pagerData->firstFreeDocumentPageId != -1) {
+                pg->prevPageId = db->pagerData->firstFreeDocumentPageId;
             }
             break;
     }
@@ -126,7 +126,7 @@ WRITE_STATUS free_page(db_handler* db, uint32_t page_id) {
 
     switch (oldPg->type) {
         case PAGE_COLLECTION: {
-            db->pagerData->first_free_collection_page_id = page_id;
+            db->pagerData->firstFreeCollectionPageId = page_id;
 
             if (db->pagerData->lastCollectionPage == page_id)
                 db->pagerData->lastCollectionPage = oldPg->prevPageId;
@@ -134,7 +134,7 @@ WRITE_STATUS free_page(db_handler* db, uint32_t page_id) {
         }
 
         case PAGE_DOCUMENT:
-            db->pagerData->first_free_document_page_id = page_id;
+            db->pagerData->firstFreeDocumentPageId = page_id;
             if (db->pagerData->lastDocumentPage == page_id)
                 db->pagerData->lastDocumentPage = oldPg->prevPageId;
             break;
@@ -171,6 +171,40 @@ WRITE_STATUS write_string_paged(db_handler* db, string_part* part) {
     return write_string_split(db->fp, part);
 }
 
+READ_STATUS read_string_split_page(db_handler* db, string_part* part) {
+    fseek(db->fp, calc_page_offset(part->pageId)+sizeof(page), SEEK_SET);
+    return read_string_split(db->fp, part);
+}
+
+READ_STATUS read_string_paged(db_handler* db, string* toRead, string_part* part) {
+    if (toRead == NULL || toRead->ch == NULL || toRead->len != part->len) return READ_ERROR;
+    string_part* curr = part;
+    curr->part = string_of_len(0);
+    while (curr->pageId > 0) {
+        if (read_string_split_page(db, curr) != READ_OK)
+            return READ_ERROR;
+        if (strncat(toRead->ch, curr->part->ch, curr->part->len) == NULL)
+            return READ_ERROR;
+        curr->pageId = curr->nxtPageId;
+    }
+    return READ_OK;
+}
+
+READ_STATUS read_document_strings(db_handler* db, document* doc) {
+    for (int i = 0; i < doc->data.count; ++i) {
+        element* el = &doc->data.elements[i];
+        if (el->e_field->e_type == STRING) {
+            if (el->string_split->len == 0) return READ_ERROR;
+            string* original = string_of_len(el->string_split->len);
+            string_part* curr = el->string_split;
+            if (read_string_paged(db, original, curr) != READ_OK)
+                return READ_ERROR;
+            el->string_data = original;
+        }
+    }
+    return READ_OK;
+}
+
 WRITE_STATUS write_document_strings(db_handler* db, document* doc) {
     for (int i = 0; i < doc->data.count; ++i) {
         element* el = &doc->data.elements[i];
@@ -201,7 +235,9 @@ void split_document_strings(db_handler* db, document* doc) {
     for (int i = 0; i < doc->data.count; ++i) {
         element* el = &doc->data.elements[i];
         if (el->e_field->e_type == STRING) {
+            size_t len = el->string_data->len;
             el->string_split = split_string(el->string_data, 0);
+            el->string_split->len = len;
             allocate_string_pages(db, el->string_split);
         }
     }
@@ -228,12 +264,14 @@ WRITE_STATUS write_document_header_to_page(db_handler* db, uint32_t pageId, docu
     return write_document_header(db->fp, doc);
 }
 
-typedef struct {
+typedef struct pagedData pagedData;
+struct pagedData {
     page* pg;
     union {
         document* doc;
     };
-} pagedData;
+    pagedData* nxt;
+};
 
 WRITE_STATUS write_document_to_page_but_split_if_needed(db_handler* db, page* pg, document* doc) {
     if (doc->data.count <= MAX_DOCUMENT_DATA_SIZE)
@@ -272,10 +310,13 @@ collection* get_collection(db_handler* handler, uint32_t page_id) {
     return col;
 }
 
-document* get_document(db_handler* handler, uint32_t page_id) {
-    fseek(handler->fp, calc_page_offset(page_id)+sizeof(page), SEEK_SET);
+document* get_document(db_handler* db, uint32_t page_id) {
+    // TODO: read all document parts...
+    fseek(db->fp, calc_page_offset(page_id)+sizeof(page), SEEK_SET);
     document* doc = malloc(sizeof(document));
-    if (read_document(handler->fp, doc) == READ_ERROR) return NULL;
+    if (read_document(db->fp, doc) == READ_ERROR) return NULL;
+    if (read_document_strings(db, doc) != READ_OK)
+        return NULL;
     return doc;
 }
 
@@ -345,4 +386,15 @@ WRITE_STATUS remove_document(db_handler* db, uint32_t page_id) {
     }
 
     return WRITE_OK;
+}
+
+WRITE_STATUS write_document_update(db_handler* db, uint32_t pageId, document* doc) {
+    pagedData* originalDoc;
+    pagedData* newPaged;
+    pagedData* originalCurr = originalDoc;
+    pagedData* newCurr = newPaged;
+    while (originalCurr != NULL && newCurr != NULL) {
+        newCurr->pg = originalCurr->pg;
+    }
+    return WRITE_ERROR;
 }

@@ -15,6 +15,8 @@ void assert_true(bool pain);
 void assert_false(bool pain);
 void assert_result_type(query_result result, query_result_type type);
 
+string* bigString();
+
 void print_running(char* test_name);
 void print_running_test(char* test_name);
 

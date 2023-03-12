@@ -16,16 +16,16 @@ typedef struct {
 
 typedef struct {
     mem_info* mem;
-    uint32_t page_id_seq; // page that can be allocated
+    uint32_t pageIdSeq; // page that can be allocated
 
     uint32_t lastCollectionPage;
-    uint32_t first_free_collection_page_id; // page that is already allocated
+    uint32_t firstFreeCollectionPageId; // page that is already allocated
 
     uint32_t lastDocumentPage;
-    uint32_t first_free_document_page_id; // page that is already allocated
+    uint32_t firstFreeDocumentPageId; // page that is already allocated
 
     uint32_t lastStringPage;
-    uint32_t first_free_string_page_id; // page that is already allocated
+    uint32_t firstFreeStringPageId; // page that is already allocated
 } pager_data;
 
 typedef struct {

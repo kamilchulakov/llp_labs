@@ -42,11 +42,13 @@ db_handler* create_db_handler(char* filename, FILE* fp, pager_data* header) {
 pager_data* create_header() {
     pager_data* header = malloc(sizeof(pager_data));
     header->mem = create_mem_info();
-    header->page_id_seq = 1;
+    header->pageIdSeq = 1;
     header->lastCollectionPage = -1;
-    header->first_free_collection_page_id = -1;
+    header->firstFreeCollectionPageId = -1;
     header->lastDocumentPage = -1;
-    header->first_free_document_page_id = -1;
+    header->firstFreeDocumentPageId = -1;
+    header->firstFreeStringPageId = -1;
+    header->lastStringPage = -1;
     return header;
 }
 
@@ -69,8 +71,8 @@ int debug_mem_info(db_handler* db_handler) {
 }
 
 uint32_t get_and_set_page_id(db_handler* db_handler) {
-    uint32_t curr_page_id = db_handler->pagerData->page_id_seq;
-    db_handler->pagerData->page_id_seq = curr_page_id + 1;
+    uint32_t curr_page_id = db_handler->pagerData->pageIdSeq;
+    db_handler->pagerData->pageIdSeq = curr_page_id + 1;
     db_handler->pagerData->mem->allocated_mem += PAGE_SIZE;
     write_db_header(db_handler->fp, db_handler->pagerData);
     return curr_page_id;

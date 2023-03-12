@@ -29,12 +29,8 @@ void test_bool(FILE* fp) {
 
 void test_split_string() {
     print_running_test("test_split_string");
-    string* str = string_of("1) THIS IS REALLY BIG STRING I MEAN HUGE I MEAN YOU TOTALLY KNOW IT\n"
-                            "2) THIS IS REALLY BIG STRING I MEAN HUGE I MEAN YOU TOTALLY KNOW IT\n"
-                            "3) THIS IS REALLY BIG STRING I MEAN HUGE I MEAN YOU TOTALLY KNOW IT\n"
-                            "4) THIS IS REALLY BIG STRING I MEAN HUGE I MEAN YOU TOTALLY KNOW IT\n"
-                            "5) THIS IS REALLY BIG STRING I MEAN HUGE I MEAN YOU TOTALLY KNOW IT\n"
-                            "6) THIS IS REALLY BIG STRING I MEAN HUGE I MEAN YOU TOTALLY KNOW IT\n");
+
+    string* str = bigString();
     string_part* parts = split_string(str, 0);
 
     int count = 1;

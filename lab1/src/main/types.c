@@ -53,8 +53,17 @@ string* string_of(char* ch) {
     return str;
 }
 
-bool string_equals(void* first, void* second) {
-    return ((string *) first)->len == ((string *) second)->len && strcmp(((string *) first)->ch, ((string *) second)->ch) == 0;
+string* string_of_len(size_t len) {
+    string* str = malloc(sizeof(string));
+    if (str == NULL) return NULL;
+    str->len = len;
+    str->ch = malloc(sizeof(char)*len);
+    if (str->ch == NULL) return NULL;
+    return str;
+}
+
+bool string_equals(string* first, string* second) {
+    return first->len == second->len && strcmp(first->ch, second->ch) == 0;
 }
 
 string_part* split_string(string* str, size_t start) {
@@ -87,7 +96,9 @@ READ_STATUS read_string_split(FILE* fp, string_part *part) {
 }
 
 READ_STATUS read_string_header_in_document(FILE* fp, string_part *part) {
-    return read_uint(fp, &part->pageId);
+    if (read_uint(fp, &part->pageId) != READ_OK || fread(&(part->len), sizeof(size_t), 1, fp) != 1)
+        return READ_ERROR;
+    return READ_OK;
 }
 
 WRITE_STATUS write_string_split(FILE* fp, string_part *part) {
@@ -99,7 +110,9 @@ WRITE_STATUS write_string_split(FILE* fp, string_part *part) {
 }
 
 WRITE_STATUS write_string_header_in_document(FILE* fp, string_part* part) {
-    return write_uint(fp, &part->pageId);
+    if (write_uint(fp, &part->pageId) != WRITE_OK || fwrite(&(part->len), sizeof(size_t), 1, fp) != 1)
+        return WRITE_ERROR;
+    return WRITE_OK;
 }
 
 READ_STATUS read_uint(FILE* fp, uint32_t* val) {
