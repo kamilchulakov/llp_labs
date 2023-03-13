@@ -1,4 +1,4 @@
-add_library(benchmarks STATIC mem.c)
+add_library(benchmarks STATIC mem.c util.c util.h speed.c speed.h)
 target_link_libraries(benchmarks db tests)
 add_executable(bench bench.c)
 target_link_libraries(bench benchmarks)

@@ -1,38 +1,9 @@
 #include <sys/stat.h>
 
 #include "mem.h"
-#include "../main/query_executor.h"
 #include "../test/test.h"
 #include "../main/pager.h"
-
-void insert_schema(db_handler* db) {
-    create_schema_query query = {new_collection(string_of("mem"), new_schema(4))};
-    query.col->sch->fields[0].e_type = INT32;
-    query.col->sch->fields[0].e_name = string_of("int_field");
-    query.col->sch->fields[1].e_type = BOOLEAN;
-    query.col->sch->fields[1].e_name = string_of("bool_field");
-    query.col->sch->fields[2].e_type = DOUBLE;
-    query.col->sch->fields[2].e_name = string_of("double_field");
-    query.col->sch->fields[3].e_type = STRING;
-    query.col->sch->fields[3].e_name = string_of("string_field");
-    create_schema(db, &query);
-}
-
-void insert_documents(db_handler* db, int amount) {
-    insert_query query = {NULL, string_of("mem"), create_document(0)};
-    for (int i = 0; i < amount; ++i) {
-        query.doc = create_document(4);
-        query.doc->data.elements[0] = *create_element(INT32, "int_field");
-        query.doc->data.elements[0].int_data = i;
-        query.doc->data.elements[1] = *create_element(BOOLEAN, "bool_field");
-        query.doc->data.elements[1].bool_data = i % 2;
-        query.doc->data.elements[2] = *create_element(DOUBLE, "double_field");
-        query.doc->data.elements[2].double_data = ((double) i) / 3;
-        query.doc->data.elements[3] = *create_element(STRING, "string_field");
-        query.doc->data.elements[3].string_data = bigString();
-        collection_insert(db, &query);
-    }
-}
+#include "util.h"
 
 void check_free_document_pages(db_handler* db, int amount) {
     uint32_t currPg = db->pagerData->firstFreeDocumentPageId;
@@ -62,11 +33,6 @@ void check_free_string_pages(db_handler* db, int amount) {
     assert(count >= amount);
 }
 
-void clear_all_documents(db_handler* db) {
-    find_query findQuery = {string_of("mem"), NULL};
-    collection_remove(db, &findQuery);
-}
-
 __off_t get_mem() {
     struct stat st;
     stat("bench-mem", &st);
@@ -77,11 +43,14 @@ void bench_mem(int loops, int amount) {
     print_running("BENCHMARK MEMORY USAGE");
 
     db_handler* db = open_db_file("bench-mem");
+
     insert_schema(db);
+    off_t* memes = malloc(2 * loops * sizeof(off_t));
 
     for (int i = 0; i < loops; ++i) {
         printf("LOOP #%d\n", i+1);
         insert_documents(db, amount);
+        memes[2 * i] = get_mem();
         printf("MEM: after insert: %ld\n", get_mem());
         check_free_document_pages(db, 0);
         check_free_string_pages(db, 0);
@@ -93,12 +62,19 @@ void bench_mem(int loops, int amount) {
         check_free_string_pages(db, (i+1)*2*amount);
 
         insert_documents(db, (i+1)*amount);
+        memes[2 * i + 1] = get_mem();
         printf("MEM: after insert: %ld\n", get_mem());
         check_free_document_pages(db, 0);
         check_free_string_pages(db, 0);
         assert(db->pagerData->pageIdSeq == (i+1)*3*amount+2);
         printf("__________________________\n");
     }
+
+    printf("RESULT:\n");
+    for (int i = 0; i < loops; ++i) {
+        printf("%d,%ld,%ld\n", i+1, memes[2 * i], memes[2 * i + 1]);
+    }
+    printf("__________________________\n");
 
     utilize_db_file(db);
 }

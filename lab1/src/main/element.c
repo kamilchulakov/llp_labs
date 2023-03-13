@@ -67,6 +67,7 @@ element_filter* create_element_filter(
     if (flt == NULL) return NULL;
     flt->type = op_type;
     flt->el = el;
+    flt->nxt = NULL;
     return flt;
 }
 

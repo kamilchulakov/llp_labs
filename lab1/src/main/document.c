@@ -107,7 +107,8 @@ schema* schema_from_document(document* doc) {
 bool document_satisfies_element_filter(document* doc, element_filter* filter) {
     if (doc == NULL) return false;
     element *el = NULL;
-    for (int i = 0; i < doc->data.count; ++i) {
+    int count = (int) doc->data.count;
+    for (int i = 0; i < count; ++i) {
         if (field_equals(doc->data.elements[i].e_field, filter->el->e_field) == true) {
             el = doc->data.elements+i;
             break;
