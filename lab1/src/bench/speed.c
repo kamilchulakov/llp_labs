@@ -15,12 +15,10 @@ void bench_speed(int loops, int amount) {
 
     for (int i = 0; i < loops; ++i) {
         clock_t beforeInsert = clock();
-        insert_documents(db, amount);
-        clock_t afterInsert = clock();
-        collection_find_all(db);
-        clock_t afterFindAll = clock();
-        collection_find_true(db);
-        clock_t afterFindTrue = clock();
+        clock_t afterInsert, afterFindAll, afterFindTrue;
+        insert_documents(db, amount, &afterInsert);
+        collection_find_all(db, &afterFindAll);
+        collection_find_true(db, &afterFindTrue);
 
         insertDocumentsTime[i] = ((double) (afterInsert - beforeInsert)) / CLOCKS_PER_SEC;
         findAllTime[i] = ((double) (afterFindAll - afterInsert)) / CLOCKS_PER_SEC;
@@ -34,4 +32,8 @@ void bench_speed(int loops, int amount) {
     printf("__________________________\n");
 
     utilize_db_file(db);
+
+    free(insertDocumentsTime);
+    free(findAllTime);
+    free(findTrueTime);
 }

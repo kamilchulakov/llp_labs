@@ -25,6 +25,8 @@ document* copy_document(document* doc, uint32_t elementsFrom, uint32_t elementsT
         goodElementsTo = doc->data.count - 1;
 
     document* res = create_document(goodElementsTo - elementsFrom + 1);
+    res->data.nextPage = doc->data.nextPage;
+    res->data.nextDoc = doc->data.nextDoc;
     for (uint32_t i = elementsFrom; i <= goodElementsTo; ++i) {
         res->data.elements[i - elementsFrom] = doc->data.elements[i];
     }
@@ -42,6 +44,36 @@ document* copy_document(document* doc, uint32_t elementsFrom, uint32_t elementsT
 
 void free_document(document* doc) {
     for (size_t i = 0; i < (size_t) doc->data.count; ++i) {
+        free_field(doc->data.elements[i].e_field);
+        doc->data.elements[i].e_field = NULL;
+    }
+    free(doc->data.elements);
+    free(doc);
+}
+
+void free_document_with_strings(document* doc) {
+    for (size_t i = 0; i < (size_t) doc->data.count; ++i) {
+        if (doc->data.elements[i].e_field->e_type == STRING) {
+            free_string(doc->data.elements[i].string_data);
+        }
+        free_field(doc->data.elements[i].e_field);
+        doc->data.elements[i].e_field = NULL;
+    }
+    free(doc->data.elements);
+    free(doc);
+}
+
+void free_document_with_string_parts(document* doc) {
+    for (size_t i = 0; i < (size_t) doc->data.count; ++i) {
+        if (doc->data.elements[i].e_field->e_type == STRING) {
+            string_part* curr = doc->data.elements[i].string_split;
+            while (curr) {
+                string_part* prev = curr;
+                curr = prev->nxt;
+                free_string(prev->part);
+                free(prev);
+            }
+        }
         free_field(doc->data.elements[i].e_field);
         doc->data.elements[i].e_field = NULL;
     }

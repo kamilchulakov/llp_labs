@@ -3,7 +3,6 @@
 WRITE_STATUS write_schema_data(FILE* fp, schema* sch) {
     for (uint32_t i = 0; i < sch->field_count; ++i) {
         if (write_field(fp, &sch->fields[i]) != READ_OK) {
-            // FREE
             return WRITE_ERROR;
         }
     }
@@ -24,7 +23,6 @@ READ_STATUS read_fields(FILE* fp, schema* sch) {
     for (uint32_t i = 0; i < sch->field_count; ++i) {
         sch->fields[i].e_name = malloc(sizeof(string));
         if (read_field(fp, &sch->fields[i]) != READ_OK) {
-            // FREE
             return READ_ERROR;
         }
     }

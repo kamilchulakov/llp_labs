@@ -14,4 +14,6 @@ query_result collection_insert(db_handler* db, insert_query* query);
 query_result collection_remove(db_handler* db, find_query* query);
 query_result collection_update(db_handler* db, update_query* query);
 
+void free_result(query_result res);
+
 #endif //APP_QUERY_EXECUTOR_H

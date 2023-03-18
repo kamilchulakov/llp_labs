@@ -49,7 +49,7 @@ void bench_mem(int loops, int amount) {
 
     for (int i = 0; i < loops; ++i) {
         printf("LOOP #%d\n", i+1);
-        insert_documents(db, amount);
+        insert_documents(db, amount, NULL);
         memes[2 * i] = get_mem();
         printf("MEM: after insert: %ld\n", get_mem());
         check_free_document_pages(db, 0);
@@ -61,7 +61,7 @@ void bench_mem(int loops, int amount) {
         check_free_document_pages(db, (i+1)*amount);
         check_free_string_pages(db, (i+1)*2*amount);
 
-        insert_documents(db, (i+1)*amount);
+        insert_documents(db, (i + 1) * amount, NULL);
         memes[2 * i + 1] = get_mem();
         printf("MEM: after insert: %ld\n", get_mem());
         check_free_document_pages(db, 0);

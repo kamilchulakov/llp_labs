@@ -248,8 +248,10 @@ READ_STATUS read_document_strings(db_handler* db, document* doc) {
             if (el->string_split->len == 0) return READ_ERROR;
             string* original = string_of_len(el->string_split->len);
             string_part* curr = el->string_split;
-            if (read_string_paged(db, original, curr) != READ_OK)
+            if (read_string_paged(db, original, curr) != READ_OK) {
+                free_string(original);
                 return READ_ERROR;
+            }
             el->string_data = original;
         }
     }
@@ -302,12 +304,18 @@ WRITE_STATUS write_document_to_page(db_handler* db, uint32_t page_id, document* 
 
     debug("pager.WRITE_DOCUMENT_TO_PAGE: page(id=%d)\n", page_id);
 
-    split_document_strings(db, doc);
+    document* copy = copy_document(doc, 0, doc->data.count, true);
+
+    split_document_strings(db, copy);
     fseek(db->fp, calc_page_offset(page_id)+sizeof(page), SEEK_SET);
-    if (write_document_header(db->fp, doc) != WRITE_OK ||
-        write_document_data(db->fp, doc) != WRITE_OK)
+    if (write_document_header(db->fp, copy) != WRITE_OK ||
+        write_document_data(db->fp, copy) != WRITE_OK) {
+        free_document_with_string_parts(copy);
         return WRITE_ERROR;
-    return write_document_strings(db, doc);
+    }
+    WRITE_STATUS res = write_document_strings(db, copy);
+    // free_document_with_string_parts(doc);
+    return res;
 }
 
 WRITE_STATUS write_document_header_to_page(db_handler* db, uint32_t pageId, document* doc) {
@@ -357,7 +365,7 @@ collection* get_collection(db_handler* handler, uint32_t page_id) {
     fseek(handler->fp, calc_page_offset(page_id)+sizeof(page), SEEK_SET);
     collection* col = empty_collection();
     if (read_collection(handler->fp, col) == READ_ERROR) {
-        // FREE
+        free(col);
         return NULL;
     }
     return col;
@@ -368,7 +376,7 @@ document* get_document(db_handler* db, uint32_t page_id) {
     document* doc = malloc(sizeof(document));
     if (read_document(db->fp, doc) != READ_OK ||
         read_document_strings(db, doc) != READ_OK) {
-        free_document(doc);
+        free(doc);
         return NULL;
     }
 

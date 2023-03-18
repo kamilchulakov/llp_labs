@@ -44,6 +44,27 @@ query_result document_list_result(document_list* lst) {
     return (query_result) {DATA_RESULT_TYPE, .data = document_list_data(lst)};
 }
 
+void free_result(query_result res) {
+    if (res.type == DATA_RESULT_TYPE) {
+        if (res.data->type == DOCUMENT_LIST_RESULT_TYPE) {
+            document_list* curr = res.data->documents;
+            while (curr && curr->currDoc) {
+                document_list* prev = curr;
+                curr = curr->nxt;
+
+                free_document_with_strings(prev->currDoc);
+                free(prev);
+            }
+        }
+
+        if (res.data->type == COLLECTION_RESULT_TYPE) {
+            free_collection(res.data->col);
+        }
+
+        free(res.data);
+    }
+}
+
 query_result get_collection_or_schema_by_name(db_handler* db, string* col, bool returnCollection) {
     uint32_t collection_page_id = db->pagerData->lastCollectionPage;
     if (collection_page_id == -1) return nok();

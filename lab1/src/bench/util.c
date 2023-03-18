@@ -11,11 +11,12 @@ void insert_schema(db_handler* db) {
     query.col->sch->fields[2].e_name = string_of("double_field");
     query.col->sch->fields[3].e_type = STRING;
     query.col->sch->fields[3].e_name = string_of("string_field");
-    create_schema(db, &query);
+    query_result res = create_schema(db, &query);
+//    free_result(res);
     free_collection(query.col);
 }
 
-void insert_documents(db_handler* db, int amount) {
+void insert_documents(db_handler *db, int amount, clock_t *time) {
     insert_query query = {NULL, string_of("mem"), NULL};
     for (int i = 0; i < amount; ++i) {
         query.doc = create_document(4);
@@ -27,40 +28,38 @@ void insert_documents(db_handler* db, int amount) {
         query.doc->data.elements[2].double_data = ((double) i) / 3;
         query.doc->data.elements[3] = *create_element(STRING, "string_field");
         query.doc->data.elements[3].string_data = bigString();
-        collection_insert(db, &query);
-        free_document(query.doc);
+        query_result res = collection_insert(db, &query);
+        *time = clock();
+        free_result(res);
+//        free_document_with_strings(query.doc);
     }
 }
 
-void free_result(query_result res) {
-    if (res.type == DATA_RESULT_TYPE) {
-        if (res.data->type == DOCUMENT_LIST_RESULT_TYPE) {
-            document_list* curr = res.data->documents;
-            while (curr && curr->currDoc) {
-                document_list* prev = curr;
-                curr = curr->nxt;
-
-                free(prev);
-            }
-        }
-        free(res.data);
-    }
-}
-
-void collection_find_all(db_handler* db) {
+void collection_find_all(db_handler *db, clock_t* time) {
     find_query findQuery = {string_of("mem"), NULL};
-    free_result(collection_find(db, &findQuery));
+    query_result res = collection_find(db, &findQuery);
+    *time = clock();
+//    free_result(res);
+    free_string(findQuery.collection);
 }
 
-void collection_find_true(db_handler* db) {
+void collection_find_true(db_handler *db, clock_t *time) {
     find_query findQuery = {string_of("mem"), malloc(sizeof(complex_filter))};
     findQuery.filters->type = ELEMENT_FILTER;
     findQuery.filters->el_filter = create_element_filter(CMP_EQ,create_element(BOOLEAN, "bool_field"));
     findQuery.filters->el_filter->el->bool_data = true;
-    free_result(collection_find(db, &findQuery));
+    query_result res = collection_find(db, &findQuery);
+    *time = clock();
+    free_result(res);
+    free_string(findQuery.collection);
+    free_field(findQuery.filters->el_filter->el->e_field);
+    free(findQuery.filters->el_filter->el);
+    free(findQuery.filters->el_filter);
+    free(findQuery.filters);
 }
 
 void clear_all_documents(db_handler* db) {
     find_query findQuery = {string_of("mem"), NULL};
     collection_remove(db, &findQuery);
+    free_string(findQuery.collection);
 }

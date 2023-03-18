@@ -28,6 +28,8 @@ struct document {
 document* create_document(uint32_t elements);
 document* copy_document(document* doc, uint32_t elementsFrom, uint32_t elementsTo, bool withHeader);
 void free_document(document* doc);
+void free_document_with_strings(document* doc);
+void free_document_with_string_parts(document* doc);
 
 WRITE_STATUS write_document(FILE* fp, document* doc);
 WRITE_STATUS write_document_data(FILE* fp, document* doc);
