@@ -1,11 +1,14 @@
 #include "schema.h"
 
-WRITE_STATUS write_schema_data(FILE* fp, schema* sch_data) {
-    if (fwrite(sch_data->fields, sizeof(field),
-               sch_data->field_count, fp) == sch_data->field_count)
-        return WRITE_OK;
-    else
-        return WRITE_ERROR;
+WRITE_STATUS write_schema_data(FILE* fp, schema* sch) {
+    for (uint32_t i = 0; i < sch->field_count; ++i) {
+        if (write_field(fp, &sch->fields[i]) != READ_OK) {
+            // FREE
+            return WRITE_ERROR;
+        }
+    }
+
+    return WRITE_OK;
 }
 
 WRITE_STATUS write_schema(FILE* fp, schema* sch) {
@@ -18,8 +21,10 @@ READ_STATUS read_fields(FILE* fp, schema* sch) {
     sch->fields = malloc(sizeof(field)*sch->field_count);
     if (sch->fields == NULL) return READ_ERROR;
 
-    for (int i = 0; i < sch->field_count; ++i) {
-        if (read_field(fp, &sch->fields[i]) == READ_ERROR) {
+    for (uint32_t i = 0; i < sch->field_count; ++i) {
+        sch->fields[i].e_name = malloc(sizeof(string));
+        if (read_field(fp, &sch->fields[i]) != READ_OK) {
+            // FREE
             return READ_ERROR;
         }
     }
@@ -66,4 +71,12 @@ schema* new_schema(uint32_t field_count) {
     if (res->fields == NULL) return NULL;
     res->field_count = field_count;
     return res;
+}
+
+void free_schema(schema* sch) {
+    for (uint32_t i = 0; i < sch->field_count; ++i) {
+        free_string(sch->fields[i].e_name);
+    }
+    free(sch->fields);
+    free(sch);
 }

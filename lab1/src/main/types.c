@@ -48,9 +48,11 @@ size_t string_size(string* str) {
 string* string_of(char* ch) {
     string* str = malloc(sizeof(string));
     if (str == NULL) return NULL;
-    if (ch != NULL)
+    if (ch != NULL) {
         str->len = strlen(ch);
-    str->ch = ch;
+        str->ch = malloc(sizeof(char) * str->len);
+        str->ch = strcpy(str->ch, ch);
+    }
     return str;
 }
 
@@ -68,6 +70,11 @@ bool string_equals(string* first, string* second) {
     if (first->len == second->len && strcmp(first->ch, second->ch) == 0)
         return true;
     return false;
+}
+
+void free_string(string* str) {
+    free(str->ch);
+    free(str);
 }
 
 string_part* split_string(string* str, size_t start) {

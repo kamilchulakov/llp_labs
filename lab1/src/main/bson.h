@@ -14,5 +14,6 @@ READ_STATUS read_field(FILE* fp, field* e_field);
 WRITE_STATUS write_field(FILE* fp, field* e_field);
 field* empty_field();
 bool field_equals(field* first, field* second);
+void free_field(field* e_field);
 
 #endif

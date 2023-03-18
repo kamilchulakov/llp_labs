@@ -29,6 +29,7 @@ string* string_of(char* ch);
 string* string_of_len(size_t len);
 size_t string_size(string* str);
 bool string_equals(string* first, string* second);
+void free_string(string* str);
 
 string_part* split_string(string* str, size_t start);
 READ_STATUS read_string_split(FILE* fp, string_part *part);

@@ -42,8 +42,7 @@ document* copy_document(document* doc, uint32_t elementsFrom, uint32_t elementsT
 
 void free_document(document* doc) {
     for (size_t i = 0; i < (size_t) doc->data.count; ++i) {
-        free(doc->data.elements[i].e_field->e_name);
-        free(doc->data.elements[i].e_field);
+        free_field(doc->data.elements[i].e_field);
         doc->data.elements[i].e_field = NULL;
     }
     free(doc->data.elements);
@@ -95,7 +94,10 @@ READ_STATUS read_document_data(FILE* fp, document* doc) {
         read_uint(fp, &doc->data.nextPage) != READ_OK) return READ_ERROR;
     doc->data.elements = malloc(sizeof(element)*doc->data.count);
     for (int i = 0; i < doc->data.count; ++i) {
-        if (read_element(fp, doc->data.elements+i) != READ_OK) return READ_ERROR;
+        if (read_element(fp, &(doc->data.elements[i])) != READ_OK) {
+            free(doc->data.elements);
+            return READ_ERROR;
+        }
     }
     return READ_OK;
 }

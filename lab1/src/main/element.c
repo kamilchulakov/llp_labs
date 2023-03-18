@@ -54,9 +54,10 @@ WRITE_STATUS write_element(FILE* fp, element* el) {
 READ_STATUS read_element(FILE* fp, element* el) {
     el->e_field = empty_field();
     if (el->e_field == NULL) return READ_ERROR;
-    if (read_field(fp, el->e_field) != READ_OK)
+    if (read_field(fp, el->e_field) != READ_OK) {
+        free_field(el->e_field);
         return READ_ERROR;
-    else
+    } else
         return read_element_data(fp, el);
 }
 

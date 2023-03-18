@@ -15,5 +15,6 @@ typedef struct {
 collection* new_collection(string* name, schema* sch);
 WRITE_STATUS write_collection(FILE* fp, collection *col);
 READ_STATUS read_collection(FILE* fp, collection* col);
+void free_collection(collection* col);
 
 #endif //ENORMEDB_COLLECTION_H

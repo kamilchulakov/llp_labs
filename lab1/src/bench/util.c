@@ -12,6 +12,7 @@ void insert_schema(db_handler* db) {
     query.col->sch->fields[3].e_type = STRING;
     query.col->sch->fields[3].e_name = string_of("string_field");
     create_schema(db, &query);
+    free_collection(query.col);
 }
 
 void insert_documents(db_handler* db, int amount) {

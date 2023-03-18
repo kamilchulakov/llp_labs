@@ -35,3 +35,9 @@ READ_STATUS read_collection(FILE* fp, collection* col) {
         return READ_ERROR;
     return read_schema(fp, col->sch);
 }
+
+void free_collection(collection* col) {
+    free_string(col->name);
+    free_schema(col->sch);
+    free(col);
+}

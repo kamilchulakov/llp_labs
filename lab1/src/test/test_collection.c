@@ -5,10 +5,10 @@ void test_collection_write_and_read(db_handler* db) {
     collection* col = new_collection(string_of("bob"), new_schema(1));
     field fld = {.e_name = string_of("field"), .e_type = STRING};
     col->sch->fields[0] = fld;
-    fseek(db->fp, 0, SEEK_SET);
+    seek_db_header(db->fp);
     assert(write_collection(db->fp, col) == WRITE_OK);
     collection* col2 = new_collection(string_of("not bob"), new_schema(0));
-    fseek(db->fp, 0, SEEK_SET);
+    seek_db_header(db->fp);
     assert(read_collection(db->fp,col2) == READ_OK);
     assert(string_equals(col->name, col2->name));
 }
