@@ -15,7 +15,7 @@ void insert_schema(db_handler* db) {
 }
 
 void insert_documents(db_handler* db, int amount) {
-    insert_query query = {NULL, string_of("mem"), create_document(0)};
+    insert_query query = {NULL, string_of("mem"), NULL};
     for (int i = 0; i < amount; ++i) {
         query.doc = create_document(4);
         query.doc->data.elements[0] = *create_element(INT32, "int_field");
@@ -27,6 +27,7 @@ void insert_documents(db_handler* db, int amount) {
         query.doc->data.elements[3] = *create_element(STRING, "string_field");
         query.doc->data.elements[3].string_data = bigString();
         collection_insert(db, &query);
+        free_document(query.doc);
     }
 }
 

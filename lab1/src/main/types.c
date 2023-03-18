@@ -102,8 +102,9 @@ READ_STATUS read_string_split(FILE* fp, string_part *part) {
 }
 
 READ_STATUS read_string_header_in_document(FILE* fp, string_part *part) {
-    if (read_uint(fp, &part->pageId) != READ_OK || fread(&(part->len), sizeof(size_t), 1, fp) != 1)
+    if (read_uint(fp, &part->pageId) != READ_OK || fread(&(part->len), sizeof(size_t), 1, fp) != 1) {
         return READ_ERROR;
+    }
     return READ_OK;
 }
 

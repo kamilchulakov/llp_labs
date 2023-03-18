@@ -119,7 +119,10 @@ page* get_page(db_handler* db_handler, uint32_t page_id) {
     if (page_id < 1) return NULL;
     page* pg = malloc(sizeof(page));
     fseek(db_handler->fp, calc_page_offset(page_id), SEEK_SET);
-    if (fread(pg, sizeof(page), 1, db_handler->fp) != 1) return NULL;
+    if (fread(pg, sizeof(page), 1, db_handler->fp) != 1) {
+        free(pg);
+        return NULL;
+    }
     return pg;
 }
 
@@ -224,8 +227,11 @@ string_part* read_string_split_by_page(db_handler* db, uint32_t pageId) {
 READ_STATUS read_string_paged(db_handler* db, string* toRead, string_part* part) {
     if (toRead == NULL || toRead->ch == NULL || toRead->len != part->len) return READ_ERROR;
     string_part* curr = part;
-    curr->part = string_of_len(0);
     while (curr->pageId > 0) {
+        if (curr->part == NULL) {
+            curr->part = malloc(sizeof(string));
+            if (curr->part == NULL) break;
+        }
         if (read_string_split_page(db, curr) != READ_OK)
             return READ_ERROR;
         curr->pageId = curr->nxtPageId;
@@ -350,21 +356,31 @@ collection* empty_collection() {
 collection* get_collection(db_handler* handler, uint32_t page_id) {
     fseek(handler->fp, calc_page_offset(page_id)+sizeof(page), SEEK_SET);
     collection* col = empty_collection();
-    if (read_collection(handler->fp, col) == READ_ERROR) return NULL;
+    if (read_collection(handler->fp, col) == READ_ERROR) {
+        // FREE
+        return NULL;
+    }
     return col;
 }
 
 document* get_document(db_handler* db, uint32_t page_id) {
     fseek(db->fp, calc_page_offset(page_id)+sizeof(page), SEEK_SET);
     document* doc = malloc(sizeof(document));
-    if (read_document(db->fp, doc) == READ_ERROR) return NULL;
-    if (read_document_strings(db, doc) != READ_OK)
+    if (read_document(db->fp, doc) != READ_OK ||
+        read_document_strings(db, doc) != READ_OK) {
+        free_document(doc);
         return NULL;
+    }
+
     document* curr = doc;
     while (curr->data.nextPage != -1) {
         curr->data.nextDoc = get_document(db, curr->data.nextPage);
         curr = curr->data.nextDoc;
-        if (curr == NULL) return NULL;
+        if (curr == NULL) {
+            // FREE others
+            free_document(doc);
+            return NULL;
+        }
     }
     return doc;
 }

@@ -4,7 +4,7 @@
 
 document* create_document(uint32_t elements) {
     document* doc = malloc(sizeof(document));
-    if (doc) {
+    if (doc != NULL) {
         doc->parentPage=-1;
         doc->childPage=-1;
         doc->prevBrotherPage=-1;
@@ -38,6 +38,16 @@ document* copy_document(document* doc, uint32_t elementsFrom, uint32_t elementsT
         res->parentPage =         doc->parentPage;
     }
     return res;
+}
+
+void free_document(document* doc) {
+    for (size_t i = 0; i < (size_t) doc->data.count; ++i) {
+        free(doc->data.elements[i].e_field->e_name);
+        free(doc->data.elements[i].e_field);
+        doc->data.elements[i].e_field = NULL;
+    }
+    free(doc->data.elements);
+    free(doc);
 }
 
 WRITE_STATUS write_document_header(FILE* fp, document* doc) {
@@ -99,9 +109,18 @@ READ_STATUS read_document(FILE* fp, document* doc) {
 schema* schema_from_document(document* doc) {
     schema* sch = new_schema(doc->data.count);
     for (size_t i = 0; i < doc->data.count; i++) {
-        sch->fields[i] = *doc->data.elements[i].e_field;
+        sch->fields[i].e_type = doc->data.elements[i].e_field->e_type;
+        sch->fields[i].e_name = string_of(doc->data.elements[i].e_field->e_name->ch);
     }
     return sch;
+}
+
+bool schema_equals_document(schema* first, document* doc) {
+    schema* second = schema_from_document(doc);
+    bool res = schema_equals(first, second);
+//    free(second->fields);
+//    free(second);
+    return res;
 }
 
 bool document_satisfies_element_filter(document* doc, element_filter* filter) {

@@ -19,7 +19,10 @@ field* empty_field() {
     field* fld = malloc(sizeof(field));
     if (fld == NULL) return NULL;
     fld->e_name = malloc(sizeof(string));
-    if (fld->e_name == NULL) return NULL;
+    if (fld->e_name == NULL) {
+        // FREE
+        return NULL;
+    }
     return fld;
 }
 

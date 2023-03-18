@@ -50,9 +50,12 @@ bool schema_equals(schema* first, schema* second) {
                 }
             }
         }
-        if (find == false)
+        if (find == false) {
+            free(field_is_used);
             return false;
+        }
     }
+    free(field_is_used);
     return true;
 }
 

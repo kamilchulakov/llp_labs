@@ -101,13 +101,13 @@ query_result collection_insert(db_handler* db, insert_query* query) {
     document* doc = query->doc;
     query_result res = get_collection_or_schema_by_name(db, query->collection, true);
     if (res.type != DATA_RESULT_TYPE || res.data->type != COLLECTION_RESULT_TYPE) {
-        debug("collection not found\n");
+        debug("executor.INSERT_DOCUMENT: collection not found\n");
         return nok();
     }
 
     schema* sch = res.data->col->sch;
-    if (schema_equals(sch, schema_from_document(doc)) == false) {
-        debug("document schema is different from collection schema\n");
+    if (schema_equals_document(sch, doc) == false) {
+        debug("executor.INSERT_DOCUMENT: document schema is different from collection schema\n");
         return nok();
     }
 
@@ -136,7 +136,7 @@ query_result collection_insert(db_handler* db, insert_query* query) {
     } else {
         document* parentDoc = get_document_header(db, query->parent->parent_id);
         if (parentDoc == NULL) {
-            debug("no parent document(id=%d)\n", query->parent->parent_id);
+            debug("executor.INSERT_DOCUMENT: no parent document(id=%d)\n", query->parent->parent_id);
             return nok();
         }
 
@@ -215,14 +215,17 @@ query_result collection_find(db_handler* db, find_query* query) {
 
         document* doc = get_document(db, pg->page_id);
 
+        if (doc == NULL) break;
+
         if (document_satisfies_filter(doc, query->filters) == true) {
             currNode->currDoc = doc;
             currNode->pageId = pg->page_id;
             currNode->nxt = malloc(sizeof(document_list));
             currNode = currNode->nxt;
+            pg = get_page(db, doc->prevCollectionDocument);
+        } else {
+            pg = get_page(db, doc->prevCollectionDocument);
         }
-
-        pg = get_page(db, doc->prevCollectionDocument);
     }
     debug("__________________________________\n");
     return document_list_result(resList);

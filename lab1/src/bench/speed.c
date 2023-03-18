@@ -33,5 +33,5 @@ void bench_speed(int loops, int amount) {
     }
     printf("__________________________\n");
 
-    //utilize_db_file(db);
+    utilize_db_file(db);
 }

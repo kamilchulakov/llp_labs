@@ -27,6 +27,7 @@ struct document {
 
 document* create_document(uint32_t elements);
 document* copy_document(document* doc, uint32_t elementsFrom, uint32_t elementsTo, bool withHeader);
+void free_document(document* doc);
 
 WRITE_STATUS write_document(FILE* fp, document* doc);
 WRITE_STATUS write_document_data(FILE* fp, document* doc);
@@ -36,6 +37,7 @@ READ_STATUS read_document(FILE* fp, document* doc);
 READ_STATUS read_document_header(FILE* fp, document* doc);
 
 schema* schema_from_document(document* doc);
+bool schema_equals_document(schema* first, document* doc);
 
 bool document_satisfies_filter(document* doc, complex_filter* filter);
 
