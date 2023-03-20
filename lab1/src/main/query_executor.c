@@ -94,8 +94,11 @@ query_result get_schema(db_handler* db, get_schema_query* query) {
 query_result create_schema(db_handler* db, create_schema_query* query) {
     debug("executor.CREATE_SCHEMA: collection=%s\n", query->col->name->ch);
     page* pg = get_free_collection_page(db);
-    if (write_collection_to_page(db, pg->page_id, query->col) == WRITE_OK)
+    if (write_collection_to_page(db, pg->page_id, query->col) == WRITE_OK) {
+        free(pg);
         return ok();
+    }
+    free(pg);
     return nok();
 }
 

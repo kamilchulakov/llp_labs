@@ -2,6 +2,7 @@
 
 page* create_empty_page(uint32_t page_id) {
     page* pg = malloc(sizeof(page));
+    if (pg == NULL) return NULL;
     pg->page_id = page_id;
     pg->is_full = false;
     pg->prevPageId = -1;

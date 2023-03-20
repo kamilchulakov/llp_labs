@@ -4,7 +4,7 @@
 
 #define MAX_DOCUMENT_DATA_SIZE (size_t) ((PAGE_SIZE - sizeof(page) - sizeof(document)) / sizeof(element))
 
-page* write_page(db_handler *db, const page *pg);
+page* write_page(db_handler *db, page *pg);
 
 long calc_page_offset(uint32_t page_id) {
     return (long) db_header_size() + PAGE_SIZE * page_id;
@@ -41,16 +41,18 @@ page* allocate_page_typed(db_handler* db, page_type type) {
             break;
         default:
             debug("pager.ALLOCATE_PAGE: unsupported page type\n");
+            free(pg);
             exit(-1);
     }
     return write_page(db, pg);
 }
 
-page* write_page(db_handler *db, const page *pg) {
+page* write_page(db_handler *db, page *pg) {
     debug("pager.WRITE_PAGE: page(id=%d)\n", pg->page_id);
     fseek(db->fp, calc_page_offset(pg->page_id), SEEK_SET);
     if (fwrite(pg, sizeof(page), 1, db->fp) == 1)
-        return (page*) pg;
+        return pg;
+    free(pg);
     return NULL;
 }
 
@@ -66,8 +68,12 @@ page* get_free_collection_page(db_handler* handler) {
         if (pg->prevPageId != -1) {
             page* pgToUpdate = get_page(handler, pg->prevPageId);
             pgToUpdate->nextPageId = pg->page_id;
-            if (write_page(handler, pgToUpdate) == NULL)
+            if (write_page(handler, pgToUpdate) == NULL) {
+                free(pg);
+                free(pgToUpdate);
                 return NULL;
+            }
+            free(pgToUpdate);
         }
         return pg;
     }

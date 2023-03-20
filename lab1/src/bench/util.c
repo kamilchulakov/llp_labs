@@ -12,7 +12,7 @@ void insert_schema(db_handler* db) {
     query.col->sch->fields[3].e_type = STRING;
     query.col->sch->fields[3].e_name = string_of("string_field");
     query_result res = create_schema(db, &query);
-//    free_result(res);
+    free_result(res);
     free_collection(query.col);
 }
 

@@ -1,4 +1,4 @@
-set(CMAKE_C_FLAGS "-DDEBUG")
+set(CMAKE_C_FLAGS "-g -DDEBUG")
 add_library(
         db
         STATIC
