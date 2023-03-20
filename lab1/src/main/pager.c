@@ -92,8 +92,11 @@ page* get_free_document_page(db_handler* db) {
     if (pg->prevPageId != -1) {
         page* pgToUpdate = get_page(db, pg->prevPageId);
         pgToUpdate->nextPageId = pg->page_id;
-        if (write_page(db, pgToUpdate) == NULL)
+        if (write_page(db, pgToUpdate) == NULL) {
+            free(pg);
+            free(pgToUpdate);
             return NULL;
+        }
     }
 
     return write_page(db, pg);
@@ -113,8 +116,11 @@ page* get_free_string_page(db_handler* db) {
     if (pg->prevPageId != -1) {
         page* pgToUpdate = get_page(db, pg->prevPageId);
         pgToUpdate->nextPageId = pg->page_id;
-        if (write_page(db, pgToUpdate) == NULL)
+        if (write_page(db, pgToUpdate) == NULL) {
+            free(pg);
+            free(pgToUpdate);
             return NULL;
+        }
     }
 
     return write_page(db, pg);
@@ -283,7 +289,9 @@ void allocate_string_pages(db_handler* db, string_part* split) {
     string_part* curr = split;
     string_part* prev = NULL;
     while (curr) {
-        curr->pageId = get_free_string_page(db)->page_id;
+        page* pg = get_free_string_page(db);
+        curr->pageId = pg->page_id;
+        free(pg);
         if (prev) prev->nxtPageId = curr->pageId;
         prev = curr;
         curr = curr->nxt;

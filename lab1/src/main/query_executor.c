@@ -145,18 +145,23 @@ query_result collection_insert(db_handler* db, insert_query* query) {
 
         if (write_document_to_page_but_split_if_needed(db, pg, doc) == WRITE_OK) {
             res.data->col->lastDocPageId = pg->page_id;
-            if (write_collection_to_page(db, res.data->pageId, res.data->col) != WRITE_OK)
+            if (write_collection_to_page(db, res.data->pageId, res.data->col) != WRITE_OK) {
                 return nok();
+            }
             if (lastDocPageId != -1) {
                 document* docToUpdate = get_document_header(db, lastDocPageId);
                 docToUpdate->nextCollectionDocument = pg->page_id;
+                free(pg);
                 if (write_document_header_to_page(db, lastDocPageId, docToUpdate) == WRITE_OK)
                     return ok();
                 else
                     return nok();
             }
+            free(pg);
             return ok();
         }
+
+        free(pg);
     } else {
         document* parentDoc = get_document_header(db, query->parent->parent_id);
         if (parentDoc == NULL) {
