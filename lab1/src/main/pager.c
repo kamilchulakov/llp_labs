@@ -97,6 +97,7 @@ page* get_free_document_page(db_handler* db) {
             free(pgToUpdate);
             return NULL;
         }
+        // FREE free(pgToUpdate);
     }
 
     return write_page(db, pg);
@@ -121,6 +122,7 @@ page* get_free_string_page(db_handler* db) {
             free(pgToUpdate);
             return NULL;
         }
+        free(pgToUpdate);
     }
 
     return write_page(db, pg);
@@ -439,8 +441,16 @@ document* get_document_header(db_handler* db, uint32_t page_id) {
     if (pg == NULL) return NULL;
     if (pg->type != PAGE_DOCUMENT) return NULL;
     document *doc = malloc(sizeof(document));
-    if (doc == NULL) return NULL;
-    if (read_document_header(db->fp, doc) == READ_ERROR) return NULL;
+    if (doc == NULL) {
+        free(pg);
+        return NULL;
+    }
+    if (read_document_header(db->fp, doc) == READ_ERROR) {
+        free(doc);
+        free(pg);
+        return NULL;
+    }
+    free(pg);
     return doc;
 }
 

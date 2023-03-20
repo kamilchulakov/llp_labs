@@ -33,6 +33,7 @@ void insert_documents(db_handler *db, int amount, clock_t *time) {
         free_result(res);
 //        free_document_with_strings(query.doc);
     }
+    free_string(query.collection);
 }
 
 void collection_find_all(db_handler *db, clock_t* time) {

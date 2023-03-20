@@ -73,15 +73,19 @@ query_result get_collection_or_schema_by_name(db_handler* db, string* col, bool 
         if (!page_has_type(pg, PAGE_COLLECTION)) {
             debug("page(id=%u) is not marked as PAGE_COLLECTION\n", pg->page_id);
         }
-        collection* cl = get_collection(db, pg->page_id);
+        uint32_t page_id = pg->page_id;
+        collection* cl = get_collection(db, page_id);
         if (string_equals(cl->name,col) == true) {
-            if (returnCollection == true)
-                return collection_result(cl, pg->page_id);
-            else
+            if (returnCollection == true) {
+                return collection_result(cl, page_id);
+            } else {
+                free(pg);
                 return schema_result(cl->sch);
+            }
         }
         pg = get_page(db, pg->prevPageId);
     }
+    free(pg);
     debug("schema %s was not found\n", col->ch);
     return nok();
 }
@@ -251,11 +255,14 @@ query_result collection_find(db_handler* db, find_query* query) {
             currNode->pageId = pg->page_id;
             currNode->nxt = malloc(sizeof(document_list));
             currNode = currNode->nxt;
+            free(pg);
             pg = get_page(db, doc->prevCollectionDocument);
         } else {
+            free(pg);
             pg = get_page(db, doc->prevCollectionDocument);
         }
     }
+    free(pg);
     debug("__________________________________\n");
     return document_list_result(resList);
 }
