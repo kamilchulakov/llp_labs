@@ -136,6 +136,7 @@ query_result collection_insert(db_handler* db, insert_query* query) {
     schema* sch = res.data->col->sch;
     if (schema_equals_document(sch, doc) == false) {
         debug("executor.INSERT_DOCUMENT: document schema is different from collection schema\n");
+        free_result(res);
         return nok();
     }
 
@@ -150,6 +151,7 @@ query_result collection_insert(db_handler* db, insert_query* query) {
         if (write_document_to_page_but_split_if_needed(db, pg, doc) == WRITE_OK) {
             res.data->col->lastDocPageId = pg->page_id;
             if (write_collection_to_page(db, res.data->pageId, res.data->col) != WRITE_OK) {
+                free(pg);
                 return nok();
             }
             if (lastDocPageId != -1) {

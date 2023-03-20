@@ -31,7 +31,7 @@ void insert_documents(db_handler *db, int amount, clock_t *time) {
         query_result res = collection_insert(db, &query);
         *time = clock();
         free_result(res);
-//        free_document_with_strings(query.doc);
+        //  FREE free_document_with_strings(query.doc);
     }
     free_string(query.collection);
 }

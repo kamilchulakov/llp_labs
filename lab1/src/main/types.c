@@ -105,6 +105,7 @@ READ_STATUS read_string_split(FILE* fp, string_part *part) {
         read_uint(fp, &part->pageId) == READ_OK &&
         read_uint(fp, &part->nxtPageId) == READ_OK)
         return READ_OK;
+    free_string(part->part);
     return READ_ERROR;
 }
 
