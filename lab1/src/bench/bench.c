@@ -2,7 +2,7 @@
 #include "speed.h"
 
 int main() {
-    //bench_mem(3, 1000);
-    bench_speed(3, 100);
+    bench_mem(20, 5000);
+    bench_speed(20, 5000);
     return 0;
 }

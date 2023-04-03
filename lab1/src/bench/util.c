@@ -29,7 +29,7 @@ void insert_documents(db_handler *db, int amount, clock_t *time) {
         query.doc->data.elements[3] = *create_element(STRING, "string_field");
         query.doc->data.elements[3].string_data = bigString();
         query_result res = collection_insert(db, &query);
-        *time = clock();
+        if (time != NULL) *time = clock();
         free_result(res);
         //  FREE free_document_with_strings(query.doc);
     }
@@ -39,7 +39,7 @@ void insert_documents(db_handler *db, int amount, clock_t *time) {
 void collection_find_all(db_handler *db, clock_t* time) {
     find_query findQuery = {string_of("mem"), NULL};
     query_result res = collection_find(db, &findQuery);
-    *time = clock();
+    if (time != NULL) *time = clock();
 //    free_result(res);
     free_string(findQuery.collection);
 }

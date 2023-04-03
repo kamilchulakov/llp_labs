@@ -230,6 +230,9 @@ void test_collection_update(db_handler* db) {
     assert(db->pagerData->lastStringPage == 11);
     assert(db->pagerData->firstFreeStringPageId == -1);
     assert_true(collection_update(db, &query).ok);
+    element* el = create_element(STRING, "big string");
+    el->string_data = string_of("not small string");
+    assert_element_equals(get_document(db, 10)->data.elements, el);
     assert(db->pagerData->pageIdSeq == 12);
     assert(db->pagerData->firstFreeStringPageId == -1);
     assert(db->pagerData->lastStringPage == 11); // reused 11
